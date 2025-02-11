@@ -20,19 +20,27 @@ public class Quadtree
     {
         if (!bounds.Contains(particle.transform.position)) return;
 
-        if (particles.Count < MAX_PARTICLES && !isDivided)
+        if (particles.Count < MAX_PARTICLES || bounds.width <= 1f) // Avoid excessive subdivision
         {
             particles.Add(particle);
+            return;
         }
-        else
+
+        if (!isDivided) Subdivide();
+
+        foreach (var child in children)
         {
-            if (!isDivided) Subdivide();
-            foreach (var child in children)
+            if (child.bounds.Contains(particle.transform.position))
             {
                 child.Insert(particle);
+                return; // Ensure the particle is only inserted once
             }
         }
+
+        // If the particle doesn’t fit in a child, keep it in the parent node
+        particles.Add(particle);
     }
+
 
     private void Subdivide()
     {
@@ -54,15 +62,10 @@ public class Quadtree
     {
         if (found == null) found = new List<Particle>();
 
+        // If the search area doesn’t intersect this node, skip it
         if (!bounds.Overlaps(range)) return found;
 
-        foreach (var p in particles)
-        {
-            if (range.Contains(p.transform.position))
-            {
-                found.Add(p);
-            }
-        }
+        found.AddRange(particles); // Add local particles
 
         if (isDivided)
         {
@@ -74,6 +77,7 @@ public class Quadtree
 
         return found;
     }
+
 
     public void Clear()
     {

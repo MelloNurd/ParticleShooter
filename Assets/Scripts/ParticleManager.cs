@@ -48,13 +48,18 @@ public class ParticleManager : MonoBehaviour
         SpawnParticles();
     }
 
+    private int frameCounter = 0;
+    private const int UPDATE_INTERVAL = 5; // Update every 5 frames
+
     private void Update()
     {
-        // Rebuild quadtree every frame
-        quadtree = new Quadtree(simulationBounds);
-        foreach (var p in Particles)
+        if (frameCounter++ % UPDATE_INTERVAL == 0)
         {
-            quadtree.Insert(p);
+            quadtree = new Quadtree(simulationBounds);
+            foreach (var p in Particles)
+            {
+                quadtree.Insert(p);
+            }
         }
     }
 

@@ -28,7 +28,7 @@ public class Particle : MonoBehaviour
         float[,] minDistances = ParticleManager.MinDistances;
         float[,] forces = ParticleManager.Forces;
 
-        List<Particle> nearbyParticles = ParticleManager.Instance.GetNearbyParticles(this, 50); // Adjust search radius
+        List<Particle> nearbyParticles = ParticleManager.Instance.GetNearbyParticles(this, 5); // Adjust search radius
 
         foreach (Particle particle in nearbyParticles)
         {

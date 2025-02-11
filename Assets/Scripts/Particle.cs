@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -18,7 +19,6 @@ public class Particle : MonoBehaviour
 
     private void Update()
     {
-        // If the spawner has not completed spawning, do nothing
         if (!ParticleManager.IsFinishedSpawning) return;
 
         direction = Vector3.zero;
@@ -28,21 +28,19 @@ public class Particle : MonoBehaviour
         float[,] minDistances = ParticleManager.MinDistances;
         float[,] forces = ParticleManager.Forces;
 
-        foreach (Particle particle in ParticleManager.Particles)
+        List<Particle> nearbyParticles = ParticleManager.Instance.GetNearbyParticles(this, 50); // Adjust search radius
+
+        foreach (Particle particle in nearbyParticles)
         {
-            // Skip the current particle
             if (particle == this) continue;
 
-            // Calculate the direction and squared distance to the other particle
             direction = particle.transform.position - transform.position;
             float sqrDistance = direction.sqrMagnitude;
             direction.Normalize();
 
-            // Calculate forces
             if (sqrDistance < minDistances[Type, particle.Type])
             {
-                Vector3 force = direction;
-                force *= Mathf.Abs(forces[Type, particle.Type]) * -3;
+                Vector3 force = direction * -Mathf.Abs(forces[Type, particle.Type]) * 3;
                 force *= Mathf.Abs(Mathf.Lerp(1, 0, Mathf.Sqrt(sqrDistance) / minDistances[Type, particle.Type]));
                 force *= dampening;
                 totalForce += force;

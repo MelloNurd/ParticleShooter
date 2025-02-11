@@ -6,6 +6,9 @@ public class ParticleManager : MonoBehaviour
 {
     public static List<Particle> Particles { get; private set; } = new List<Particle>();
 
+    private Quadtree quadtree;
+    private Rect simulationBounds = new Rect(-10, -10, 20, 20); // Adjust based on simulation size
+
     public static float[,] Forces;
     public static float[,] MinDistances;
     public static float[,] Radii;
@@ -43,6 +46,24 @@ public class ParticleManager : MonoBehaviour
     {
         Initialize();
         SpawnParticles();
+    }
+
+    private void Update()
+    {
+        // Rebuild quadtree every frame
+        quadtree = new Quadtree(simulationBounds);
+        foreach (var p in Particles)
+        {
+            quadtree.Insert(p);
+        }
+    }
+
+    public List<Particle> GetNearbyParticles(Particle particle, float searchRadius)
+    {
+        return quadtree.QueryRange(new Rect(
+            particle.transform.position.x - searchRadius,
+            particle.transform.position.y - searchRadius,
+            searchRadius * 2, searchRadius * 2));
     }
 
     private void Initialize()

@@ -269,7 +269,6 @@ GameObject:
   - component: {fileID: 1547545162}
   - component: {fileID: 1547545161}
   - component: {fileID: 1547545160}
-  - component: {fileID: 1547545164}
   - component: {fileID: 1547545163}
   m_Layer: 0
   m_Name: FireBulletsSwitch
@@ -412,19 +411,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blasterType: 1
---- !u!114 &1547545164
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1547545159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 316f2a6c6a859324cbcd713955d379b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blasterType: 0
 --- !u!1 &1743383701
 GameObject:
   m_ObjectHideFlags: 0

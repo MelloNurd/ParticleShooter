@@ -9,9 +9,6 @@ namespace NaughtyAttributes
         public int Type { get; set; } // Determines the type of the particle, as well as the color
         public int Id { get; set; } // Can be used to single out specific particles
 
-        private float _dampening = 0.05f;
-        private float _friction = 0.85f;
-
         private Vector3 _velocity;
         private Vector3 _direction;
         private Vector3 _totalForce;
@@ -39,22 +36,22 @@ namespace NaughtyAttributes
                 _direction = particle.transform.position - transform.position;
 
                 // Wrapping world-space fixes for distance calculations
-                if (_direction.x > ParticleManager.ScreenWidth)
+                if (_direction.x > ParticleManager.Instance.ScreenWidth)
                 {
-                    _direction -= new Vector3(2 * ParticleManager.ScreenWidth, 0, 0);
+                    _direction -= new Vector3(2 * ParticleManager.Instance.ScreenWidth, 0, 0);
                 }
-                else if (_direction.x < -ParticleManager.ScreenWidth)
+                else if (_direction.x < -ParticleManager.Instance.ScreenWidth)
                 {
-                    _direction += new Vector3(2 * ParticleManager.ScreenWidth, 0, 0);
+                    _direction += new Vector3(2 * ParticleManager.Instance.ScreenWidth, 0, 0);
                 }
 
-                if (_direction.y > ParticleManager.ScreenHeight)
+                if (_direction.y > ParticleManager.Instance.ScreenHeight)
                 {
-                    _direction -= new Vector3(0, 2 * ParticleManager.ScreenHeight, 0);
+                    _direction -= new Vector3(0, 2 * ParticleManager.Instance.ScreenHeight, 0);
                 }
-                else if (_direction.y < -ParticleManager.ScreenHeight)
+                else if (_direction.y < -ParticleManager.Instance.ScreenHeight)
                 {
-                    _direction += new Vector3(0, 2 * ParticleManager.ScreenHeight, 0);
+                    _direction += new Vector3(0, 2 * ParticleManager.Instance.ScreenHeight, 0);
                 }
 
                 _distance = _direction.magnitude;
@@ -66,7 +63,7 @@ namespace NaughtyAttributes
                     Vector3 force = _direction;
                     force *= Mathf.Abs(forces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
                     force *= Map(_distance, 0, Mathf.Abs(minDistances[Type, particle.Type]), 1, 0);
-                    force *= _dampening;
+                    force *= ParticleManager.Instance.Dampening;
                     _totalForce += force;
                 }
 
@@ -76,34 +73,35 @@ namespace NaughtyAttributes
                     Vector3 force = _direction;
                     force *= forces[Type, particle.Type];
                     force *= Map(_distance, 0, ParticleManager.Radii[Type, particle.Type], 1, 0);
-                    force *= _dampening;
+                    force *= ParticleManager.Instance.Dampening;
                     _totalForce += force;
                 }
             }
 
+            // Apply all forces after calculating with all particles
             _acceleration += _totalForce;
             _velocity += _acceleration * Time.deltaTime;
-            _velocity *= _friction;
+            _velocity *= ParticleManager.Instance.Friction;
             transform.position += _velocity * Time.deltaTime;
 
-            // World-space wrapping
+            // World-space wrapping (This can probably be cleaned up)
             //transform.position = new Vector3((transform.position.x + width) % width, (transform.position.y + height) % height, 0);
-            if (transform.position.x < -ParticleManager.ScreenWidth)
+            if (transform.position.x < -ParticleManager.Instance.ScreenWidth)
             {
-                transform.position = transform.position.WithX(ParticleManager.ScreenWidth);
+                transform.position = transform.position.WithX(ParticleManager.Instance.ScreenWidth);
             }
-            if (transform.position.x > ParticleManager.ScreenWidth)
+            if (transform.position.x > ParticleManager.Instance.ScreenWidth)
             {
-                transform.position = transform.position.WithX(-ParticleManager.ScreenWidth);
+                transform.position = transform.position.WithX(-ParticleManager.Instance.ScreenWidth);
             }
 
-            if (transform.position.y < -ParticleManager.ScreenHeight)
+            if (transform.position.y < -ParticleManager.Instance.ScreenHeight)
             {
-                transform.position = transform.position.WithY(ParticleManager.ScreenHeight);
+                transform.position = transform.position.WithY(ParticleManager.Instance.ScreenHeight);
             }
-            if (transform.position.y > ParticleManager.ScreenHeight)
+            if (transform.position.y > ParticleManager.Instance.ScreenHeight)
             {
-                transform.position = transform.position.WithY(-ParticleManager.ScreenHeight);
+                transform.position = transform.position.WithY(-ParticleManager.Instance.ScreenHeight);
             }
         }
 

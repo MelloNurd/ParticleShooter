@@ -285,12 +285,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93eb94707d9ebd7478a73675f33d37f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumTypes: 8
   _particlePrefab: {fileID: 5191945715267185580, guid: fb2e06b8daa237940ba0e9275abc3039, type: 3}
-  _numberOfParticles: 751
-  _forcesRange: {x: 6, y: 9}
-  _minDistancesRange: {x: 6, y: 20}
-  _radiiRange: {x: 7, y: 15}
+  NumberOfTypes: 5
+  NumberOfParticles: 750
+  _spawnRadius: 10
+  _forcesRange: {x: 9, y: 46}
+  _minDistancesRange: {x: 5, y: 14}
+  _radiiRange: {x: 10, y: 16}
   RepulsionEffector: -3
 --- !u!4 &1475739696
 Transform:

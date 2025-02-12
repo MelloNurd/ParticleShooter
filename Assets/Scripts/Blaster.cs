@@ -4,7 +4,7 @@ public class Blaster : MonoBehaviour
 {
     [SerializeField] GameObject bulletPrefab;
     private Transform firePoint;
-    public PoolType bulletPoolType = PoolType.Bullets;
+    public PoolType bulletPoolType = PoolType.StandardBullets;
     private float bulletSpeed = 20f;
     private float fireRate = 1f;
     private float nextFireTime = 0f;

@@ -6,7 +6,8 @@ using UnityEngine;
 // Enum to categorize object pools
 public enum PoolType
 {
-    Bullets, 
+    StandardBullets,
+    FireBullets,
     None    
 }
 
@@ -18,8 +19,12 @@ public class ObjectPoolManager : MonoBehaviour
     // Parent object to hold all pooled objects
     private GameObject _objectPoolParent;
 
-    // Parent object specifically for bullets
-    private static GameObject bulletPoolParent;
+    // Parent object specifically for standard bullets
+    private static GameObject standardBulletPoolParent;
+
+    // Parent object specifically for fire bullets
+    private static GameObject fireBulletPoolParent;
+
 
     private void Awake()
     {
@@ -33,8 +38,11 @@ public class ObjectPoolManager : MonoBehaviour
         _objectPoolParent = new GameObject("Pooled Objects");
 
         // Create a specific parent for bullets
-        bulletPoolParent = new GameObject("Bullets");
-        bulletPoolParent.transform.SetParent(_objectPoolParent.transform);
+        standardBulletPoolParent = new GameObject("StandardBullets");
+        standardBulletPoolParent.transform.SetParent(_objectPoolParent.transform);
+
+        fireBulletPoolParent = new GameObject("FireBullets");
+        fireBulletPoolParent.transform.SetParent(_objectPoolParent.transform);
     }
 
     // Overloaded method to spawn an object at default position and rotation
@@ -108,8 +116,10 @@ public class ObjectPoolManager : MonoBehaviour
     {
         switch (poolType)
         {
-            case PoolType.Bullets:
-                return bulletPoolParent;
+            case PoolType.StandardBullets:
+                return standardBulletPoolParent;
+            case PoolType.FireBullets:
+                return fireBulletPoolParent;
             case PoolType.None:
                 return null;
             default:

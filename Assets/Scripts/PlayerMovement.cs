@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -9,11 +10,14 @@ public class PlayerMovement : MonoBehaviour
     private float horzMovement;
     private Rigidbody2D rb;
     public bool exhaustActive;
+    public int blasterType = 0;
 
     private ParticleSystem leftExhaust;
     private ParticleSystem rightExhaust;
     private ParticleSystem.EmissionModule leftEmission;
     private ParticleSystem.EmissionModule rightEmission;
+    private GameObject standardBlaster;
+    private GameObject fireBlaster;
 
     private void Start()
     {
@@ -22,6 +26,10 @@ public class PlayerMovement : MonoBehaviour
         // Get the single Particle System for each thruster
         leftExhaust = transform.Find("LeftThruster").GetComponentInChildren<ParticleSystem>();
         rightExhaust = transform.Find("RightThruster").GetComponentInChildren<ParticleSystem>();
+
+        // Get the blaster objects
+        standardBlaster = transform.Find("StandardBlaster").gameObject;
+        fireBlaster = transform.Find("FireBlaster").gameObject;
 
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
@@ -76,6 +84,29 @@ public class PlayerMovement : MonoBehaviour
         {
             leftEmission.rateOverTime = 0;
             rightEmission.rateOverTime = 0;
+        }
+    }
+
+    private void disableBlasters()
+    {
+        standardBlaster.SetActive(false);
+        fireBlaster.SetActive(false);
+    }
+
+    public void swapBlaster(int blasterType)
+    {
+        disableBlasters();
+        switch (blasterType)
+        {
+            case 0:
+                standardBlaster.SetActive(true);
+                break;
+            case 1:
+                fireBlaster.SetActive(true);
+                break;
+            default:
+                standardBlaster.SetActive(true);
+                break;
         }
     }
 }

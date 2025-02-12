@@ -1,9 +1,12 @@
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+public abstract class Bullet : MonoBehaviour
 {
     public float speed = 20f;
     public float lifetime = 3f;
+
+    // Initialize method to be overridden by child classes
+    public abstract void Initialize(Vector3 position, Quaternion rotation, float speed, float lifetime);
 
     private void OnEnable()
     {
@@ -13,11 +16,11 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
-        // Move the bullet forward
+        // Common movement logic, overridden if needed in child classes
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
 
-    private void ReturnToPool()
+    protected void ReturnToPool()
     {
         ObjectPoolManager.ReturnObjectToPool(gameObject);
     }
@@ -27,10 +30,12 @@ public class Bullet : MonoBehaviour
         // If bullet hits something, return to pool
         if (other.CompareTag("Enemy"))
         {
-            // You can add damage logic here
-            ObjectPoolManager.ReturnObjectToPool(gameObject);
+            HandleCollision(other); // Handle specific behavior on collision
         }
     }
+
+    // Handle specific collision behavior for different bullet types
+    public abstract void HandleCollision(Collider2D other);
 
     private void OnDisable()
     {

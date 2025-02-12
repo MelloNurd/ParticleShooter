@@ -1,0 +1,57 @@
+#pragma kernel CSMain
+
+struct Particle
+{
+    float2 position;
+    float2 velocity;
+    int type;
+};
+
+RWStructuredBuffer<Particle> particles;
+int particleCount;
+float deltaTime;
+float2 bounds;
+float interactionMatrix[3 * 3]; // Example: 3 types, 3x3 interaction matrix
+
+[numthreads(256, 1, 1)]
+void CSMain(uint id : SV_DispatchThreadID)
+{
+    if (id >= particleCount)
+        return;
+
+    Particle p = particles[id];
+
+    float2 force = float2(0, 0);
+    for (uint i = 0; i < particleCount; i++)
+    {
+        if (i == id)
+            continue;
+
+        Particle other = particles[i];
+        float2 dir = other.position - p.position;
+        float distSqr = dot(dir, dir);
+        float dist = sqrt(distSqr) + 0.001;
+
+        if (dist < 0.2)
+        { // Interaction range
+            float interaction = interactionMatrix[p.type * 3 + other.type];
+            force += interaction * normalize(dir) / distSqr;
+        }
+    }
+
+    p.velocity += force * deltaTime;
+    p.velocity *= 0.99; // Damping
+    p.position += p.velocity * deltaTime;
+
+    // Boundary conditions (wrap around)
+    if (p.position.x > bounds.x)
+        p.position.x -= bounds.x;
+    if (p.position.y > bounds.y)
+        p.position.y -= bounds.y;
+    if (p.position.x < 0)
+        p.position.x += bounds.x;
+    if (p.position.y < 0)
+        p.position.y += bounds.y;
+
+    particles[id] = p;
+}

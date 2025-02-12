@@ -9,7 +9,7 @@ public class BulletSwitcher : MonoBehaviour
         if (other.CompareTag("Player"))  // Assuming your ship has the tag "Player"
         {
             // Call a method on the ship to modify it
-            other.GetComponent<PlayerMovement>().swapBlaster(blasterType);  // Assuming 'Ship' is the script on the ship
+            other.GetComponent<Player>().swapBlaster(blasterType);  // Assuming 'Ship' is the script on the ship
         }
     }
 }

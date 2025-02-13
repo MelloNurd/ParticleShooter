@@ -2,6 +2,7 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    void Damage(float damage);
-    void DamageOverTime(float damage, float duration);
+    void Damage(float amount);
+    void DamageOverTime(float amount, float duration);
+    void HaltMovement(float duration);
 }

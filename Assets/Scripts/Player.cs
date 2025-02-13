@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     private ParticleSystem.EmissionModule rightEmission;
     private GameObject standardBlaster;
     private GameObject fireBlaster;
+    private GameObject iceBlaster;
 
     private void Start()
     {
@@ -30,6 +31,7 @@ public class Player : MonoBehaviour
         // Get the blaster objects
         standardBlaster = transform.Find("StandardBlaster").gameObject;
         fireBlaster = transform.Find("FireBlaster").gameObject;
+        iceBlaster = transform.Find("IceBlaster").gameObject;
 
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
@@ -103,6 +105,9 @@ public class Player : MonoBehaviour
                 break;
             case 1:
                 fireBlaster.SetActive(true);
+                break;
+            case 2:
+                iceBlaster.SetActive(true);
                 break;
             default:
                 standardBlaster.SetActive(true);

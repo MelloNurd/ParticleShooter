@@ -2,15 +2,20 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Dummy : MonoBehaviour, IDamageable
+public class Enemy : MonoBehaviour, IDamageable
 {
     public float maxHealth = 50f;
     private float health;
-    public bool isHalted = false;
+    private bool isHalted = false;
 
     private Slider healthSlider;
     private RectTransform sliderTransform;
     public Vector3 sliderOffset = new Vector3(0, 1.5f, 0); // Adjust height above enemy
+
+    public float moveSpeed = 2f;
+    public float moveDistance = 2f;
+    private bool isMovingUp = true;
+    private Vector3 startPosition;
 
     private Camera mainCamera;
 
@@ -31,6 +36,8 @@ public class Dummy : MonoBehaviour, IDamageable
         {
             Debug.LogError("Health slider not found on Dummy!");
         }
+
+        startPosition = transform.position;
     }
 
     private void Update()
@@ -44,12 +51,29 @@ public class Dummy : MonoBehaviour, IDamageable
             // Update the slider position
             sliderTransform.position = screenPosition;
         }
+
+        if (!isHalted)
+        {
+            MoveUpAndDown();
+        }
+    }
+
+    private void MoveUpAndDown()
+    {
+        float direction = isMovingUp ? 1 : -1;
+        transform.position += Vector3.up * direction * moveSpeed * Time.deltaTime;
+
+        // Reverse direction when reaching max distance
+        if (Vector3.Distance(startPosition, transform.position) >= moveDistance)
+        {
+            isMovingUp = !isMovingUp;
+        }
     }
 
     public void Damage(float amount)
     {
         health -= amount;
-        health = Mathf.Max(health, 0); // Prevent negative health
+        if (health <= 0) Die();
 
         UpdateHealthUI();
 
@@ -65,26 +89,16 @@ public class Dummy : MonoBehaviour, IDamageable
         StartCoroutine(StartDamageOverTime(amount, duration));
     }
 
-    private IEnumerator StartDamageOverTime(float damagePerSecond, float duration)
+    public void HaltMovement(float duration)
     {
-        float elapsedTime = 0f;
-        while (elapsedTime < duration)
-        {
-            health -= damagePerSecond;
-            health = Mathf.Max(health, 0); // Prevent negative health
+        if (!isHalted) StartCoroutine(HaltCoroutine(duration));
+    }
 
-            UpdateHealthUI();
-
-            Debug.Log($"Enemy burning: {damagePerSecond} damage. Health left: {health}");
-            if (health <= 0)
-            {
-                Respawn();
-                yield break; // Stop the coroutine if the enemy "dies"
-            }
-
-            elapsedTime += 1f;
-            yield return new WaitForSeconds(1f);
-        }
+    private IEnumerator HaltCoroutine(float duration)
+    {
+        isHalted = true;
+        yield return new WaitForSeconds(duration);
+        isHalted = false;
     }
 
     private void Respawn()
@@ -102,15 +116,20 @@ public class Dummy : MonoBehaviour, IDamageable
         }
     }
 
-    public void HaltMovement(float duration)
+    private IEnumerator StartDamageOverTime(float damagePerSecond, float duration)
     {
-        if (!isHalted) StartCoroutine(HaltCoroutine(duration));
+        float elapsedTime = 0f;
+        while (elapsedTime < duration)
+        {
+            health -= damagePerSecond;
+            if (health <= 0) { Die(); yield break; }
+            elapsedTime += 1f;
+            yield return new WaitForSeconds(1f);
+        }
     }
 
-    private IEnumerator HaltCoroutine(float duration)
+    private void Die()
     {
-        isHalted = true;
-        yield return new WaitForSeconds(duration);
-        isHalted = false;
+        Respawn();
     }
 }

@@ -8,6 +8,7 @@ public enum PoolType
 {
     StandardBullets,
     FireBullets,
+    IceBullets,
     None    
 }
 

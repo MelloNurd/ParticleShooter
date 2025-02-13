@@ -91,7 +91,7 @@ namespace NaughtyAttributes
             Radii = new float[NumberOfTypes, NumberOfTypes];
             for (int i = 0; i < NumberOfTypes; i++)
             {
-                for (int j = 0; i < NumberOfTypes; i++)
+                for (int j = 0; j < NumberOfTypes; j++)
                 {
                     // Forces
                     Forces[i, j] = Random.Range(_forcesRange.x, _forcesRange.y);

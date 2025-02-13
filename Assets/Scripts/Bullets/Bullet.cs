@@ -4,9 +4,10 @@ public abstract class Bullet : MonoBehaviour
 {
     public float speed = 20f;
     public float lifetime = 3f;
+    public float damage = 10f;
 
     // Initialize method to be overridden by child classes
-    public abstract void Initialize(Vector3 position, Quaternion rotation, float speed, float lifetime);
+    public abstract void Initialize(Vector3 position, Quaternion rotation, float speed, float lifetime, float damage);
 
     private void OnEnable()
     {
@@ -27,15 +28,13 @@ public abstract class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // If bullet hits something, return to pool
-        if (other.CompareTag("Enemy"))
+        if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            HandleCollision(other); // Handle specific behavior on collision
+            ApplyDamage(damageable);
+            ReturnToPool();
         }
     }
-
-    // Handle specific collision behavior for different bullet types
-    public abstract void HandleCollision(Collider2D other);
+    protected abstract void ApplyDamage(IDamageable target);
 
     private void OnDisable()
     {

@@ -792,6 +792,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerShipM2
       objectReference: {fileID: 0}
+    - target: {fileID: 6180576703623941882, guid: 8d88fab5c88afcc4f83b8ab9116780c3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8304078948415703977, guid: 8d88fab5c88afcc4f83b8ab9116780c3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -891,7 +895,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8371855377387520600, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

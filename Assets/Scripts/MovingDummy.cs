@@ -122,7 +122,17 @@ public class Enemy : MonoBehaviour, IDamageable
         while (elapsedTime < duration)
         {
             health -= damagePerSecond;
-            if (health <= 0) { Die(); yield break; }
+            health = Mathf.Max(health, 0); // Prevent negative health
+
+            UpdateHealthUI();
+
+            Debug.Log($"Enemy burning: {damagePerSecond} damage. Health left: {health}");
+            if (health <= 0)
+            {
+                Respawn();
+                yield break; // Stop the coroutine if the enemy "dies"
+            }
+
             elapsedTime += 1f;
             yield return new WaitForSeconds(1f);
         }

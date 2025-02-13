@@ -6,18 +6,19 @@ public class BulletSwitcher : MonoBehaviour
     // Called when another collider enters this trigger
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))  // Assuming your ship has the tag "Player"
+        // Collision with player
+        if (other.CompareTag("Player"))
         {
+            // Basic Ship
             if(other.GetComponent<Player>())
             {
-                other.GetComponent<Player>().swapBlaster(blasterType);  // Assuming 'Ship' is the script on the ship
+                other.GetComponent<Player>().swapBlaster(blasterType);
             }
+            // ShipM2
             else if (other.GetComponent<PlayerM2>())
             {
-                other.GetComponent<PlayerM2>().swapBlaster(blasterType);  // Assuming 'Ship' is the script on the ship
+                other.GetComponent<PlayerM2>().swapBlaster(blasterType);
             }
-            // Call a method on the ship to modify it
-
         }
     }
 }

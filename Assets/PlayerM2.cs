@@ -46,6 +46,7 @@ public class PlayerM2 : MonoBehaviour
 
     void Update()
     {
+        // Gets player input
         horzMovement = Input.GetAxisRaw("Horizontal");
         vertMovement = Input.GetAxisRaw("Vertical");
     }
@@ -95,6 +96,7 @@ public class PlayerM2 : MonoBehaviour
         }
     }
 
+    // Disables all blasters
     private void disableBlasters()
     {
         leftStandardBlaster.SetActive(false);
@@ -105,6 +107,7 @@ public class PlayerM2 : MonoBehaviour
         rightIceBlaster.SetActive(false);
     }
 
+    // Activates the appropriate blasters based on the blasterType
     public void swapBlaster(int blasterType)
     {
         disableBlasters();

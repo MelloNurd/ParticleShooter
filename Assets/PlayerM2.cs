@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class PlayerM2 : MonoBehaviour
 {
     public float rotationSpeed;
     public float movementSpeed;
@@ -16,9 +16,12 @@ public class Player : MonoBehaviour
     private ParticleSystem rightExhaust;
     private ParticleSystem.EmissionModule leftEmission;
     private ParticleSystem.EmissionModule rightEmission;
-    private GameObject standardBlaster;
-    private GameObject fireBlaster;
-    private GameObject iceBlaster;
+    private GameObject leftStandardBlaster;
+    private GameObject rightStandardBlaster;
+    private GameObject leftFireBlaster;
+    private GameObject rightFireBlaster;
+    private GameObject leftIceBlaster;
+    private GameObject rightIceBlaster;
 
     private void Start()
     {
@@ -29,9 +32,12 @@ public class Player : MonoBehaviour
         rightExhaust = transform.Find("RightThruster").GetComponentInChildren<ParticleSystem>();
 
         // Get the blaster objects
-        standardBlaster = transform.Find("StandardBlaster").gameObject;
-        fireBlaster = transform.Find("FireBlaster").gameObject;
-        iceBlaster = transform.Find("IceBlaster").gameObject;
+        leftStandardBlaster = transform.Find("LStandardBlaster").gameObject;
+        rightStandardBlaster = transform.Find("RStandardBlaster").gameObject;
+        leftFireBlaster = transform.Find("LFireBlaster").gameObject;
+        rightFireBlaster = transform.Find("RFireBlaster").gameObject;
+        leftIceBlaster = transform.Find("LIceBlaster").gameObject;
+        rightIceBlaster = transform.Find("RIceBlaster").gameObject;
 
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
@@ -47,7 +53,7 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         // Forward and backward movement
-        if(vertMovement > 0)
+        if (vertMovement > 0)
         {
             rb.AddForce(transform.up * vertMovement * movementSpeed);
         }
@@ -91,9 +97,12 @@ public class Player : MonoBehaviour
 
     private void disableBlasters()
     {
-        standardBlaster.SetActive(false);
-        fireBlaster.SetActive(false);
-        iceBlaster.SetActive(false);
+        leftStandardBlaster.SetActive(false);
+        rightStandardBlaster.SetActive(false);
+        leftFireBlaster.SetActive(false);
+        rightFireBlaster.SetActive(false);
+        leftIceBlaster.SetActive(false);
+        rightIceBlaster.SetActive(false);
     }
 
     public void swapBlaster(int blasterType)
@@ -102,16 +111,20 @@ public class Player : MonoBehaviour
         switch (blasterType)
         {
             case 0:
-                standardBlaster.SetActive(true);
+                leftStandardBlaster.SetActive(true);
+                rightStandardBlaster.SetActive(true);
                 break;
             case 1:
-                fireBlaster.SetActive(true);
+                leftFireBlaster.SetActive(true);
+                rightFireBlaster.SetActive(true);
                 break;
             case 2:
-                iceBlaster.SetActive(true);
+                leftIceBlaster.SetActive(true);
+                rightIceBlaster.SetActive(true);
                 break;
             default:
-                standardBlaster.SetActive(true);
+                leftStandardBlaster.SetActive(true);
+                rightStandardBlaster.SetActive(true);
                 break;
         }
     }

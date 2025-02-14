@@ -27,6 +27,13 @@ namespace NaughtyAttributes
             float[,] minDistances = ParticleManager.MinDistances;
             float[,] forces = ParticleManager.Forces;
 
+            bool printValues = false;
+
+            if(Input.GetKeyDown(KeyCode.M))
+            {
+                printValues = true;
+            }
+
             foreach (Particle particle in ParticleManager.Particles)
             {
                 // Skip the current particle
@@ -34,24 +41,30 @@ namespace NaughtyAttributes
 
                 // Calculate the direction and squared distance to the other particle
                 _direction = particle.transform.position - transform.position;
+                _distance = _direction.magnitude;
+
+                if(!(_distance < minDistances[Type, particle.Type] || _distance < ParticleManager.Radii[Type, particle.Type]))
+                {
+                    continue;
+                }
 
                 // Wrapping world-space fixes for distance calculations
-                if (_direction.x > 0.5f * ParticleManager.Instance.ScreenWidth)
+                if (_direction.x > ParticleManager.Instance.HalfScreenSpace.x)
                 {
-                    _direction.x -= ParticleManager.Instance.ScreenWidth;
+                    _direction.x -= ParticleManager.Instance.ScreenSpace.x;
                 }
-                if (_direction.x < 0.5f * -ParticleManager.Instance.ScreenWidth)
+                if (_direction.x < -ParticleManager.Instance.HalfScreenSpace.x)
                 {
-                    _direction.x += ParticleManager.Instance.ScreenWidth;
+                    _direction.x += ParticleManager.Instance.ScreenSpace.x;
                 }
 
-                if (_direction.y > 0.5f * ParticleManager.Instance.ScreenHeight)
+                if (_direction.y > ParticleManager.Instance.HalfScreenSpace.y)
                 {
-                    _direction.y -= ParticleManager.Instance.ScreenHeight;
+                    _direction.y -= ParticleManager.Instance.ScreenSpace.y;
                 }
-                if (_direction.y < 0.5f * -ParticleManager.Instance.ScreenHeight)
+                if (_direction.y < -ParticleManager.Instance.HalfScreenSpace.y)
                 {
-                    _direction.y += ParticleManager.Instance.ScreenHeight;
+                    _direction.y += ParticleManager.Instance.ScreenSpace.y;
                 }
 
                 _distance = _direction.magnitude;
@@ -78,6 +91,8 @@ namespace NaughtyAttributes
                 }
             }
 
+            printValues = false;
+
             // Apply all forces after calculating with all particles
             _acceleration += _totalForce;
             _velocity += _acceleration * Time.deltaTime;
@@ -85,22 +100,22 @@ namespace NaughtyAttributes
             transform.position += _velocity * Time.deltaTime;
 
             // World-space wrapping (This can probably be cleaned up)
-            if (transform.position.x < -ParticleManager.Instance.ScreenWidth * 0.5f)
+            if (transform.position.x < -ParticleManager.Instance.HalfScreenSpace.x)
             {
-                transform.position = transform.position.WithX(ParticleManager.Instance.ScreenWidth * 0.5f);
+                transform.position = transform.position.WithX(ParticleManager.Instance.HalfScreenSpace.x);
             }
-            if (transform.position.x > ParticleManager.Instance.ScreenWidth * 0.5f)
+            if (transform.position.x > ParticleManager.Instance.HalfScreenSpace.x)
             {
-                transform.position = transform.position.WithX(-ParticleManager.Instance.ScreenWidth * 0.5f);
+                transform.position = transform.position.WithX(-ParticleManager.Instance.HalfScreenSpace.x);
             }
 
-            if (transform.position.y < -ParticleManager.Instance.ScreenHeight * 0.5f)
+            if (transform.position.y < -ParticleManager.Instance.HalfScreenSpace.y)
             {
-                transform.position = transform.position.WithY(ParticleManager.Instance.ScreenHeight * 0.5f);
+                transform.position = transform.position.WithY(ParticleManager.Instance.HalfScreenSpace.y);
             }
-            if (transform.position.y > ParticleManager.Instance.ScreenHeight * 0.5f)
+            if (transform.position.y > ParticleManager.Instance.HalfScreenSpace.y)
             {
-                transform.position = transform.position.WithY(-ParticleManager.Instance.ScreenHeight * 0.5f);
+                transform.position = transform.position.WithY(-ParticleManager.Instance.HalfScreenSpace.y);
             }
         }
 

@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 namespace NaughtyAttributes
 {
@@ -21,9 +22,8 @@ namespace NaughtyAttributes
         private GameObject _particleParentObj;
 
         [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
-        [OnValueChanged("Restart")] [SerializeField] private Vector2 ScreenSpace = new Vector2(32, 18);
-        public float ScreenWidth => ScreenSpace.x;
-        public float ScreenHeight => ScreenSpace.y;
+        [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
+        [HideInInspector] public Vector2 HalfScreenSpace;
 
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
@@ -105,6 +105,9 @@ namespace NaughtyAttributes
         {
             // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
             if (!Application.isPlaying) return;
+
+            // Caching this to reduce calculations
+            HalfScreenSpace = ScreenSpace * 0.5f;
 
             Forces = new float[NumberOfTypes, NumberOfTypes];
             MinDistances = new float[NumberOfTypes, NumberOfTypes];

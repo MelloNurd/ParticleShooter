@@ -104,7 +104,7 @@ namespace NaughtyAttributes
                 {
                     // Forces
                     Forces[i, j] = Random.Range(_forcesRange.x, _forcesRange.y);
-                    if (Random.Range(0, 1) > 0.5f)
+                    if (Random.Range(0f, 1f) > 0.5f)
                     {
                         Forces[i, j] *= -1;
                     }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -84,6 +85,39 @@ public class Dummy : MonoBehaviour, IDamageable
 
             elapsedTime += 1f;
             yield return new WaitForSeconds(1f);
+        }
+    }
+
+    public void ChainDamage(float amount, int remainingChains)
+    {
+        Damage(amount);
+
+        if (remainingChains > 0)
+        {
+            StartCoroutine(ChainLightning(amount * 0.8f, remainingChains - 1));
+        }
+    }
+
+    private IEnumerator ChainLightning(float damage, int remainingChains)
+    {
+        yield return new WaitForSeconds(0.2f); // Short delay before chaining
+
+        Collider2D[] nearbyEnemies = Physics2D.OverlapCircleAll(transform.position, 3f);
+        List<Dummy> validTargets = new List<Dummy>();
+
+        foreach (Collider2D col in nearbyEnemies)
+        {
+            Dummy enemy = col.GetComponent<Dummy>();
+            if (enemy != null && enemy != this) // Avoid hitting itself
+            {
+                validTargets.Add(enemy);
+            }
+        }
+
+        if (validTargets.Count > 0)
+        {
+            Dummy nextTarget = validTargets[Random.Range(0, validTargets.Count)];
+            nextTarget.ChainDamage(damage, remainingChains);
         }
     }
 

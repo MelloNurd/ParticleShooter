@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     private GameObject standardBlaster;
     private GameObject fireBlaster;
     private GameObject iceBlaster;
+    private GameObject electricBlaster;
 
     private void Start()
     {
@@ -32,6 +33,7 @@ public class Player : MonoBehaviour
         standardBlaster = transform.Find("StandardBlaster").gameObject;
         fireBlaster = transform.Find("FireBlaster").gameObject;
         iceBlaster = transform.Find("IceBlaster").gameObject;
+        electricBlaster = transform.Find("ElectricBlaster").gameObject;
 
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
@@ -94,6 +96,7 @@ public class Player : MonoBehaviour
         standardBlaster.SetActive(false);
         fireBlaster.SetActive(false);
         iceBlaster.SetActive(false);
+        electricBlaster.SetActive(false);
     }
 
     public void swapBlaster(int blasterType)
@@ -109,6 +112,9 @@ public class Player : MonoBehaviour
                 break;
             case 2:
                 iceBlaster.SetActive(true);
+                break;
+            case 3:
+                electricBlaster.SetActive(true);
                 break;
             default:
                 standardBlaster.SetActive(true);

@@ -22,6 +22,8 @@ public class PlayerM2 : MonoBehaviour
     private GameObject rightFireBlaster;
     private GameObject leftIceBlaster;
     private GameObject rightIceBlaster;
+    private GameObject leftElectricBlaster;
+    private GameObject rightElectricBlaster;
 
     private void Start()
     {
@@ -38,6 +40,8 @@ public class PlayerM2 : MonoBehaviour
         rightFireBlaster = transform.Find("RFireBlaster").gameObject;
         leftIceBlaster = transform.Find("LIceBlaster").gameObject;
         rightIceBlaster = transform.Find("RIceBlaster").gameObject;
+        leftElectricBlaster = transform.Find("LElectricBlaster").gameObject;
+        rightElectricBlaster = transform.Find("RElectricBlaster").gameObject;
 
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
@@ -105,6 +109,8 @@ public class PlayerM2 : MonoBehaviour
         rightFireBlaster.SetActive(false);
         leftIceBlaster.SetActive(false);
         rightIceBlaster.SetActive(false);
+        leftElectricBlaster.SetActive(false);
+        rightElectricBlaster.SetActive(false);
     }
 
     // Activates the appropriate blasters based on the blasterType
@@ -124,6 +130,10 @@ public class PlayerM2 : MonoBehaviour
             case 2:
                 leftIceBlaster.SetActive(true);
                 rightIceBlaster.SetActive(true);
+                break;
+            case 3:
+                leftElectricBlaster.SetActive(true);
+                rightElectricBlaster.SetActive(true);
                 break;
             default:
                 leftStandardBlaster.SetActive(true);

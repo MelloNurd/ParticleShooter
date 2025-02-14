@@ -286,13 +286,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _particlePrefab: {fileID: 5191945715267185580, guid: fb2e06b8daa237940ba0e9275abc3039, type: 3}
+  ScreenSpace: {x: 16, y: 9}
   NumberOfTypes: 5
-  NumberOfParticles: 750
+  NumberOfParticles: 500
   _spawnRadius: 10
-  _forcesRange: {x: 9, y: 46}
-  _minDistancesRange: {x: 5, y: 14}
-  _radiiRange: {x: 10, y: 16}
+  _forcesRange: {x: 0.3, y: 1}
+  _minDistancesRange: {x: 30, y: 50}
+  _radiiRange: {x: 70, y: 250}
   RepulsionEffector: -3
+  Dampening: 0.05
+  Friction: 0.85
 --- !u!4 &1475739696
 Transform:
   m_ObjectHideFlags: 0

@@ -36,22 +36,22 @@ namespace NaughtyAttributes
                 _direction = particle.transform.position - transform.position;
 
                 // Wrapping world-space fixes for distance calculations
-                if (_direction.x > ParticleManager.Instance.ScreenWidth)
+                if (_direction.x > 0.5f * ParticleManager.Instance.ScreenWidth)
                 {
-                    _direction -= new Vector3(2 * ParticleManager.Instance.ScreenWidth, 0, 0);
+                    _direction.x -= ParticleManager.Instance.ScreenWidth;
                 }
-                else if (_direction.x < -ParticleManager.Instance.ScreenWidth)
+                else if (_direction.x < 0.5f * -ParticleManager.Instance.ScreenWidth)
                 {
-                    _direction += new Vector3(2 * ParticleManager.Instance.ScreenWidth, 0, 0);
+                    _direction.x += ParticleManager.Instance.ScreenWidth;
                 }
 
-                if (_direction.y > ParticleManager.Instance.ScreenHeight)
+                if (_direction.y > 0.5f * ParticleManager.Instance.ScreenHeight)
                 {
-                    _direction -= new Vector3(0, 2 * ParticleManager.Instance.ScreenHeight, 0);
+                    _direction.y -= ParticleManager.Instance.ScreenHeight;
                 }
-                else if (_direction.y < -ParticleManager.Instance.ScreenHeight)
+                else if (_direction.y < 0.5f * -ParticleManager.Instance.ScreenHeight)
                 {
-                    _direction += new Vector3(0, 2 * ParticleManager.Instance.ScreenHeight, 0);
+                    _direction.y += ParticleManager.Instance.ScreenHeight;
                 }
 
                 _distance = _direction.magnitude;
@@ -85,23 +85,22 @@ namespace NaughtyAttributes
             transform.position += _velocity * Time.deltaTime;
 
             // World-space wrapping (This can probably be cleaned up)
-            //transform.position = new Vector3((transform.position.x + width) % width, (transform.position.y + height) % height, 0);
-            if (transform.position.x < -ParticleManager.Instance.ScreenWidth)
+            if (transform.position.x < -ParticleManager.Instance.ScreenWidth * 0.5f)
             {
-                transform.position = transform.position.WithX(ParticleManager.Instance.ScreenWidth);
+                transform.position = transform.position.WithX(ParticleManager.Instance.ScreenWidth * 0.5f);
             }
-            if (transform.position.x > ParticleManager.Instance.ScreenWidth)
+            if (transform.position.x > ParticleManager.Instance.ScreenWidth * 0.5f)
             {
-                transform.position = transform.position.WithX(-ParticleManager.Instance.ScreenWidth);
+                transform.position = transform.position.WithX(-ParticleManager.Instance.ScreenWidth * 0.5f);
             }
 
-            if (transform.position.y < -ParticleManager.Instance.ScreenHeight)
+            if (transform.position.y < -ParticleManager.Instance.ScreenHeight * 0.5f)
             {
-                transform.position = transform.position.WithY(ParticleManager.Instance.ScreenHeight);
+                transform.position = transform.position.WithY(ParticleManager.Instance.ScreenHeight * 0.5f);
             }
-            if (transform.position.y > ParticleManager.Instance.ScreenHeight)
+            if (transform.position.y > ParticleManager.Instance.ScreenHeight * 0.5f)
             {
-                transform.position = transform.position.WithY(-ParticleManager.Instance.ScreenHeight);
+                transform.position = transform.position.WithY(-ParticleManager.Instance.ScreenHeight * 0.5f);
             }
         }
 

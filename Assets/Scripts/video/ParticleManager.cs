@@ -27,15 +27,17 @@ namespace NaughtyAttributes
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 99)] [SerializeField] private float _spawnRadius = 10f;
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 60.0f)] [SerializeField] private Vector2 _forcesRange;
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 60.0f)] [SerializeField] private Vector2 _minDistancesRange;
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 60.0f)] [SerializeField] private Vector2 _radiiRange;
-        [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector;
+        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 5.0f)] [SerializeField] private Vector2 _forcesRange = new Vector2(0.3f, 1f);
+        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 100.0f)] [SerializeField] private Vector2 _minDistancesRange = new Vector2(30f, 50f);
+        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 1000.0f)] [SerializeField] private Vector2 _radiiRange = new Vector2(70f, 250f);
+        [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
 
         [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
         [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void Awake()
         {
@@ -55,6 +57,9 @@ namespace NaughtyAttributes
                 Debug.LogError("Particle prefab is not assigned in the inspector.");
                 return;
             }
+
+            // Enable running in background so the game does not need to be focused on to run
+            Application.runInBackground = true;
         }
 
         private void Start()

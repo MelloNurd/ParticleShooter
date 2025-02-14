@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace NaughtyAttributes
@@ -20,7 +21,7 @@ namespace NaughtyAttributes
         private GameObject _particleParentObj;
 
         [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
-        [OnValueChanged("Restart")] [SerializeField] private Vector2 ScreenSpace = new Vector2(16, 9);
+        [OnValueChanged("Restart")] [SerializeField] private Vector2 ScreenSpace = new Vector2(32, 18);
         public float ScreenWidth => ScreenSpace.x;
         public float ScreenHeight => ScreenSpace.y;
 
@@ -30,14 +31,23 @@ namespace NaughtyAttributes
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 5.0f)] [SerializeField] private Vector2 _forcesRange = new Vector2(0.3f, 1f);
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 100.0f)] [SerializeField] private Vector2 _minDistancesRange = new Vector2(30f, 50f);
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 1000.0f)] [SerializeField] private Vector2 _radiiRange = new Vector2(70f, 250f);
+        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _forcesRange = new Vector2(0.3f, 1f);
+        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _minDistancesRange = new Vector2(1f, 3f);
+        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _radiiRange = new Vector2(3f, 5f);
         [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
 
         [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
         [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
+        [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 3)] [SerializeField] public float _timeScale = 1f;
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        private void ChangeTimescale()
+        {
+            Time.timeScale = _timeScale;
+        }
 
         private void Awake()
         {
@@ -90,6 +100,7 @@ namespace NaughtyAttributes
             SpawnParticles();
         }
 
+        [Button("Reset Values", EButtonEnableMode.Playmode)]
         private void Initialize()
         {
             // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.

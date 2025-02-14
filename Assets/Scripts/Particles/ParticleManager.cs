@@ -75,6 +75,10 @@ namespace NaughtyAttributes
             {
                 Restart();
             }
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                SwapForces();
+            }
         }
 
         [Button("Restart Simulation", EButtonEnableMode.Playmode)]
@@ -159,6 +163,20 @@ namespace NaughtyAttributes
             }
 
             Destroy(_particleParentObj);
+        }
+        private void SwapForces()
+        {
+            // Swap the forces between particle types
+            for (int i = 0; i < NumberOfTypes; i++)
+            {
+                for (int j = i + 1; j < NumberOfTypes; j++)
+                {
+                    float temp = Forces[i, j];
+                    Forces[i, j] = Forces[j, i];
+                    Forces[j, i] = temp;
+                }
+            }
+            Debug.Log("Forces swapped between particle types.");
         }
     }
 }

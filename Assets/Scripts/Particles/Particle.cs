@@ -40,7 +40,7 @@ namespace NaughtyAttributes
                 {
                     _direction.x -= ParticleManager.Instance.ScreenWidth;
                 }
-                else if (_direction.x < 0.5f * -ParticleManager.Instance.ScreenWidth)
+                if (_direction.x < 0.5f * -ParticleManager.Instance.ScreenWidth)
                 {
                     _direction.x += ParticleManager.Instance.ScreenWidth;
                 }
@@ -49,7 +49,7 @@ namespace NaughtyAttributes
                 {
                     _direction.y -= ParticleManager.Instance.ScreenHeight;
                 }
-                else if (_direction.y < 0.5f * -ParticleManager.Instance.ScreenHeight)
+                if (_direction.y < 0.5f * -ParticleManager.Instance.ScreenHeight)
                 {
                     _direction.y += ParticleManager.Instance.ScreenHeight;
                 }
@@ -105,8 +105,9 @@ namespace NaughtyAttributes
         }
 
         float Map(float value, float inMin, float inMax, float outMin, float outMax)
-        {
-            return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
-        }
+   {
+       value = Mathf.Clamp(value, inMin, inMax);
+       return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
+   }
     }
 }

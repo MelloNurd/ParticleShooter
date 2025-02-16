@@ -27,13 +27,6 @@ namespace NaughtyAttributes
             float[,] minDistances = ParticleManager.MinDistances;
             float[,] forces = ParticleManager.Forces;
 
-            bool printValues = false;
-
-            if(Input.GetKeyDown(KeyCode.M))
-            {
-                printValues = true;
-            }
-
             foreach (Particle particle in ParticleManager.Particles)
             {
                 // Skip the current particle
@@ -85,8 +78,6 @@ namespace NaughtyAttributes
                 }
             }
 
-            printValues = false;
-
             // Apply all forces after calculating with all particles
             _acceleration += _totalForce;
             _velocity += _acceleration * Time.deltaTime;
@@ -114,9 +105,9 @@ namespace NaughtyAttributes
         }
 
         float Map(float value, float inMin, float inMax, float outMin, float outMax)
-   {
-       value = Mathf.Clamp(value, inMin, inMax);
-       return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
-   }
+        {
+           value = Mathf.Clamp(value, inMin, inMax);
+           return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
+        }
     }
 }

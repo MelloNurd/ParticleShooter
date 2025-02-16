@@ -20,6 +20,7 @@ namespace NaughtyAttributes
         public static bool IsFinishedSpawning { get; set; } = false;
 
         private GameObject _particleParentObj;
+        private ParticleJobManager jobManager;
 
         [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
         [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
@@ -27,7 +28,6 @@ namespace NaughtyAttributes
 
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
         [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
-        [OnValueChanged("Restart")] [UnityEngine.Range(1, 99)] [SerializeField] private float _spawnRadius = 10f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ namespace NaughtyAttributes
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
-        [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 3)] [SerializeField] public float _timeScale = 1f;
+        [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void ChangeTimescale()
@@ -70,6 +70,9 @@ namespace NaughtyAttributes
 
             // Enable running in background so the game does not need to be focused on to run
             Application.runInBackground = true;
+
+            // Cache the job manager
+            jobManager = GetComponent<ParticleJobManager>();
         }
 
         private void Start()
@@ -130,6 +133,9 @@ namespace NaughtyAttributes
                     Radii[i, j] = Random.Range(_radiiRange.x, _radiiRange.y);
                 }
             }
+
+            // Update the tables in the job manager
+            jobManager.AssignTables(Forces, MinDistances, Radii);
         }
 
         private void SpawnParticles()
@@ -141,7 +147,7 @@ namespace NaughtyAttributes
             for (int i = 0; i < NumberOfParticles; i++)
             {
                 // Find a random position around (0, 0) using _spawnRadius
-                Vector3 randomPos = new Vector3(Random.Range(-_spawnRadius, _spawnRadius), Random.Range(-_spawnRadius, _spawnRadius), 0);
+                Vector3 randomPos = new Vector3(Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
                 
                 // Create the particle, rename it, and put it under the parent GameObject
                 GameObject particle = Instantiate(_particlePrefab, randomPos, Quaternion.identity);
@@ -158,7 +164,9 @@ namespace NaughtyAttributes
                     particle.GetComponent<SpriteRenderer>().color = color;
                 }
             }
+            
             IsFinishedSpawning = true;
+            jobManager.Initialize();
         }
 
         private void ClearParticles()

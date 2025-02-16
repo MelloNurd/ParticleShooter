@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 702697741}
   - component: {fileID: 702697740}
   - component: {fileID: 702697743}
+  - component: {fileID: 702697744}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -235,7 +236,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -256,6 +257,23 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &702697744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 702697739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0.15
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: d00da05018c786348bb2e87b6c0b8a71, type: 2}
 --- !u!1 &1475739694
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,6 +284,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1475739696}
   - component: {fileID: 1475739695}
+  - component: {fileID: 1475739697}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -287,15 +306,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _particlePrefab: {fileID: 5191945715267185580, guid: fb2e06b8daa237940ba0e9275abc3039, type: 3}
   ScreenSpace: {x: 32, y: 18}
+  HalfScreenSpace: {x: 0, y: 0}
   NumberOfTypes: 5
-  NumberOfParticles: 500
-  _spawnRadius: 10
+  NumberOfParticles: 2500
   _forcesRange: {x: 0.3, y: 1}
   _minDistancesRange: {x: 1, y: 3}
   _radiiRange: {x: 3, y: 5}
-  RepulsionEffector: -3
-  Dampening: 0.05
-  Friction: 0.85
+  RepulsionEffector: -2.5
+  Dampening: 0.9
+  Friction: 0.9
   _timeScale: 1
 --- !u!4 &1475739696
 Transform:
@@ -312,6 +331,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1475739697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475739694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7227620e6edc50b488153ddd194fd150, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  forces: []
+  minDistances: []
+  radii: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

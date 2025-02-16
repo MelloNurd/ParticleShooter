@@ -41,12 +41,6 @@ namespace NaughtyAttributes
 
                 // Calculate the direction and squared distance to the other particle
                 _direction = particle.transform.position - transform.position;
-                _distance = _direction.magnitude;
-
-                if(!(_distance < minDistances[Type, particle.Type] || _distance < ParticleManager.Radii[Type, particle.Type]))
-                {
-                    continue;
-                }
 
                 // Wrapping world-space fixes for distance calculations
                 if (_direction.x > ParticleManager.Instance.HalfScreenSpace.x)

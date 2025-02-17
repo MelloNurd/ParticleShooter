@@ -1,13 +1,19 @@
-using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     public float rotationSpeed;
     public float movementSpeed;
-    public float rotationDeceleration;
+    public float boostMultiplier = 2f;  // Boost increases speed
+    public float maxBoost = 100f;
+    public float boostAmount;
+    public float boostUsageRate = 20f;
+    public float boostRechargeRate = 10f;
+
     private float vertMovement;
     private float horzMovement;
+    private bool isBoosting;
     private Rigidbody2D rb;
     public bool exhaustActive;
     public int blasterType = 0;
@@ -21,9 +27,12 @@ public class Player : MonoBehaviour
     private GameObject iceBlaster;
     private GameObject electricBlaster;
 
+    private Slider boostSlider;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        boostAmount = maxBoost;
 
         // Get the single Particle System for each thruster
         leftExhaust = transform.Find("LeftThruster").GetComponentInChildren<ParticleSystem>();
@@ -35,6 +44,8 @@ public class Player : MonoBehaviour
         iceBlaster = transform.Find("IceBlaster").gameObject;
         electricBlaster = transform.Find("ElectricBlaster").gameObject;
 
+        boostSlider = GameObject.Find("PlayerBoost").GetComponent<Slider>();
+
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
         rightEmission = rightExhaust.emission;
@@ -44,25 +55,43 @@ public class Player : MonoBehaviour
     {
         horzMovement = Input.GetAxisRaw("Horizontal");
         vertMovement = Input.GetAxisRaw("Vertical");
+
+        // Check if the player is boosting
+        isBoosting = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.B)) && boostAmount > 0;
+        boostSlider.value = boostAmount / maxBoost;
+
     }
 
     private void FixedUpdate()
     {
-        // Forward and backward movement
-        if(vertMovement > 0)
+        float currentSpeed = movementSpeed;
+
+        // Boost logic
+        if (isBoosting)
         {
-            rb.AddForce(transform.up * vertMovement * movementSpeed);
+            currentSpeed *= boostMultiplier;
+            boostAmount -= boostUsageRate * Time.fixedDeltaTime;
+            
+        }
+        else if (boostAmount < maxBoost) // Recharge boost
+        {
+            boostAmount += boostRechargeRate * Time.fixedDeltaTime;
+        }
+
+        // Forward and backward movement
+        if (vertMovement > 0)
+        {
+            rb.AddForce(transform.up * vertMovement * currentSpeed);
         }
 
         // Activate exhaust when moving forward
         if (exhaustActive && vertMovement > 0)
         {
-            leftEmission.rateOverTime = 20;
-            rightEmission.rateOverTime = 20;
+            leftEmission.rateOverTime = isBoosting ? 40 : 20; // More exhaust when boosting
+            rightEmission.rateOverTime = isBoosting ? 40 : 20;
         }
         else
         {
-            // Deactivate exhaust when not moving
             leftEmission.rateOverTime = 0;
             rightEmission.rateOverTime = 0;
         }
@@ -89,6 +118,9 @@ public class Player : MonoBehaviour
             leftEmission.rateOverTime = 0;
             rightEmission.rateOverTime = 0;
         }
+
+        // Clamp boost amount within bounds
+        boostAmount = Mathf.Clamp(boostAmount, 0, maxBoost);
     }
 
     private void disableBlasters()

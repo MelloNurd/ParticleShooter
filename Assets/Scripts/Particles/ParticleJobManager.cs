@@ -4,6 +4,8 @@ using Unity.Jobs;
 using Unity.Burst;
 using System.Runtime.InteropServices;
 using NaughtyAttributes;
+using System.Collections.Generic;
+using System.Linq;
 
 public class ParticleJobManager : MonoBehaviour
 {
@@ -14,6 +16,7 @@ public class ParticleJobManager : MonoBehaviour
 
     // References to Particle GameObjects (populated by your ParticleManager)
     private Particle[] particles;
+    private List<int> particlesToRemove = new List<int>();
 
     // Native arrays for simulation data and interaction parameters.
     // Double-buffered arrays:
@@ -92,7 +95,7 @@ public class ParticleJobManager : MonoBehaviour
             {
                 position = particles[i].transform.position,
                 velocity = Vector3.zero,
-                type = particles[i].Type
+                type = particles[i].Type,
             };
             particleArrayRead[i] = pd;
             particleArrayWrite[i] = pd;
@@ -104,6 +107,12 @@ public class ParticleJobManager : MonoBehaviour
     private void Update()
     {
         if (!_isReady) return;
+
+        // Remove particles if any
+        if (particlesToRemove.Count > 0)
+        {
+            RemoveParticles();
+        }
 
         int numParticles = particleArrayRead.Length;
 
@@ -151,6 +160,51 @@ public class ParticleJobManager : MonoBehaviour
         if (nativeMinDistances.IsCreated) nativeMinDistances.Dispose();
         if (nativeRadii.IsCreated) nativeRadii.Dispose();
     }
+
+    public void RequestParticleRemoval(Particle particle)
+    {
+        int index = System.Array.IndexOf(particles, particle);
+        if (index >= 0 && !particlesToRemove.Contains(index))
+        {
+            particlesToRemove.Add(index);
+        }
+    }
+
+    private void RemoveParticles()
+    {
+        // Sort indices in descending order to avoid reindexing issues
+        particlesToRemove.Sort((a, b) => b.CompareTo(a));
+
+        foreach (int index in particlesToRemove)
+        {
+            // Remove from particles array
+            var tempList = particles.ToList();
+            tempList.RemoveAt(index);
+            particles = tempList.ToArray();
+
+            // Remove from native arrays
+            RemoveAtNativeArray(ref particleArrayRead, index);
+            RemoveAtNativeArray(ref particleArrayWrite, index);
+        }
+
+        particlesToRemove.Clear();
+    }
+
+    // Helper method to remove element at index from NativeArray
+    private void RemoveAtNativeArray(ref NativeArray<ParticleData> array, int index)
+    {
+        if (index < 0 || index >= array.Length) return;
+
+        NativeArray<ParticleData> newArray = new NativeArray<ParticleData>(array.Length - 1, Allocator.Persistent);
+        if (index > 0)
+            NativeArray<ParticleData>.Copy(array, 0, newArray, 0, index);
+
+        if (index < array.Length - 1)
+            NativeArray<ParticleData>.Copy(array, index + 1, newArray, index, array.Length - index - 1);
+
+        array.Dispose();
+        array = newArray;
+    }
 }
 
 [BurstCompile]
@@ -179,6 +233,7 @@ public struct ParticleJob : IJobParallelFor
     public void Execute(int i)
     {
         ParticleData self = inputParticles[i];
+
         Vector3 totalForce = Vector3.zero;
 
         for (int j = 0; j < numParticles; j++)
@@ -187,6 +242,7 @@ public struct ParticleJob : IJobParallelFor
                 continue;
 
             ParticleData other = inputParticles[j];
+
             // Calculate direction and apply world wrapping adjustments for distance calculation.
             Vector3 direction = other.position - self.position;
             if (direction.x > halfScreenSpace.x)

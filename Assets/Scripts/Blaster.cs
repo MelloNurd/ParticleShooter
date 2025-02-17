@@ -6,7 +6,7 @@ public class Blaster : MonoBehaviour
     private Transform firePoint;
     public PoolType bulletPoolType = PoolType.StandardBullets;
     private float bulletSpeed = 20f;
-    private float fireRate = 1f;
+    private float fireRate = .5f;
     private float nextFireTime = 0f;
 
     private void Start()

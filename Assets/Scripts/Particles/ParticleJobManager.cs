@@ -93,8 +93,6 @@ public class ParticleJobManager : MonoBehaviour
         particleArrayRead = new NativeArray<ParticleJobData>(numParticles, Allocator.Persistent);
         particleArrayWrite = new NativeArray<ParticleJobData>(numParticles, Allocator.Persistent);
 
-        Debug.Log($"numParticles: {numParticles}, Particles.Count: {ParticleManager.Particles.Count}");
-
         // Initialize both buffers with the current particle data.
         for (int i = 0; i < numParticles; i++)
         {

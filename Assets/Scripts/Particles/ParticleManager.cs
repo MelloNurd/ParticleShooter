@@ -173,7 +173,7 @@ namespace NaughtyAttributes
                 ParticleData data = new ParticleData()
                 {
                     Id = i,
-                    Type = i,
+                    Type = Random.Range(0, NumberOfTypes),
                 };
 
                 ParticleManager.Particles.Add(data);
@@ -184,7 +184,6 @@ namespace NaughtyAttributes
             }
             
             IsFinishedSpawning = true;
-            Debug.Log("reehehe");
             jobManager.Initialize();
         }
 

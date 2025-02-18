@@ -251,7 +251,7 @@ public struct ParticleJob : IJobParallelFor
                 continue;
 
             ParticleJobData other = inputParticles[j];
-            
+
             // Calculate direction and apply world wrapping adjustments for distance calculation.
             Vector3 direction = other.position - self.position;
             if (direction.x > halfScreenSpace.x)

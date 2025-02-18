@@ -35,7 +35,7 @@ public class ParticleJobManager : MonoBehaviour
 
     public void AssignTables(float[,] forcesMatrix, float[,] minDistancesMatrix, float[,] radiiMatrix)
     {
-        int numTypes = ParticleManager.Instance.NumberOfTypes;
+        int numTypes = ParticleManagerJOBS.Instance.NumberOfTypes;
         int numTypesSquared = numTypes * numTypes;
 
         // Flattening values of arrays.
@@ -80,14 +80,14 @@ public class ParticleJobManager : MonoBehaviour
 
     public void Initialize()
     {
-        Debug.Log($"Initializing Jobs with {ParticleManager.Particles.Count} particles.");
+        Debug.Log($"Initializing Jobs with {ParticleManagerJOBS.Particles.Count} particles.");
 
         // Get the particles from your ParticleManager.
         //particles = ParticleManager.Particles.ToArray();
 
-        particles = new ParticleSystem.Particle[ParticleManager.Instance.NumberOfParticles];
+        particles = new ParticleSystem.Particle[ParticleManagerJOBS.Instance.NumberOfParticles];
 
-        int numParticles = ParticleManager.Instance.ParticleSystem.GetParticles(particles);
+        int numParticles = ParticleManagerJOBS.Instance.ParticleSystem.GetParticles(particles);
 
         // Allocate two NativeArrays for double buffering.
         particleArrayRead = new NativeArray<ParticleJobData>(numParticles, Allocator.Persistent);
@@ -100,7 +100,7 @@ public class ParticleJobManager : MonoBehaviour
             {
                 position = particles[i].position,
                 velocity = Vector3.zero,
-                type = ParticleManager.Particles[i].Type,
+                type = ParticleManagerJOBS.Particles[i].Type,
             };
             particleArrayRead[i] = pd;
             particleArrayWrite[i] = pd;
@@ -130,14 +130,14 @@ public class ParticleJobManager : MonoBehaviour
             minDistances = nativeMinDistances,
             radii = nativeRadii,
             numParticles = numParticles,
-            numTypes = ParticleManager.Instance.NumberOfTypes,
+            numTypes = ParticleManagerJOBS.Instance.NumberOfTypes,
             deltaTime = Time.deltaTime,
-            friction = ParticleManager.Instance.Friction,
-            dampening = ParticleManager.Instance.Dampening,
-            repulsionEffector = ParticleManager.Instance.RepulsionEffector,
+            friction = ParticleManagerJOBS.Instance.Friction,
+            dampening = ParticleManagerJOBS.Instance.Dampening,
+            repulsionEffector = ParticleManagerJOBS.Instance.RepulsionEffector,
             // Pass screen parameters for world wrapping.
-            screenSpace = ParticleManager.Instance.ScreenSpace,         // For example: (ScreenSpace.x, ScreenSpace.y)
-            halfScreenSpace = ParticleManager.Instance.HalfScreenSpace      // For example: (HalfScreenSpace.x, HalfScreenSpace.y)
+            screenSpace = ParticleManagerJOBS.Instance.ScreenSpace,         // For example: (ScreenSpace.x, ScreenSpace.y)
+            halfScreenSpace = ParticleManagerJOBS.Instance.HalfScreenSpace      // For example: (HalfScreenSpace.x, HalfScreenSpace.y)
         };
 
         // Schedule with a batch size (64 particles per batch).
@@ -151,7 +151,7 @@ public class ParticleJobManager : MonoBehaviour
             particles[i].position = particleArrayWrite[i].position;
         }
 
-        ParticleManager.Instance.ParticleSystem.SetParticles(particles, numParticles);
+        ParticleManagerJOBS.Instance.ParticleSystem.SetParticles(particles, numParticles);
 
         // Swap the buffers so the output becomes the input for the next frame.
         NativeArray<ParticleJobData> temp = particleArrayRead;

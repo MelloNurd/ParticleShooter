@@ -14,7 +14,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
         if (health <= 0)
         {
-            Die();
+            //Die();
         }
     }
 
@@ -35,7 +35,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
             if (health <= 0)
             {
-                Die();
+                //Die();
                 yield break; // Stop the coroutine if the enemy "dies"
             }
 
@@ -62,7 +62,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
         if (health <= 0 && remainingChains == 0)
         {
-            Die();
+            //Die();
         }
     }
 
@@ -106,26 +106,26 @@ public class ParticleHealth : MonoBehaviour, IDamageable
         }
     }
 
-    private void Die()
-    {
-        Particle particle = GetComponent<Particle>();
-        if (particle != null)
-        {
-            ParticleJobManager jobManager = FindFirstObjectByType<ParticleJobManager>();
-            if (jobManager != null)
-            {
-                jobManager.RequestParticleRemoval(particle);
-            }
-            else
-            {
-                Debug.LogWarning("ParticleJobManager not found in the scene.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Particle component not found on the game object.");
-        }
+    //private void Die()
+    //{
+    //    Particle particle = GetComponent<Particle>();
+    //    if (particle != null)
+    //    {
+    //        ParticleJobManager jobManager = FindFirstObjectByType<ParticleJobManager>();
+    //        if (jobManager != null)
+    //        {
+    //            jobManager.RequestParticleRemoval(particle);
+    //        }
+    //        else
+    //        {
+    //            Debug.LogWarning("ParticleJobManager not found in the scene.");
+    //        }
+    //    }
+    //    else
+    //    {
+    //        Debug.LogWarning("Particle component not found on the game object.");
+    //    }
 
-        Destroy(gameObject);
-    }
+    //    Destroy(gameObject);
+    //}
 }

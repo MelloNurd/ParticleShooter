@@ -118,7 +118,7 @@ public class ParticleJobManager : MonoBehaviour
         // Remove particles if any
         if (particlesToRemove.Count > 0)
         {
-            RemoveParticles();
+            //RemoveParticles();
         }
 
         int numParticles = particleArrayRead.Length;
@@ -171,34 +171,34 @@ public class ParticleJobManager : MonoBehaviour
         if (nativeRadii.IsCreated) nativeRadii.Dispose();
     }
 
-    public void RequestParticleRemoval(Particle particle)
-    {
-        int index = System.Array.IndexOf(particles, particle);
-        if (index >= 0 && !particlesToRemove.Contains(index))
-        {
-            particlesToRemove.Add(index);
-        }
-    }
+    //public void RequestParticleRemoval(Particle particle)
+    //{
+    //    int index = System.Array.IndexOf(particles, particle);
+    //    if (index >= 0 && !particlesToRemove.Contains(index))
+    //    {
+    //        particlesToRemove.Add(index);
+    //    }
+    //}
 
-    private void RemoveParticles()
-    {
-        // Sort indices in descending order to avoid reindexing issues
-        particlesToRemove.Sort((a, b) => b.CompareTo(a));
+    //private void RemoveParticles()
+    //{
+    //    // Sort indices in descending order to avoid reindexing issues
+    //    particlesToRemove.Sort((a, b) => b.CompareTo(a));
 
-        foreach (int index in particlesToRemove)
-        {
-            // Remove from particles array
-            var tempList = particles.ToList();
-            tempList.RemoveAt(index);
-            particles = tempList.ToArray();
+    //    foreach (int index in particlesToRemove)
+    //    {
+    //        // Remove from particles array
+    //        var tempList = particles.ToList();
+    //        tempList.RemoveAt(index);
+    //        particles = tempList.ToArray();
 
-            // Remove from native arrays
-            RemoveAtNativeArray(ref particleArrayRead, index);
-            RemoveAtNativeArray(ref particleArrayWrite, index);
-        }
+    //        // Remove from native arrays
+    //        RemoveAtNativeArray(ref particleArrayRead, index);
+    //        RemoveAtNativeArray(ref particleArrayWrite, index);
+    //    }
 
-        particlesToRemove.Clear();
-    }
+    //    particlesToRemove.Clear();
+    //}
 
     // Helper method to remove element at index from NativeArray
     private void RemoveAtNativeArray(ref NativeArray<ParticleData> array, int index)

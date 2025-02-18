@@ -15,13 +15,13 @@ public class ParticleJobManager : MonoBehaviour
     public float[] radii;
 
     // References to Particle GameObjects (populated by your ParticleManager)
-    private Particle[] particles;
     private List<int> particlesToRemove = new List<int>();
+    //private Particle[] particles;
 
     // Native arrays for simulation data and interaction parameters.
     // Double-buffered arrays:
-    private NativeArray<ParticleData> particleArrayRead;
-    private NativeArray<ParticleData> particleArrayWrite;
+    private NativeArray<ParticleJobData> particleArrayRead;
+    private NativeArray<ParticleJobData> particleArrayWrite;
     private NativeArray<float> nativeForces;
     private NativeArray<float> nativeMinDistances;
     private NativeArray<float> nativeRadii;
@@ -30,6 +30,8 @@ public class ParticleJobManager : MonoBehaviour
     private JobHandle jobHandle;
 
     private bool _isReady;
+
+    ParticleSystem.Particle[] particles;
 
     public void AssignTables(float[,] forcesMatrix, float[,] minDistancesMatrix, float[,] radiiMatrix)
     {
@@ -81,21 +83,26 @@ public class ParticleJobManager : MonoBehaviour
         Debug.Log($"Initializing Jobs with {ParticleManager.Particles.Count} particles.");
 
         // Get the particles from your ParticleManager.
-        particles = ParticleManager.Particles.ToArray();
-        int numParticles = particles.Length;
+        //particles = ParticleManager.Particles.ToArray();
+
+        particles = new ParticleSystem.Particle[ParticleManager.Instance.NumberOfParticles];
+
+        int numParticles = ParticleManager.Instance.ParticleSystem.GetParticles(particles);
 
         // Allocate two NativeArrays for double buffering.
-        particleArrayRead = new NativeArray<ParticleData>(numParticles, Allocator.Persistent);
-        particleArrayWrite = new NativeArray<ParticleData>(numParticles, Allocator.Persistent);
+        particleArrayRead = new NativeArray<ParticleJobData>(numParticles, Allocator.Persistent);
+        particleArrayWrite = new NativeArray<ParticleJobData>(numParticles, Allocator.Persistent);
+
+        Debug.Log($"numParticles: {numParticles}, Particles.Count: {ParticleManager.Particles.Count}");
 
         // Initialize both buffers with the current particle data.
         for (int i = 0; i < numParticles; i++)
         {
-            ParticleData pd = new ParticleData
+            ParticleJobData pd = new ParticleJobData
             {
-                position = particles[i].transform.position,
+                position = particles[i].position,
                 velocity = Vector3.zero,
-                type = particles[i].Type,
+                type = ParticleManager.Particles[i].Type,
             };
             particleArrayRead[i] = pd;
             particleArrayWrite[i] = pd;
@@ -142,11 +149,14 @@ public class ParticleJobManager : MonoBehaviour
         // Update the GameObjects with the new positions.
         for (int i = 0; i < numParticles; i++)
         {
-            particles[i].transform.position = particleArrayWrite[i].position;
+            //particles[i].transform.position = particleArrayWrite[i].position;
+            particles[i].position = particleArrayWrite[i].position;
         }
 
+        ParticleManager.Instance.ParticleSystem.SetParticles(particles, numParticles);
+
         // Swap the buffers so the output becomes the input for the next frame.
-        NativeArray<ParticleData> temp = particleArrayRead;
+        NativeArray<ParticleJobData> temp = particleArrayRead;
         particleArrayRead = particleArrayWrite;
         particleArrayWrite = temp;
     }
@@ -211,9 +221,9 @@ public class ParticleJobManager : MonoBehaviour
 public struct ParticleJob : IJobParallelFor
 {
     // Read-only input buffer.
-    [Unity.Collections.ReadOnly] public NativeArray<ParticleData> inputParticles;
+    [Unity.Collections.ReadOnly] public NativeArray<ParticleJobData> inputParticles;
     // Output buffer where each thread writes its own result.
-    public NativeArray<ParticleData> outputParticles;
+    public NativeArray<ParticleJobData> outputParticles;
 
     [Unity.Collections.ReadOnly] public NativeArray<float> forces;
     [Unity.Collections.ReadOnly] public NativeArray<float> minDistances;
@@ -232,8 +242,7 @@ public struct ParticleJob : IJobParallelFor
 
     public void Execute(int i)
     {
-        ParticleData self = inputParticles[i];
-
+        ParticleJobData self = inputParticles[i];
         Vector3 totalForce = Vector3.zero;
 
         for (int j = 0; j < numParticles; j++)
@@ -241,8 +250,8 @@ public struct ParticleJob : IJobParallelFor
             if (i == j)
                 continue;
 
-            ParticleData other = inputParticles[j];
-
+            ParticleJobData other = inputParticles[j];
+            
             // Calculate direction and apply world wrapping adjustments for distance calculation.
             Vector3 direction = other.position - self.position;
             if (direction.x > halfScreenSpace.x)
@@ -299,7 +308,7 @@ public struct ParticleJob : IJobParallelFor
 }
 
 // A simple data structure for particle state. Must be blittable.
-public struct ParticleData
+public struct ParticleJobData
 {
     public Vector3 position;
     public Vector3 velocity;

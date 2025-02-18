@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using static UnityEngine.ParticleSystem;
 
 namespace NaughtyAttributes
 {
@@ -10,10 +11,8 @@ namespace NaughtyAttributes
     {
         public static ParticleManager Instance { get; private set; }
 
-        public static List<Particle> Particles { get; private set; } = new List<Particle>();
+        public static List<ParticleData> Particles { get; private set; } = new List<ParticleData>();
 
-        [SerializeField] private GameObject _particlePrefab;
-        
         public static float[,] Forces;
         public static float[,] MinDistances;
         public static float[,] Radii;
@@ -21,6 +20,9 @@ namespace NaughtyAttributes
 
         private GameObject _particleParentObj;
         private ParticleJobManager jobManager;
+
+        [SerializeField] private GameObject _particlePrefab;
+        public ParticleSystem ParticleSystem;
 
         [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
         [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
@@ -88,9 +90,10 @@ namespace NaughtyAttributes
             {
                 Restart();
             }
-            if (Input.GetKeyDown(KeyCode.T))
+
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                SwapForces();
+                ParticleSystem.Emit(2);
             }
         }
 
@@ -143,29 +146,45 @@ namespace NaughtyAttributes
             // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
             if (!Application.isPlaying) return;
 
-            _particleParentObj = new GameObject("ParticleParent");
+            ParticleSystem.MainModule main = ParticleSystem.main;
+            main.maxParticles = NumberOfParticles;
+
+            ParticleSystem.Emit(NumberOfParticles);
+
+            var individualParticles = new ParticleSystem.Particle[ParticleManager.Instance.NumberOfParticles];
+
+            int activeCount = ParticleManager.Instance.ParticleSystem.GetParticles(individualParticles);
+            if(NumberOfParticles != activeCount)
+            {
+                Debug.LogError("Error spawning particles!");
+                return;
+            }
+
             for (int i = 0; i < NumberOfParticles; i++)
             {
                 // Find a random position around (0, 0) using _spawnRadius
                 Vector3 randomPos = new Vector3(Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
-                
-                // Create the particle, rename it, and put it under the parent GameObject
-                GameObject particle = Instantiate(_particlePrefab, randomPos, Quaternion.identity);
-                particle.name = "Particle " + i;
-                particle.transform.parent = _particleParentObj.transform;
 
-                Particle particleScript = particle.GetComponent<Particle>();
-                if (particleScript != null)
+                // Create the particle, rename it, and put it under the parent GameObject
+                //GameObject particle = Instantiate(_particlePrefab, randomPos, Quaternion.identity);
+                //particle.name = "Particle " + i;
+                //particle.transform.parent = _particleParentObj.transform;
+
+                ParticleData data = new ParticleData()
                 {
-                    ParticleManager.Particles.Add(particle.GetComponent<Particle>());
-                    particleScript.Type = Random.Range(0, NumberOfTypes);
-                    particleScript.Id = i;
-                    Color color = Color.HSVToRGB((float)particleScript.Type / NumberOfTypes, 1, 1);
-                    particle.GetComponent<SpriteRenderer>().color = color;
-                }
+                    Id = i,
+                    Type = i,
+                };
+
+                ParticleManager.Particles.Add(data);
+                Color color = Color.HSVToRGB((float)data.Type / NumberOfTypes, 1, 1);
+
+                individualParticles[i].startColor = color;
+                individualParticles[i].position = randomPos;
             }
             
             IsFinishedSpawning = true;
+            Debug.Log("reehehe");
             jobManager.Initialize();
         }
 
@@ -175,30 +194,14 @@ namespace NaughtyAttributes
             if (!Application.isPlaying) return;
             
             IsFinishedSpawning = false;
-            
-            GameObject temp;
-            for (int i = Particles.Count - 1; i >= 0; i--) // Unsure if necessary, but traversing backwards through the list just in case
-            {
-                temp = Particles[i].gameObject;
-                Particles.Remove(Particles[i]);
-                Destroy(temp);
-            }
 
-            Destroy(_particleParentObj);
+            ParticleSystem.Clear();
         }
-        private void SwapForces()
-        {
-            // Swap the forces between particle types
-            for (int i = 0; i < NumberOfTypes; i++)
-            {
-                for (int j = i + 1; j < NumberOfTypes; j++)
-                {
-                    float temp = Forces[i, j];
-                    Forces[i, j] = Forces[j, i];
-                    Forces[j, i] = temp;
-                }
-            }
-            Debug.Log("Forces swapped between particle types.");
-        }
+    }
+
+    public struct ParticleData
+    {
+        public int Id;
+        public int Type;
     }
 }

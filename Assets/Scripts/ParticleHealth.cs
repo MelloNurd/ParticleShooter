@@ -51,18 +51,18 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
     public void ChainDamage(float amount, int remainingChains)
     {
-        Damage(amount);
+        health -= amount;
 
         Debug.Log($"Enemy chain lightning damage: {amount} damage. Health left: {health}");
 
-        if (health <= 0)
-        {
-            Die();
-        }
-
         if (remainingChains > 0)
         {
-            StartCoroutine(ChainLightning(amount * 0.8f, remainingChains - 1));
+            StartCoroutine(ChainLightning(amount * 0.9f, remainingChains - 1));
+        }
+
+        if (health <= 0 && remainingChains == 0)
+        {
+            Die();
         }
     }
 
@@ -70,33 +70,62 @@ public class ParticleHealth : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(0.2f); // Short delay before chaining
 
-        Collider2D[] nearbyParticles = Physics2D.OverlapCircleAll(transform.position, 3f);
-        List<Particle> validTargets = new List<Particle>();
+        Collider2D[] nearbyColliders = Physics2D.OverlapCircleAll(transform.position, 3f);
+        Debug.Log($"Found {nearbyColliders.Length} colliders within range.");
 
-        foreach (Collider2D col in nearbyParticles)
+        List<ParticleHealth> validTargets = new List<ParticleHealth>();
+
+        foreach (Collider2D col in nearbyColliders)
         {
-            Particle particle = col.GetComponent<Particle>();
-            if (particle != null && particle != this.GetComponent<Particle>()) // Avoid hitting itself
+            ParticleHealth particleHealth = col.GetComponent<ParticleHealth>();
+            if (particleHealth != null && particleHealth != this)
             {
-                validTargets.Add(particle);
+                validTargets.Add(particleHealth);
+                Debug.Log($"Added {col.gameObject.name} to validTargets.");
+            }
+            else
+            {
+                Debug.Log($"Skipped {col.gameObject.name} - ParticleHealth component not found or self-targeting.");
             }
         }
 
+        Debug.Log($"Total valid targets: {validTargets.Count}");
+
         if (validTargets.Count > 0)
         {
-            Particle nextTarget = validTargets[Random.Range(0, validTargets.Count)];
-            ParticleHealth particleHealth = nextTarget.GetComponent<ParticleHealth>();
-            if (particleHealth != null)
+            ParticleHealth nextTarget = validTargets[Random.Range(0, validTargets.Count)];
+            if (nextTarget != null)
             {
-                particleHealth.ChainDamage(damage, remainingChains);
+                Debug.Log($"Chained to next target: {nextTarget.gameObject.name}");
+                nextTarget.ChainDamage(damage, remainingChains);
             }
+        }
+        else
+        {
+            Debug.Log("No valid targets found for chain lightning.");
         }
     }
 
     private void Die()
     {
-        ParticleJobManager jobManager = FindFirstObjectByType<ParticleJobManager>();
-        jobManager.RequestParticleRemoval(GetComponent<Particle>());
+        Particle particle = GetComponent<Particle>();
+        if (particle != null)
+        {
+            ParticleJobManager jobManager = FindFirstObjectByType<ParticleJobManager>();
+            if (jobManager != null)
+            {
+                jobManager.RequestParticleRemoval(particle);
+            }
+            else
+            {
+                Debug.LogWarning("ParticleJobManager not found in the scene.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Particle component not found on the game object.");
+        }
+
         Destroy(gameObject);
     }
 }

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6393566473244210960}
   - component: {fileID: 7066594040583182549}
   m_Layer: 0
-  m_Name: ElectricBullet Variant
+  m_Name: ElectricBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

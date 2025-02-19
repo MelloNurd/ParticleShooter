@@ -470,18 +470,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a072be966319c6441bbf3a0bba579f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _particlePrefab: {fileID: 5191945715267185580, guid: fb2e06b8daa237940ba0e9275abc3039, type: 3}
+  ParticlePrefab: {fileID: 5191945715267185580, guid: fb2e06b8daa237940ba0e9275abc3039, type: 3}
+  ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
   ScreenSpace: {x: 32, y: 18}
   HalfScreenSpace: {x: 0, y: 0}
   NumberOfTypes: 5
   NumberOfParticles: 500
-  _forcesRange: {x: 0.3, y: 1}
-  _minDistancesRange: {x: 1, y: 3}
-  _radiiRange: {x: 3, y: 5}
+  ForcesRange: {x: 0.3, y: 1}
+  MinDistancesRange: {x: 1, y: 3}
+  RadiiRange: {x: 3, y: 5}
   RepulsionEffector: -3
   Dampening: 0.9
   Friction: 0.85
   _timeScale: 1
+  MinPopulation: 15
+  NumFood: 200
+  FoodRange: 5
+  FoodEnergy: 100
+  ReproductionEnergy: 1000
+  StartingEnergy: 400
 --- !u!1001 &2072402522
 PrefabInstance:
   m_ObjectHideFlags: 0

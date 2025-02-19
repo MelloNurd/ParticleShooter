@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace NaughtyAttributes
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _forcesRange = new Vector2(0.3f, 1f);
+        [OnValueChanged("OnForcesRangeChanged")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _forcesRange = new Vector2(0.3f, 1f);
         [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _minDistancesRange = new Vector2(1f, 3f);
         [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] private Vector2 _radiiRange = new Vector2(3f, 5f);
         [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
@@ -42,6 +43,9 @@ namespace NaughtyAttributes
         [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
         [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        public Vector2 ForcesRange => _forcesRange;
+        public static event Action<Vector2> ForcesRangeChanged;
 
         private void ChangeTimescale()
         {
@@ -116,19 +120,25 @@ namespace NaughtyAttributes
                 for (int j = 0; j < NumberOfTypes; j++)
                 {
                     // Forces
-                    Forces[i, j] = Random.Range(_forcesRange.x, _forcesRange.y);
-                    if (Random.Range(0f, 1f) > 0.5f)
+                    Forces[i, j] = UnityEngine.Random.Range(_forcesRange.x, _forcesRange.y);
+                    if (UnityEngine.Random.Range(0f, 1f) > 0.5f)
                     {
                         Forces[i, j] *= -1;
                     }
 
                     // Minimum distances
-                    MinDistances[i, j] = Random.Range(_minDistancesRange.x, _minDistancesRange.y);
+                    MinDistances[i, j] = UnityEngine.Random.Range(_minDistancesRange.x, _minDistancesRange.y);
                     
                     // Radii
-                    Radii[i, j] = Random.Range(_radiiRange.x, _radiiRange.y);
+                    Radii[i, j] = UnityEngine.Random.Range(_radiiRange.x, _radiiRange.y);
                 }
             }
+        }
+
+        private void OnForcesRangeChanged()
+        {
+            Initialize();
+            ForcesRangeChanged?.Invoke(_forcesRange);
         }
 
         private void SpawnParticles()
@@ -140,7 +150,7 @@ namespace NaughtyAttributes
             for (int i = 0; i < NumberOfParticles; i++)
             {
                 // Find a random position around (0, 0) using _spawnRadius
-                Vector3 randomPos = new Vector3(Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
+                Vector3 randomPos = new Vector3(UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
                 
                 // Create the particle, rename it, and put it under the parent GameObject
                 GameObject particle = Instantiate(_particlePrefab, randomPos, Quaternion.identity);
@@ -151,7 +161,7 @@ namespace NaughtyAttributes
                 if (particleScript != null)
                 {
                     ParticleManager.Particles.Add(particle.GetComponent<Particle>());
-                    particleScript.Type = Random.Range(0, NumberOfTypes);
+                    particleScript.Type = UnityEngine.Random.Range(0, NumberOfTypes);
                     particleScript.Id = i;
                     Color color = Color.HSVToRGB((float)particleScript.Type / NumberOfTypes, 1, 1);
                     particle.GetComponent<SpriteRenderer>().color = color;
@@ -192,4 +202,5 @@ namespace NaughtyAttributes
             Debug.Log("Forces swapped between particle types.");
         }
     }
+
 }

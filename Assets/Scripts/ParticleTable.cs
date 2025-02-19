@@ -12,6 +12,9 @@ public class ParticleTable : MonoBehaviour
     private float[,] attractionMatrix; // The matrix storing attraction/repulsion values
 
     private int typeParticles;
+    private Vector2 forcesRange;
+
+    private bool firstRun = true;
 
     IEnumerator Start()
     {
@@ -20,6 +23,9 @@ public class ParticleTable : MonoBehaviour
 
         // Get the particle count from ParticleManager
         typeParticles = ParticleManager.Instance.NumberOfTypes;
+
+        // Get the forces range from ParticleManager
+        forcesRange = ParticleManager.Instance.ForcesRange;
 
         // Initialize the attractionMatrix
         attractionMatrix = new float[typeParticles, typeParticles];
@@ -31,6 +37,39 @@ public class ParticleTable : MonoBehaviour
         GenerateTableUI();
 
         gameObject.SetActive(false);
+    }
+
+    private void OnEnable()
+{
+    CellTextChangedEvent.OnCellTextChanged += UpdateParticleManager;
+    ParticleManager.ForcesRangeChanged += OnForcesRangeChanged;
+
+    
+    if (attractionMatrix != null && !firstRun)
+    {
+        GetForcesMatrix(); // Ensure the forces matrix is up to date
+        Debug.Log("Updating table colors on enable.");
+        UpdateTableColors();
+    }
+    else
+    {
+            firstRun = false;
+    }
+}
+
+
+
+    private void OnDisable()
+    {
+        CellTextChangedEvent.OnCellTextChanged -= UpdateParticleManager;
+        ParticleManager.ForcesRangeChanged -= OnForcesRangeChanged;
+    }
+
+    private void OnForcesRangeChanged(Vector2 newRange)
+    {
+        forcesRange = newRange;
+        GetForcesMatrix(); // Recalculate the forces matrix based on the new range
+        UpdateTableColors();
     }
 
     void GetForcesMatrix()
@@ -104,16 +143,17 @@ public class ParticleTable : MonoBehaviour
                     cellScript.Initialize(rowType, colType, value);
                     inputField.text = value.ToString("0.00");
 
-                    // Color coding based on value
+                    // Normalize the value based on forcesRange
+                    float normalizedValue = (value - forcesRange.x) / (forcesRange.y - forcesRange.x);
+
+                    // Interpolate color based on normalized value
                     if (value > 0)
                     {
-                        // Interpolate between white and green
-                        bg.color = Color.Lerp(Color.white, Color.green, value);
+                        bg.color = Color.Lerp(Color.white, Color.green, normalizedValue);
                     }
                     else if (value < 0)
                     {
-                        // Interpolate between white and red
-                        bg.color = Color.Lerp(Color.white, Color.red, -value);
+                        bg.color = Color.Lerp(Color.white, Color.red, -normalizedValue);
                     }
                     else
                     {
@@ -124,19 +164,41 @@ public class ParticleTable : MonoBehaviour
         }
     }
 
+    private void UpdateTableColors()
+    {
+        for (int i = 1; i <= typeParticles; i++) // Start from 1 to skip the first row
+        {
+            for (int j = 1; j <= typeParticles; j++) // Start from 1 to skip the first column
+            {
+                Transform cellTransform = gridParent.GetChild(i * (typeParticles + 1) + j);
+                TMP_InputField inputField = cellTransform.GetComponentInChildren<TMP_InputField>();
+                Image bg = cellTransform.GetComponentInChildren<Image>();
+
+                float value = attractionMatrix[i - 1, j - 1]; // Adjust indices for attractionMatrix
+                inputField.text = value.ToString("0.00");
+
+                float normalizedValue = (value - forcesRange.x) / (forcesRange.y - forcesRange.x);
+
+                // Interpolate color based on normalized value
+                if (value > 0)
+                {
+                    bg.color = Color.Lerp(Color.white, Color.green, normalizedValue);
+                }
+                else if (value < 0)
+                {
+                    bg.color = Color.Lerp(Color.white, Color.red, -normalizedValue);
+                }
+                else
+                {
+                    bg.color = Color.white;
+                }
+            }
+        }
+    }
+
     private Color GetParticleColor(int typeIndex)
     {
         return Color.HSVToRGB((float)typeIndex / typeParticles, 1, 1);
-    }
-
-    private void OnEnable()
-    {
-        CellTextChangedEvent.OnCellTextChanged += UpdateParticleManager;
-    }
-
-    private void OnDisable()
-    {
-        CellTextChangedEvent.OnCellTextChanged -= UpdateParticleManager;
     }
 
     private void UpdateParticleManager(int row, int col, float newValue)
@@ -155,3 +217,4 @@ public class ParticleTable : MonoBehaviour
         }
     }
 }
+

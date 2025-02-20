@@ -68,13 +68,12 @@ namespace NaughtyAttributes
             }
             for (int i = 0; i < numParticles; i++)
             {
-                positions[i] = new Vector3(x + Random.Range(-50, 50), y + Random.Range(-50, 50));
+                positions[i] = new Vector3(x + Random.Range(-0.5f, 0.5f), y + Random.Range(-0.5f, 0.5f));
 
                 Particle newParticle = Instantiate(_particlePrefab, positions[i], Quaternion.identity, transform).GetComponent<Particle>();
-                if(newParticle != null)
-                {
-                    newParticle.Type = 1 + Random.Range(0, _numTypes); // Type 0 is food
-                }
+                newParticle.Position = positions[i];
+                newParticle.Type = 1 + Random.Range(0, _numTypes); // Type 0 is food
+                newParticle.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)newParticle.Type / _numTypes, 1, 1); // color based on type
             }
         }
 

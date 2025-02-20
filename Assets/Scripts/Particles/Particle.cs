@@ -8,10 +8,10 @@ namespace NaughtyAttributes
 {
     public class Particle : MonoBehaviour
     {
-        public Vector3 Position { get; set; } = Vector3.zero; // Storing this manually, despite having Transform, to make switching to DOD easier later
-        public Vector3 Velocity { get; set; } // Used to handle custom physics
-        public int Type { get; set; } // Determines the type of the particle, as well as the color
-        public int Id { get; set; } // Can be used to single out specific particles
+        [ShowNativeProperty] public Vector3 Position { get; set; } = Vector3.zero; // Storing this manually, despite having Transform, to make switching to DOD easier later
+        [ShowNativeProperty] public Vector3 Velocity { get; set; } // Used to handle custom physics
+        [ShowNativeProperty] public int Type { get; set; } // Determines the type of the particle, as well as the color
+        [ShowNativeProperty] public int Id { get; set; } // Can be used to single out specific particles
 
         private Transform _transform; // Caching the object's transform. Very slight performance gain.
 
@@ -259,8 +259,8 @@ namespace NaughtyAttributes
             _transform.position = Position;
         }
 
-        private void Update()
-        {
+        // private void Update()
+        // {
             //// If the spawner has not completed spawning, do nothing
             //if (!ParticleManager.IsFinishedSpawning) return;
 
@@ -347,7 +347,7 @@ namespace NaughtyAttributes
             //}
 
             //_transform.position = Position;
-        }
+        // }
 
         private float Map(float value, float inMin, float inMax, float outMin, float outMax)
         {

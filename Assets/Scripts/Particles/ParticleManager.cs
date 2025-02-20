@@ -29,26 +29,26 @@ namespace NaughtyAttributes
 
         public static event Action<Vector2> ForcesRangeChanged;
 
-        [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
-        [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
-        [HideInInspector] public Vector2 HalfScreenSpace;
+         ////////////////////////////////////////////////////////////////
+        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
+        [BoxGroup("Simulation Configuration")] [HideInInspector] public Vector2 HalfScreenSpace;
 
-        [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
-        [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
+        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
+        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
-        [OnValueChanged("OnForcesRangeChanged")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 ForcesRange = new Vector2(0.3f, 1f);
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 MinDistancesRange = new Vector2(1f, 3f);
-        [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 RadiiRange = new Vector2(3f, 5f);
-        [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
+        /////////////////////////////////////////////////////////////////////
+        [BoxGroup("Particle Properties")] [OnValueChanged("OnForcesRangeChanged")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 ForcesRange = new Vector2(0.3f, 1f);
+        [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 MinDistancesRange = new Vector2(1f, 3f);
+        [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 RadiiRange = new Vector2(3f, 5f);
+        [BoxGroup("Particle Properties")][UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
 
-        [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
-        [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
+        [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
+        [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
-        [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
+        /////////////////////////////////////////////////////////////////////
+        [BoxGroup("Unity Settings")] [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public int MinPopulation = 15;
@@ -110,18 +110,9 @@ namespace NaughtyAttributes
                 colony.Tick();
             }
 
-            for (int i = Clusters.Count - 1; i >= 0; i--)
-            { // remove dead (energyless cells)
-                Cluster c = Clusters[i];
-                if (c.Energy <= 0)
-                {
-                    //convertToFood(c);
-                    Clusters.RemoveAt(i);  // could convert to food instead
-                }
-            }
-
+            Die();  // cells die if they run out of energy
             Eat();  // cells collect nearby food
-            Replace();  // if the pop is below minPop add cells
+            ForceCopy();  // if the pop is below minPop add cells
             Reproduce();  // cells with lots of energy reproduce
 
             if(Time.frameCount % 5 == 0)
@@ -135,7 +126,11 @@ namespace NaughtyAttributes
             Vector2 pos = GetRandomPointOnScreen();
 
             Particle temp = Instantiate(ParticlePrefab, pos, Quaternion.identity).GetComponent<Particle>();
+
+            temp.Position = pos;
             temp.Type = 0;
+
+            temp.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)temp.Type / NumberOfTypes, 1, 1); // color based on type
 
             return temp;
         }
@@ -156,6 +151,19 @@ namespace NaughtyAttributes
             foreach (Particle p in c.Swarm)
             {
                 Food.Add(CreateFoodParticle());
+            }
+        }
+
+        void Die() {
+            for (int i = Clusters.Count - 1; i >= 0; i--)
+            { // remove dead (energyless cells)
+                Cluster c = Clusters[i];
+                if (c.Energy <= 0)
+                {
+                    Debug.Log("Cluster died");
+                    //convertToFood(c);
+                    Clusters.RemoveAt(i);  // could convert to food instead
+                }
             }
         }
 
@@ -181,21 +189,19 @@ namespace NaughtyAttributes
         // If population is below minPopulation add cells by copying and mutating
         // randomly selected existing cells.
         // Note: if the population all dies simultanious the program will crash - extinction!
-        void Replace()
+        void ForceCopy()
         {
-            Debug.Log("COUNT: " + Clusters.Count);
-            if (Clusters.Count < MinPopulation)
+            if (Clusters.Count > 0 && Clusters.Count < MinPopulation)
             {
-                int parent = UnityEngine.Random.Range(0, Clusters.Count);
-
                 Cluster temp = CreateCluster();
 
-                Cluster parentCell = Clusters[parent];
-
-                temp.CopyCell(parentCell);
-
-                temp.MutateCell();
-
+                if(Clusters.Count > 0) { // As long as there are at least some cells, copy and mutate a random one
+                    int parent = UnityEngine.Random.Range(0, Clusters.Count);
+                    Cluster parentCell = Clusters[parent];
+                    temp.CopyCell(parentCell);
+                    temp.MutateCell();
+                }
+                
                 Clusters.Add(temp);
             }
         }
@@ -247,7 +253,7 @@ namespace NaughtyAttributes
             // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
             if (!Application.isPlaying) return;
 
-            // Caching this to reduce calculations
+            // Caching this to reduce repeated calculations
             HalfScreenSpace = ScreenSpace * 0.5f;
 
             //Forces = new float[NumberOfTypes, NumberOfTypes];
@@ -312,8 +318,9 @@ namespace NaughtyAttributes
                     ParticleManager.Particles.Add(particle.GetComponent<Particle>());
                     particleScript.Type = UnityEngine.Random.Range(0, NumberOfTypes);
                     particleScript.Id = i;
-                    Color color = Color.HSVToRGB((float)particleScript.Type / NumberOfTypes, 1, 1);
-                    particle.GetComponent<SpriteRenderer>().color = color;
+
+                    // Color based on type
+                    particle.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)particleScript.Type / NumberOfTypes, 1, 1);
                 }
             }
             IsFinishedSpawning = true;

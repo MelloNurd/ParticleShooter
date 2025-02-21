@@ -51,7 +51,7 @@ namespace NaughtyAttributes
         [BoxGroup("Unity Settings")] [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public int MinPopulation = 50;
+        public int StartPopulation = 50;
         public int NumFood = 200; // starting amount of food
         public float FoodRange = 0.1f; // distance to collect food
         public int FoodEnergy = 100; // energy from food
@@ -116,7 +116,7 @@ namespace NaughtyAttributes
             // Simulation
             foreach(Cluster colony in Clusters)
             {
-                colony.Tick();
+                colony.UpdateCluster();
             }
 
             Die();  // cells die if they run out of energy
@@ -196,8 +196,6 @@ namespace NaughtyAttributes
                     Cluster temp = CreateCluster();
                     temp.gameObject.name = "Cluster (Reproduced)";
 
-                    Debug.Log("Cluster Reproduced");
-
                     temp.CopyCell(c); // copy the parent cell's 'DNA'
 
                     c.Energy -= StartingEnergy;  // parent cell loses energy (child cell recieves it) 
@@ -214,11 +212,12 @@ namespace NaughtyAttributes
         // Note: if the population all dies simultanious the program will crash - extinction!
         void ForceCopy()
         {
-            if (Clusters.Count > 0 && Clusters.Count < MinPopulation)
+            if (Clusters.Count > 0 && Clusters.Count < StartPopulation)
             {
                 Cluster temp = CreateCluster();
+                temp.gameObject.name = "Cluster (Force Copied)";
 
-                if(Clusters.Count > 0) { // As long as there are at least some cells, copy and mutate a random one
+                if (Clusters.Count > 0) { // As long as there are at least some cells, copy and mutate a random one
                     int parent = UnityEngine.Random.Range(0, Clusters.Count);
                     Cluster parentCell = Clusters[parent];
                     temp.CopyCell(parentCell);
@@ -231,33 +230,23 @@ namespace NaughtyAttributes
 
         void Eat()
         {
-            float dis;
-            Vector3 vector = Vector3.zero;
             foreach (Cluster c in Clusters)
             {  // for every cell
-                foreach (Particle p in c.Swarm)
-                {  // for every particle in every cell
-                    if (p.Type == 1)
-                    { // 1 is the eating type of paricle
-                        for (int i = Food.Count - 1; i >= 0; i--)
-                        {  // for every food particle - yes this gets slow
-                            Particle f = Food[i];
-                            vector = f.Position - p.Position;
+                foreach (Particle p in c.Swarm) // for every particle in every cell
+                { 
+                    if (p.Type != 1) continue; // 1 is the eating type of paricle
 
-                            if (vector.x > HalfScreenSpace.x) { vector.x -= ScreenSpace.x; }
-                            if (vector.x < -HalfScreenSpace.x) { vector.x += ScreenSpace.x; }
-                            if (vector.y > HalfScreenSpace.y) { vector.y -= ScreenSpace.y; }
-                            if (vector.y < -HalfScreenSpace.y) { vector.y += ScreenSpace.y; }
+                    Collider2D[] nearby = Physics2D.OverlapCircleAll(p.Position, FoodRange); // find nearby colliders (to look for food)
 
-                            dis = vector.magnitude;
-                            if (dis < FoodRange)
-                            {
-                                c.Energy += FoodEnergy; // gain 100 energy for eating food 
-                                Particle temp = Food[i];
-                                Food.RemoveAt(i);
-                                Destroy(temp.gameObject);
+                    foreach (Collider2D f in nearby)
+                    {
+                        if(f.TryGetComponent<Particle>(out Particle food))
+                        {
+                            if(food.Type != 0) continue; // 0 is the food type of particle
 
-                            }
+                            c.Energy += FoodEnergy; // gain 100 energy for eating food 
+                            Food.Remove(food);
+                            Destroy(food.gameObject);
                         }
                     }
                 }
@@ -270,7 +259,6 @@ namespace NaughtyAttributes
             // Restarts the simulation by first clearing all particles and then restarting the process
             ClearParticles();
             Initialize();
-            //SpawnParticles();
         }
 
         [Button("Reset Values", EButtonEnableMode.Playmode)]
@@ -282,7 +270,7 @@ namespace NaughtyAttributes
             // Caching this to reduce repeated calculations
             HalfScreenSpace = ScreenSpace * 0.5f;
 
-            for (int i = 0; i < MinPopulation; i++)
+            for (int i = 0; i < StartPopulation; i++)
             {
                 Clusters.Add(CreateCluster());
             }

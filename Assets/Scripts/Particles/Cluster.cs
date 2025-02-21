@@ -20,6 +20,9 @@ namespace NaughtyAttributes
         public float[,] InternalRadii;
         public float[,] ExternalRadii;
 
+        public float MaxInternalRadii { get; set; } = 0;
+        public float MaxExternalRadii { get; set; } = 0;
+
         public int Energy;
 
         private Vector3[] positions;
@@ -66,9 +69,18 @@ namespace NaughtyAttributes
                     ExternalForces[i, j] = Random.Range(-1f, 1f); // external forces could be attractive or repulsive
                     ExternalMins[i, j] = Random.Range(1f, 3f);
                     ExternalRadii[i, j] = Random.Range(ExternalMins[i, j] * 2f, 7f);
+
+                    if (InternalRadii[i, j] > MaxInternalRadii)
+                    {
+                        MaxInternalRadii = InternalRadii[i, j];
+                    }
+                    if (ExternalRadii[i, j] > MaxExternalRadii)
+                    {
+                        MaxExternalRadii = ExternalRadii[i, j];
+                    }
                 }
             }
-
+            
             for (int i = 0; i < numParticles; i++)
             {
                 positions[i] = new Vector3(x + Random.Range(-0.5f, 0.5f), y + Random.Range(-0.5f, 0.5f));
@@ -139,7 +151,7 @@ namespace NaughtyAttributes
             } // Could also mutate the number of particles in the cell
         }
 
-        public void Tick()
+        public void UpdateCluster()
         {
             foreach (Particle p in Swarm)
             { // for each particle in this cell
@@ -148,7 +160,21 @@ namespace NaughtyAttributes
                 p.ApplyFoodForces(this);
             }
 
+            AdjustCenter();
+
             Energy -= 1; // cells lose one energy/timestep - should be a variable. Or dependent on forces generated
+        }
+
+        public void AdjustCenter()
+        {
+            // Go through each particle in Swarm and calculate the average position, then set transform.position to that.
+            Vector3 avg = Vector3.zero;
+            foreach (Particle p in Swarm)
+            {
+                avg += p.Position;
+            }
+            avg /= Swarm.Count;
+            transform.position = avg;
         }
     }
 }

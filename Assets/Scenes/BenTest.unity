@@ -335,9 +335,9 @@ MonoBehaviour:
   NumFood: 200
   FoodRange: 0.1
   FoodEnergy: 100
-  ReproductionEnergy: 1000
+  ReproductionEnergy: 500
   StartingEnergy: 400
-  MaxFood: 50
+  MaxFood: 200
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

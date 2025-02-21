@@ -167,14 +167,40 @@ namespace NaughtyAttributes
 
         public void AdjustCenter()
         {
-            // Go through each particle in Swarm and calculate the average position, then set transform.position to that.
-            Vector3 avg = Vector3.zero;
+            Vector2 avg = Vector2.zero;
+            float worldWidth = ParticleManager.Instance.ScreenSpace.x;   // Width of your game world in world units
+            float worldHeight = ParticleManager.Instance.ScreenSpace.y; // Height of your game world in world units
+
+            // Sum positions, adjusting for wrapping
             foreach (Particle p in Swarm)
             {
-                avg += p.Position;
+                Vector2 pos = p.Position;
+
+                // Calculate the shortest distance in X
+                float dx = pos.x - transform.position.x;
+                if (dx > worldWidth / 2)
+                    dx -= worldWidth;
+                else if (dx < -worldWidth / 2)
+                    dx += worldWidth;
+
+                // Calculate the shortest distance in Y
+                float dy = pos.y - transform.position.y;
+                if (dy > worldHeight / 2)
+                    dy -= worldHeight;
+                else if (dy < -worldHeight / 2)
+                    dy += worldHeight;
+
+                avg += new Vector2(transform.position.x + dx, transform.position.y + dy);
             }
+
             avg /= Swarm.Count;
-            transform.position = avg;
+
+            // Wrap the cluster's position to keep it within bounds
+            avg.x = (avg.x + worldWidth) % worldWidth;
+            avg.y = (avg.y + worldHeight) % worldHeight;
+
+            transform.position = new Vector3(avg.x, avg.y, transform.position.z);
         }
+
     }
 }

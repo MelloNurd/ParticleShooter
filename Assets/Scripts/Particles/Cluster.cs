@@ -11,6 +11,8 @@ namespace NaughtyAttributes
     {
         public List<Particle> Swarm { get; set; } = new List<Particle>();
 
+        public int Id { get; set; }
+
         public float[,] InternalForces;
         public float[,] ExternalForces;
         public float[,] InternalMins;
@@ -59,21 +61,24 @@ namespace NaughtyAttributes
                 for (int j = 0; j < _numTypes; j++)
                 {
                     InternalForces[i, j] = Random.Range(0.1f, 1f); // internal forces are initially attractive, but can mutate
-                    InternalMins[i, j] = Random.Range(40f, 70f);
-                    InternalRadii[i, j] = Random.Range(InternalMins[i, j] * 2f, 300f); // minimum 'primary' force range must be twice repulsive range
+                    InternalMins[i, j] = Random.Range(.1f, 1f);
+                    InternalRadii[i, j] = Random.Range(InternalMins[i, j] * 2, 2f); // minimum 'primary' force range must be twice repulsive range
                     ExternalForces[i, j] = Random.Range(-1f, 1f); // external forces could be attractive or repulsive
-                    ExternalMins[i, j] = Random.Range(40f, 70f);
-                    ExternalRadii[i, j] = Random.Range(ExternalMins[i, j] * 2f, 300f);
+                    ExternalMins[i, j] = Random.Range(1f, 3f);
+                    ExternalRadii[i, j] = Random.Range(ExternalMins[i, j] * 2f, 7f);
                 }
             }
+
             for (int i = 0; i < numParticles; i++)
             {
                 positions[i] = new Vector3(x + Random.Range(-0.5f, 0.5f), y + Random.Range(-0.5f, 0.5f));
 
                 Particle newParticle = Instantiate(_particlePrefab, positions[i], Quaternion.identity, transform).GetComponent<Particle>();
                 newParticle.Position = positions[i];
-                newParticle.Type = 1 + Random.Range(0, _numTypes); // Type 0 is food
+                newParticle.Type = 1 + Random.Range(0, _numTypes - 1);
+                newParticle.ParentCluster = this;
                 newParticle.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)newParticle.Type / _numTypes, 1, 1); // color based on type
+                Swarm.Add(newParticle);
             }
         }
 
@@ -81,6 +86,7 @@ namespace NaughtyAttributes
         // (I don't trust deep copy when data structures get complex :)
         public void CopyCell(Cluster colony)
         {
+
             for (int i = 0; i < _numTypes; i++)
             {
                 for (int j = 0; j < _numTypes; j++)
@@ -93,18 +99,15 @@ namespace NaughtyAttributes
                     ExternalRadii[i, j] = colony.ExternalRadii[i, j];
                 }
             }
-            float x = Random.Range(0, ParticleManager.Instance.ScreenSpace.x);
-            float y = Random.Range(0, ParticleManager.Instance.ScreenSpace.y);
             for (int i = 0; i < numParticles; i++)
             {
-                positions[i] = new Vector3(x + colony.positions[i].x, y + colony.positions[i].y);
                 Particle p = Swarm[i];
-                Particle temp = Instantiate(_particlePrefab, positions[i], Quaternion.identity).GetComponent<Particle>();
-                if (temp != null)
-                {
-                    temp.Type = p.Type;
-                    Swarm.Add(temp); // add to the new cell
-                }
+                //Particle temp = Instantiate(_particlePrefab, p.Position, Quaternion.identity, colony.transform).GetComponent<Particle>();
+                p.Position = colony.Swarm[i].Position;
+                p.transform.position = p.Position;
+                p.Type = colony.Swarm[i].Type;
+                p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1); // color based on type
+                //Swarm.Add(p); // add to the new cell
             }
         }
 
@@ -117,11 +120,11 @@ namespace NaughtyAttributes
                 for (int j = 0; j < _numTypes; j++)
                 {
                     InternalForces[i, j] += Random.Range(-0.1f, 0.1f);
-                    InternalMins[i, j] += Random.Range(-5f, 5f);
-                    InternalRadii[i, j] += Random.Range(-10f, 10f);
+                    InternalMins[i, j] += Random.Range(-0.5f, 0.5f);
+                    InternalRadii[i, j] += Random.Range(-0.10f, 0.10f);
                     ExternalForces[i, j] += Random.Range(-0.1f, 0.1f);
-                    ExternalMins[i, j] += Random.Range(-5f, 5f);
-                    ExternalRadii[i, j] += Random.Range(-10f, 10f);
+                    ExternalMins[i, j] += Random.Range(-0.5f, 0.5f);
+                    ExternalRadii[i, j] += Random.Range(-0.10f, 0.10f);
                 }
             }
             for (int i = 0; i < numParticles; i++)
@@ -130,7 +133,8 @@ namespace NaughtyAttributes
                 if (Random.Range(0, 100) < 10)
                 {  // 10% of the time a particle changes type
                     Particle p = Swarm[i];
-                    p.Type = 1 + Random.Range(0, _numTypes);
+                    p.Type = 1 + Random.Range(0, _numTypes - 1);
+                    p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1); // color based on type
                 }
             } // Could also mutate the number of particles in the cell
         }

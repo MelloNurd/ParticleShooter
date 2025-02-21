@@ -41,7 +41,7 @@ namespace NaughtyAttributes
         [BoxGroup("Particle Properties")] [OnValueChanged("OnForcesRangeChanged")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 ForcesRange = new Vector2(0.3f, 1f);
         [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 MinDistancesRange = new Vector2(1f, 3f);
         [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 RadiiRange = new Vector2(3f, 5f);
-        [BoxGroup("Particle Properties")][UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
+        [BoxGroup("Particle Properties")] [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
 
         [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
         [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
@@ -51,12 +51,17 @@ namespace NaughtyAttributes
         [BoxGroup("Unity Settings")] [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public int MinPopulation = 15;
+        public int MinPopulation = 50;
         public int NumFood = 200; // starting amount of food
-        public int FoodRange = 5; // distance to collect food
+        public float FoodRange = 0.1f; // distance to collect food
         public int FoodEnergy = 100; // energy from food
         public int ReproductionEnergy = 1000;
-        public int StartingEnergy = 400;
+        public int StartingEnergy = 200;
+        public int MaxFood = 200;
+
+        private int _runningClusterCount = 0;
+
+        private GameObject _foodParent;
 
         private void ChangeTimescale()
         {
@@ -84,12 +89,16 @@ namespace NaughtyAttributes
 
             // Enable running in background so the game does not need to be focused on to run
             Application.runInBackground = true;
+
+            _foodParent = new GameObject("FoodParent");
         }
 
         private void Start()
         {
             Initialize();
             //SpawnParticles();
+
+            InvokeRepeating("SpawnFood", 0, 5);
         }
 
         private void Update()
@@ -114,8 +123,11 @@ namespace NaughtyAttributes
             Eat();  // cells collect nearby food
             ForceCopy();  // if the pop is below minPop add cells
             Reproduce();  // cells with lots of energy reproduce
+        }
 
-            if(Time.frameCount % 5 == 0)
+        private void SpawnFood()
+        {
+            if(Food.Count < MaxFood)
             {
                 Food.Add(CreateFoodParticle());
             }
@@ -125,12 +137,14 @@ namespace NaughtyAttributes
         {
             Vector2 pos = GetRandomPointOnScreen();
 
-            Particle temp = Instantiate(ParticlePrefab, pos, Quaternion.identity).GetComponent<Particle>();
+            Particle temp = Instantiate(ParticlePrefab, pos, Quaternion.identity, _foodParent.transform).GetComponent<Particle>();
+            temp.gameObject.name = "Food Particle";
 
             temp.Position = pos;
             temp.Type = 0;
+            temp.ParentCluster = null; // Food should not have a parent cluster
 
-            temp.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)temp.Type / NumberOfTypes, 1, 1); // color based on type
+            temp.GetComponent<SpriteRenderer>().color = Color.HSVToRGB(0, 1, 1); // color based on type
 
             return temp;
         }
@@ -141,6 +155,9 @@ namespace NaughtyAttributes
 
             Cluster temp = Instantiate(ClusterPrefab).GetComponent<Cluster>(); // make a new cell at a random location
             temp.Initialize(pos.x, pos.y);
+            temp.Id = _runningClusterCount++;
+
+            temp.gameObject.name = "Cluster";
 
             return temp;
         }
@@ -160,11 +177,12 @@ namespace NaughtyAttributes
                 Cluster c = Clusters[i];
                 if (c.Energy <= 0)
                 {
-                    Debug.Log("Cluster died");
                     //convertToFood(c);
                     Clusters.RemoveAt(i);  // could convert to food instead
+                    Destroy(c.gameObject);
                 }
             }
+
         }
 
         void Reproduce()
@@ -176,12 +194,17 @@ namespace NaughtyAttributes
                 if (c.Energy > ReproductionEnergy)
                 { // if a cell has enough energy 
                     Cluster temp = CreateCluster();
+                    temp.gameObject.name = "Cluster (Reproduced)";
+
+                    Debug.Log("Cluster Reproduced");
 
                     temp.CopyCell(c); // copy the parent cell's 'DNA'
 
-                    c.Energy -= StartingEnergy;  // parent cell loses energy (daughter cell recieves it) 
+                    c.Energy -= StartingEnergy;  // parent cell loses energy (child cell recieves it) 
 
-                    temp.MutateCell(); // mutate the daughter cell
+                    temp.MutateCell(); // mutate the child cell
+
+                    Clusters.Add(temp); // Add the child cell to the population
                 }
             }
         }
@@ -230,7 +253,10 @@ namespace NaughtyAttributes
                             if (dis < FoodRange)
                             {
                                 c.Energy += FoodEnergy; // gain 100 energy for eating food 
+                                Particle temp = Food[i];
                                 Food.RemoveAt(i);
+                                Destroy(temp.gameObject);
+
                             }
                         }
                     }
@@ -244,7 +270,7 @@ namespace NaughtyAttributes
             // Restarts the simulation by first clearing all particles and then restarting the process
             ClearParticles();
             Initialize();
-            SpawnParticles();
+            //SpawnParticles();
         }
 
         [Button("Reset Values", EButtonEnableMode.Playmode)]
@@ -255,28 +281,6 @@ namespace NaughtyAttributes
 
             // Caching this to reduce repeated calculations
             HalfScreenSpace = ScreenSpace * 0.5f;
-
-            //Forces = new float[NumberOfTypes, NumberOfTypes];
-            //MinDistances = new float[NumberOfTypes, NumberOfTypes];
-            //Radii = new float[NumberOfTypes, NumberOfTypes];
-            //for (int i = 0; i < NumberOfTypes; i++)
-            //{
-            //    for (int j = 0; j < NumberOfTypes; j++)
-            //    {
-            //        // Forces
-            //        Forces[i, j] = UnityEngine.Random.Range(ForcesRange.x, ForcesRange.y);
-            //        if (UnityEngine.Random.Range(0f, 1f) > 0.5f)
-            //        {
-            //            Forces[i, j] *= -1;
-            //        }
-
-            //        // Minimum distances
-            //        MinDistances[i, j] = UnityEngine.Random.Range(MinDistancesRange.x, MinDistancesRange.y);
-                    
-            //        // Radii
-            //        Radii[i, j] = UnityEngine.Random.Range(RadiiRange.x, RadiiRange.y);
-            //    }
-            //}
 
             for (int i = 0; i < MinPopulation; i++)
             {
@@ -293,37 +297,6 @@ namespace NaughtyAttributes
         {
             Initialize();
             ForcesRangeChanged?.Invoke(ForcesRange);
-        }
-
-        private void SpawnParticles()
-        {
-            // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
-            if (!Application.isPlaying) return;
-
-            _particleParentObj = new GameObject("ParticleParent");
-            for (int i = 0; i < NumberOfParticles; i++)
-            {
-                // Find a random position around (0, 0) using _spawnRadius
-                Vector3 randomPos = GetRandomPointOnScreen();
-                
-                // Create the particle, rename it, and put it under the parent GameObject
-                GameObject particle = Instantiate(ParticlePrefab, randomPos, Quaternion.identity);
-                particle.name = "Particle " + i;
-                particle.transform.parent = _particleParentObj.transform;
-
-                Particle particleScript = particle.GetComponent<Particle>();
-                if (particleScript != null)
-                {
-                    particleScript.Position = particle.transform.position;
-                    ParticleManager.Particles.Add(particle.GetComponent<Particle>());
-                    particleScript.Type = UnityEngine.Random.Range(0, NumberOfTypes);
-                    particleScript.Id = i;
-
-                    // Color based on type
-                    particle.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)particleScript.Type / NumberOfTypes, 1, 1);
-                }
-            }
-            IsFinishedSpawning = true;
         }
 
         private void ClearParticles()

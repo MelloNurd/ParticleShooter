@@ -112,7 +112,7 @@ namespace NaughtyAttributes
             foreach(Cluster otherColoy in ParticleManager.Clusters)
             {
                 if (otherColoy == cluster) return;
-                if (Vector2.Distance(cluster.transform.position, otherColoy.transform.position) > cluster.MaxExternalRadii) continue;
+                if (Vector2.Distance(cluster.Center, otherColoy.transform.position) > cluster.MaxExternalRadii) continue;
 
                 foreach (Particle particle in otherColoy.Swarm)
                 {
@@ -199,7 +199,7 @@ namespace NaughtyAttributes
 
             foreach (Particle food in ParticleManager.Food)
             {
-                if (Vector2.Distance(cluster.transform.position, food.Position) > cluster.MaxExternalRadii) continue;
+                if (Vector2.Distance(cluster.Center, food.Position) > cluster.MaxExternalRadii) continue;
 
                 // Calculate the direction and squared distance to the other particle
                 Vector3 _direction = food.Position - Position;

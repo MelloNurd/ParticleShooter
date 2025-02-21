@@ -25,10 +25,11 @@ namespace NaughtyAttributes
 
         public int Energy;
 
+        public Vector3 Center;
+        
         private Vector3[] positions;
         int numParticles = 40;
         int radius; // average distance from center
-        Vector3 center;
 
         private GameObject _particlePrefab;
         private int _numTypes;
@@ -199,7 +200,7 @@ namespace NaughtyAttributes
             avg.x = (avg.x + worldWidth) % worldWidth;
             avg.y = (avg.y + worldHeight) % worldHeight;
 
-            transform.position = new Vector3(avg.x, avg.y, transform.position.z);
+            Center = new Vector3(avg.x, avg.y, transform.position.z);
         }
 
     }

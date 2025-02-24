@@ -331,7 +331,7 @@ MonoBehaviour:
   Dampening: 0.9
   Friction: 0.85
   _timeScale: 2
-  StartPopulation: 24
+  StartPopulation: 20
   NumFood: 200
   FoodRange: 0.1
   FoodEnergy: 100

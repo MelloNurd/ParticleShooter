@@ -1,4 +1,8 @@
 using NUnit.Framework;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using static Unity.Entities.SystemBaseDelegates;
@@ -109,7 +113,7 @@ namespace NaughtyAttributes
         {
             Vector3 totalForce = Vector3.zero;
 
-            foreach(Cluster otherColoy in ParticleManager.Clusters)
+            foreach (Cluster otherColoy in ParticleManager.Clusters)
             {
                 if (otherColoy == cluster) return;
                 if (Vector2.Distance(cluster.Center, otherColoy.transform.position) > cluster.MaxExternalRadii) continue;
@@ -268,6 +272,31 @@ namespace NaughtyAttributes
         {
             value = Mathf.Clamp(value, inMin, inMax);
             return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
+        }
+
+        [BurstCompile]
+        public struct ParticleJob : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<ParticleData> Particles;
+            public NativeArray<ParticleData> UpdatedParticles;
+            public float DeltaTime;
+
+            public void Execute(int index)
+            {
+                ParticleData particle = Particles[index];
+                // Apply forces and update position here
+                particle.Position += particle.Velocity * DeltaTime;
+                UpdatedParticles[index] = particle;
+            }
+        }
+
+        [BurstCompile]
+        public struct ParticleData
+        {
+            public float3 Position;
+            public float3 Velocity;
+            public int Type;
+            public int Id;
         }
     }
 }

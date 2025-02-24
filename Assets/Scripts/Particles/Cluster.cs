@@ -1,5 +1,9 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
@@ -26,7 +30,7 @@ namespace NaughtyAttributes
         public int Energy;
 
         public Vector3 Center;
-        
+
         private Vector3[] positions;
         int numParticles = 40;
         int radius; // average distance from center
@@ -50,8 +54,8 @@ namespace NaughtyAttributes
             ExternalMins = new float[_numTypes, _numTypes];
             InternalRadii = new float[_numTypes, _numTypes];
             ExternalRadii = new float[_numTypes, _numTypes];
-            // Positions are the inital relative positions of all of the particles.
-            // This is critcal to cells starting in a 'good' configuration.
+            // Positions are the initial relative positions of all of the particles.
+            // This is critical to cells starting in a 'good' configuration.
             positions = new Vector3[numParticles];
             GenerateNew(x, y);
         }
@@ -64,12 +68,12 @@ namespace NaughtyAttributes
             {
                 for (int j = 0; j < _numTypes; j++)
                 {
-                    InternalForces[i, j] = Random.Range(0.1f, 1f); // internal forces are initially attractive, but can mutate
-                    InternalMins[i, j] = Random.Range(.1f, 1f);
-                    InternalRadii[i, j] = Random.Range(InternalMins[i, j] * 2, 2f); // minimum 'primary' force range must be twice repulsive range
-                    ExternalForces[i, j] = Random.Range(-1f, 1f); // external forces could be attractive or repulsive
-                    ExternalMins[i, j] = Random.Range(1f, 3f);
-                    ExternalRadii[i, j] = Random.Range(ExternalMins[i, j] * 2f, 7f);
+                    InternalForces[i, j] = UnityEngine.Random.Range(0.1f, 1f); // internal forces are initially attractive, but can mutate
+                    InternalMins[i, j] = UnityEngine.Random.Range(.1f, 1f);
+                    InternalRadii[i, j] = UnityEngine.Random.Range(InternalMins[i, j] * 2, 2f); // minimum 'primary' force range must be twice repulsive range
+                    ExternalForces[i, j] = UnityEngine.Random.Range(-1f, 1f); // external forces could be attractive or repulsive
+                    ExternalMins[i, j] = UnityEngine.Random.Range(1f, 3f);
+                    ExternalRadii[i, j] = UnityEngine.Random.Range(ExternalMins[i, j] * 2f, 7f);
 
                     if (InternalRadii[i, j] > MaxInternalRadii)
                     {
@@ -81,14 +85,14 @@ namespace NaughtyAttributes
                     }
                 }
             }
-            
+
             for (int i = 0; i < numParticles; i++)
             {
-                positions[i] = new Vector3(x + Random.Range(-0.5f, 0.5f), y + Random.Range(-0.5f, 0.5f));
+                positions[i] = new Vector3(x + UnityEngine.Random.Range(-0.5f, 0.5f), y + UnityEngine.Random.Range(-0.5f, 0.5f));
 
                 Particle newParticle = Instantiate(_particlePrefab, positions[i], Quaternion.identity, transform).GetComponent<Particle>();
                 newParticle.Position = positions[i];
-                newParticle.Type = 1 + Random.Range(0, _numTypes - 1);
+                newParticle.Type = 1 + UnityEngine.Random.Range(0, _numTypes - 1);
                 newParticle.ParentCluster = this;
                 newParticle.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)newParticle.Type / _numTypes, 1, 1); // color based on type
                 Swarm.Add(newParticle);
@@ -99,7 +103,6 @@ namespace NaughtyAttributes
         // (I don't trust deep copy when data structures get complex :)
         public void CopyCell(Cluster colony)
         {
-
             for (int i = 0; i < _numTypes; i++)
             {
                 for (int j = 0; j < _numTypes; j++)
@@ -115,12 +118,10 @@ namespace NaughtyAttributes
             for (int i = 0; i < numParticles; i++)
             {
                 Particle p = Swarm[i];
-                //Particle temp = Instantiate(_particlePrefab, p.Position, Quaternion.identity, colony.transform).GetComponent<Particle>();
                 p.Position = colony.Swarm[i].Position;
                 p.transform.position = p.Position;
                 p.Type = colony.Swarm[i].Type;
                 p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1); // color based on type
-                //Swarm.Add(p); // add to the new cell
             }
         }
 
@@ -132,21 +133,21 @@ namespace NaughtyAttributes
             {
                 for (int j = 0; j < _numTypes; j++)
                 {
-                    InternalForces[i, j] += Random.Range(-0.1f, 0.1f);
-                    InternalMins[i, j] += Random.Range(-0.5f, 0.5f);
-                    InternalRadii[i, j] += Random.Range(-0.10f, 0.10f);
-                    ExternalForces[i, j] += Random.Range(-0.1f, 0.1f);
-                    ExternalMins[i, j] += Random.Range(-0.5f, 0.5f);
-                    ExternalRadii[i, j] += Random.Range(-0.10f, 0.10f);
+                    InternalForces[i, j] += UnityEngine.Random.Range(-0.1f, 0.1f);
+                    InternalMins[i, j] += UnityEngine.Random.Range(-0.5f, 0.5f);
+                    InternalRadii[i, j] += UnityEngine.Random.Range(-0.10f, 0.10f);
+                    ExternalForces[i, j] += UnityEngine.Random.Range(-0.1f, 0.1f);
+                    ExternalMins[i, j] += UnityEngine.Random.Range(-0.5f, 0.5f);
+                    ExternalRadii[i, j] += UnityEngine.Random.Range(-0.10f, 0.10f);
                 }
             }
             for (int i = 0; i < numParticles; i++)
             {
-                positions[i] = new Vector3(positions[i].x + Random.Range(-5, 5), positions[i].y + Random.Range(-5, 5));
-                if (Random.Range(0, 100) < 10)
+                positions[i] = new Vector3(positions[i].x + UnityEngine.Random.Range(-5, 5), positions[i].y + UnityEngine.Random.Range(-5, 5));
+                if (UnityEngine.Random.Range(0, 100) < 10)
                 {  // 10% of the time a particle changes type
                     Particle p = Swarm[i];
-                    p.Type = 1 + Random.Range(0, _numTypes - 1);
+                    p.Type = 1 + UnityEngine.Random.Range(0, _numTypes - 1);
                     p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1); // color based on type
                 }
             } // Could also mutate the number of particles in the cell
@@ -203,5 +204,27 @@ namespace NaughtyAttributes
             Center = new Vector3(avg.x, avg.y, transform.position.z);
         }
 
+        [BurstCompile]
+        public struct ClusterJob : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<ClusterData> Clusters;
+            public NativeArray<ClusterData> UpdatedClusters;
+            public float DeltaTime;
+
+            public void Execute(int index)
+            {
+                ClusterData cluster = Clusters[index];
+                // Update cluster logic here
+                UpdatedClusters[index] = cluster;
+            }
+        }
+
+        [BurstCompile]
+        public struct ClusterData
+        {
+            public float3 Center;
+            public int Energy;
+            public int Id;
+        }
     }
 }

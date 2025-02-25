@@ -423,7 +423,7 @@ MonoBehaviour:
   RepulsionEffector: -3
   Dampening: 0.9
   Friction: 0.85
-  _timeScale: 2
+  _timeScale: 1
   StartPopulation: 20
   NumFood: 200
   FoodRange: 0.1

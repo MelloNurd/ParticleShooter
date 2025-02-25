@@ -295,7 +295,7 @@ namespace NaughtyAttributes
                 // Attract to front point
                 targetPosition = ParticleManager.Instance.player.frontPoint.position;
             }
-            else if (Type == 1)
+            else if (Type%2 == 1)
             {
                 // Attract to back point
                 targetPosition = ParticleManager.Instance.player.backPoint.position;

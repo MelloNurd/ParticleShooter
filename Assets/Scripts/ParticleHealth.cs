@@ -10,11 +10,11 @@ public class ParticleHealth : MonoBehaviour, IDamageable
     public void Damage(float amount)
     {
         health -= amount;
-        Debug.Log($"Enemy took {amount} damage. Health left: {health}");
+        Debug.Log($"Particle took {amount} damage. Health left: {health}");
 
         if (health <= 0)
         {
-            //Die();
+            Die();
         }
     }
 
@@ -31,12 +31,12 @@ public class ParticleHealth : MonoBehaviour, IDamageable
             health -= damagePerSecond;
             health = Mathf.Max(health, 0); // Prevent negative health
 
-            Debug.Log($"Enemy burning: {damagePerSecond} damage. Health left: {health}");
+            Debug.Log($"Particle burning: {damagePerSecond} damage. Health left: {health}");
 
             if (health <= 0)
             {
-                //Die();
-                yield break; // Stop the coroutine if the enemy "dies"
+                Die();
+                yield break; // Stop the coroutine if the particle "dies"
             }
 
             elapsedTime += 1f;
@@ -47,13 +47,17 @@ public class ParticleHealth : MonoBehaviour, IDamageable
     public void HaltMovement(float duration)
     {
         health -= 100;
+        if (health <= 0)
+        {
+            Die();
+        }
     }
 
     public void ChainDamage(float amount, int remainingChains)
     {
         health -= amount;
 
-        Debug.Log($"Enemy chain lightning damage: {amount} damage. Health left: {health}");
+        Debug.Log($"Particle chain lightning damage: {amount} damage. Health left: {health}");
 
         if (remainingChains > 0)
         {
@@ -62,7 +66,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
         if (health <= 0 && remainingChains == 0)
         {
-            //Die();
+            Die();
         }
     }
 
@@ -106,26 +110,19 @@ public class ParticleHealth : MonoBehaviour, IDamageable
         }
     }
 
-    //private void Die()
-    //{
-    //    Particle particle = GetComponent<Particle>();
-    //    if (particle != null)
-    //    {
-    //        ParticleJobManager jobManager = FindFirstObjectByType<ParticleJobManager>();
-    //        if (jobManager != null)
-    //        {
-    //            jobManager.RequestParticleRemoval(particle);
-    //        }
-    //        else
-    //        {
-    //            Debug.LogWarning("ParticleJobManager not found in the scene.");
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning("Particle component not found on the game object.");
-    //    }
+    private void Die()
+    {
+        Particle particle = GetComponent<Particle>();
+        if (particle != null)
+        {
+            ParticleManager.Instance.RemoveParticle(particle);
+        }
+        else
+        {
+            Debug.LogWarning("Particle component not found on the game object.");
+        }
 
-    //    Destroy(gameObject);
-    //}
+        Destroy(gameObject);
+    }
+
 }

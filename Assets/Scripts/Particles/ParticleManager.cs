@@ -1,10 +1,7 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -22,7 +19,7 @@ namespace NaughtyAttributes
 
         public GameObject ParticlePrefab;
         public GameObject ClusterPrefab;
-
+        
         public static float[,] Forces;
         public static float[,] MinDistances;
         public static float[,] Radii;
@@ -32,26 +29,26 @@ namespace NaughtyAttributes
 
         public static event Action<Vector2> ForcesRangeChanged;
 
-        ////////////////////////////////////////////////////////////////
-        [BoxGroup("Simulation Configuration")][OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
-        [BoxGroup("Simulation Configuration")][HideInInspector] public Vector2 HalfScreenSpace;
+         ////////////////////////////////////////////////////////////////
+        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
+        [BoxGroup("Simulation Configuration")] [HideInInspector] public Vector2 HalfScreenSpace;
 
-        [BoxGroup("Simulation Configuration")][OnValueChanged("Restart")][UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
-        [BoxGroup("Simulation Configuration")][OnValueChanged("Restart")][UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
+        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
+        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /////////////////////////////////////////////////////////////////////
-        [BoxGroup("Particle Properties")][OnValueChanged("OnForcesRangeChanged")][MinMaxSlider(0.0f, 18.0f)][SerializeField] public Vector2 ForcesRange = new Vector2(0.3f, 1f);
-        [BoxGroup("Particle Properties")][OnValueChanged("Initialize")][MinMaxSlider(0.0f, 18.0f)][SerializeField] public Vector2 MinDistancesRange = new Vector2(1f, 3f);
-        [BoxGroup("Particle Properties")][OnValueChanged("Initialize")][MinMaxSlider(0.0f, 18.0f)][SerializeField] public Vector2 RadiiRange = new Vector2(3f, 5f);
-        [BoxGroup("Particle Properties")][UnityEngine.Range(-5, 5)][SerializeField] public float RepulsionEffector = -3f;
+        [BoxGroup("Particle Properties")] [OnValueChanged("OnForcesRangeChanged")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 ForcesRange = new Vector2(0.3f, 1f);
+        [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 MinDistancesRange = new Vector2(1f, 3f);
+        [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 RadiiRange = new Vector2(3f, 5f);
+        [BoxGroup("Particle Properties")] [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
 
-        [BoxGroup("Particle Properties")][UnityEngine.Range(0, 1)][SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
-        [BoxGroup("Particle Properties")][UnityEngine.Range(0, 2)][SerializeField] public float Friction = 0.85f;
+        [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
+        [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /////////////////////////////////////////////////////////////////////
-        [BoxGroup("Unity Settings")][OnValueChanged("ChangeTimescale")][UnityEngine.Range(0, 5)][SerializeField] public float _timeScale = 1f;
+        [BoxGroup("Unity Settings")] [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public int StartPopulation = 50;
@@ -65,9 +62,6 @@ namespace NaughtyAttributes
         private int _runningClusterCount = 0;
 
         private GameObject _foodParent;
-
-        private NativeArray<ParticleData> _particleData;
-        private NativeArray<ParticleData> _updatedParticleData;
 
         private void ChangeTimescale()
         {
@@ -110,7 +104,7 @@ namespace NaughtyAttributes
         private void Update()
         {
             // Inputs
-            if (Input.GetKeyDown(KeyCode.R)) // Restart the simulation if the "R" key is pressed
+            if(Input.GetKeyDown(KeyCode.R)) // Restart the simulation if the "R" key is pressed
             {
                 Restart();
             }
@@ -119,31 +113,8 @@ namespace NaughtyAttributes
                 SwapForces();
             }
 
-            // Schedule and execute the particle update job
-            var job = new ParticleJob
-            {
-                Particles = _particleData,
-                UpdatedParticles = _updatedParticleData,
-                DeltaTime = Time.deltaTime
-            };
-
-            JobHandle handle = job.Schedule(_particleData.Length, 64);
-            handle.Complete();
-
-            // Copy updated data back to the original array
-            for (int i = 0; i < _particleData.Length; i++)
-            {
-                _particleData[i] = _updatedParticleData[i];
-            }
-
-            // Update GameObjects with new positions
-            for (int i = 0; i < Particles.Count; i++)
-            {
-                Particles[i].transform.position = _particleData[i].Position;
-            }
-
             // Simulation
-            foreach (Cluster colony in Clusters)
+            foreach(Cluster colony in Clusters)
             {
                 colony.UpdateCluster();
             }
@@ -156,7 +127,7 @@ namespace NaughtyAttributes
 
         private void SpawnFood()
         {
-            if (Food.Count < MaxFood)
+            if(Food.Count < MaxFood)
             {
                 Food.Add(CreateFoodParticle());
             }
@@ -200,8 +171,7 @@ namespace NaughtyAttributes
             }
         }
 
-        void Die()
-        {
+        void Die() {
             for (int i = Clusters.Count - 1; i >= 0; i--)
             { // remove dead (energyless cells)
                 Cluster c = Clusters[i];
@@ -212,6 +182,7 @@ namespace NaughtyAttributes
                     Destroy(c.gameObject);
                 }
             }
+
         }
 
         void Reproduce()
@@ -227,7 +198,7 @@ namespace NaughtyAttributes
 
                     temp.CopyCell(c); // copy the parent cell's 'DNA'
 
-                    c.Energy -= StartingEnergy;  // parent cell loses energy (child cell receives it) 
+                    c.Energy -= StartingEnergy;  // parent cell loses energy (child cell recieves it) 
 
                     temp.MutateCell(); // mutate the child cell
 
@@ -238,7 +209,7 @@ namespace NaughtyAttributes
 
         // If population is below minPopulation add cells by copying and mutating
         // randomly selected existing cells.
-        // Note: if the population all dies simultaneous the program will crash - extinction!
+        // Note: if the population all dies simultanious the program will crash - extinction!
         void ForceCopy()
         {
             if (Clusters.Count > 0 && Clusters.Count < StartPopulation)
@@ -246,14 +217,13 @@ namespace NaughtyAttributes
                 Cluster temp = CreateCluster();
                 temp.gameObject.name = "Cluster (Force Copied)";
 
-                if (Clusters.Count > 0)
-                { // As long as there are at least some cells, copy and mutate a random one
+                if (Clusters.Count > 0) { // As long as there are at least some cells, copy and mutate a random one
                     int parent = UnityEngine.Random.Range(0, Clusters.Count);
                     Cluster parentCell = Clusters[parent];
                     temp.CopyCell(parentCell);
                     temp.MutateCell();
                 }
-
+                
                 Clusters.Add(temp);
             }
         }
@@ -263,16 +233,16 @@ namespace NaughtyAttributes
             foreach (Cluster c in Clusters)
             {  // for every cell
                 foreach (Particle p in c.Swarm) // for every particle in every cell
-                {
-                    if (p.Type != 1) continue; // 1 is the eating type of particle
+                { 
+                    if (p.Type != 1) continue; // 1 is the eating type of paricle
 
                     Collider2D[] nearby = Physics2D.OverlapCircleAll(p.Position, FoodRange); // find nearby colliders (to look for food)
 
                     foreach (Collider2D f in nearby)
                     {
-                        if (f.TryGetComponent<Particle>(out Particle food))
+                        if(f.TryGetComponent<Particle>(out Particle food))
                         {
-                            if (food.Type != 0) continue; // 0 is the food type of particle
+                            if(food.Type != 0) continue; // 0 is the food type of particle
 
                             c.Energy += FoodEnergy; // gain 100 energy for eating food 
                             Food.Remove(food);
@@ -309,29 +279,6 @@ namespace NaughtyAttributes
             {
                 Food.Add(CreateFoodParticle());
             }
-
-            // Ensure the Particles list is populated
-            for (int i = 0; i < NumberOfParticles; i++)
-            {
-                Particle particle = Instantiate(ParticlePrefab).GetComponent<Particle>();
-                Particles.Add(particle);
-            }
-
-            _particleData = new NativeArray<ParticleData>(NumberOfParticles, Allocator.Persistent);
-            _updatedParticleData = new NativeArray<ParticleData>(NumberOfParticles, Allocator.Persistent);
-
-            // Initialize particle data
-            for (int i = 0; i < NumberOfParticles; i++)
-            {
-                ParticleData particleData = new ParticleData
-                {
-                    Position = new float3(Particles[i].Position.x, Particles[i].Position.y, Particles[i].Position.z),
-                    Velocity = new float3(Particles[i].Velocity.x, Particles[i].Velocity.y, Particles[i].Velocity.z),
-                    Type = Particles[i].Type,
-                    Id = Particles[i].Id
-                };
-                _particleData[i] = particleData;
-            }
         }
 
         private void OnForcesRangeChanged()
@@ -344,9 +291,9 @@ namespace NaughtyAttributes
         {
             // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
             if (!Application.isPlaying) return;
-
+            
             IsFinishedSpawning = false;
-
+            
             GameObject temp;
             for (int i = Particles.Count - 1; i >= 0; i--) // Unsure if necessary, but traversing backwards through the list just in case
             {
@@ -357,7 +304,6 @@ namespace NaughtyAttributes
 
             Destroy(_particleParentObj);
         }
-
         private void SwapForces()
         {
             // Swap the forces between particle types
@@ -378,41 +324,14 @@ namespace NaughtyAttributes
             return new Vector3(UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
         }
 
-        private void OnDestroy()
+        public void RemoveParticle(Particle particle)
         {
-            if (_particleData.IsCreated)
+            if (Particles.Contains(particle))
             {
-                _particleData.Dispose();
-            }
-            if (_updatedParticleData.IsCreated)
-            {
-                _updatedParticleData.Dispose();
+                Particles.Remove(particle);
             }
         }
 
-        [BurstCompile]
-        public struct ParticleData
-        {
-            public float3 Position;
-            public float3 Velocity;
-            public int Type;
-            public int Id;
-        }
-
-        [BurstCompile]
-        public struct ParticleJob : IJobParallelFor
-        {
-            [ReadOnly] public NativeArray<ParticleData> Particles;
-            public NativeArray<ParticleData> UpdatedParticles;
-            public float DeltaTime;
-
-            public void Execute(int index)
-            {
-                ParticleData particle = Particles[index];
-                // Apply forces and update position here
-                particle.Position += particle.Velocity * DeltaTime;
-                UpdatedParticles[index] = particle;
-            }
-        }
     }
+
 }

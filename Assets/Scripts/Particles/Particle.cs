@@ -28,6 +28,8 @@ namespace NaughtyAttributes
 
         public void ApplyInternalForces(Cluster cluster)
         {
+            if (this == null || _transform == null) return; // Check if the particle or its transform has been destroyed
+
             Vector3 totalForce = Vector3.zero;
             Vector3 acceleration = Vector3.zero;
 
@@ -106,11 +108,16 @@ namespace NaughtyAttributes
                 Position = Position.WithY(-ParticleManager.Instance.HalfScreenSpace.y);
             }
 
-            _transform.position = Position;
+            if (_transform != null) // Check if the transform is still valid
+            {
+                _transform.position = Position;
+            }
         }
 
         public void ApplyExternalForces(Cluster cluster)
         {
+            if (this == null || _transform == null) return; // Check if the particle or its transform has been destroyed
+
             Vector3 totalForce = Vector3.zero;
 
             foreach (Cluster otherColoy in ParticleManager.Clusters)
@@ -194,11 +201,16 @@ namespace NaughtyAttributes
                 Position = Position.WithY(-ParticleManager.Instance.HalfScreenSpace.y);
             }
 
-            _transform.position = Position;
+            if (_transform != null) // Check if the transform is still valid
+            {
+                _transform.position = Position;
+            }
         }
 
         public void ApplyFoodForces(Cluster cluster)
         {
+            if (this == null || _transform == null) return; // Check if the particle or its transform has been destroyed
+
             Vector3 totalForce = Vector3.zero;
 
             foreach (Particle food in ParticleManager.Food)
@@ -265,8 +277,12 @@ namespace NaughtyAttributes
                 Position = Position.WithY(-ParticleManager.Instance.HalfScreenSpace.y);
             }
 
-            _transform.position = Position;
+            if (_transform != null) // Check if the transform is still valid
+            {
+                _transform.position = Position;
+            }
         }
+
 
         private float Map(float value, float inMin, float inMax, float outMin, float outMax)
         {

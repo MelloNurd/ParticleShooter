@@ -283,6 +283,64 @@ namespace NaughtyAttributes
             }
         }
 
+        public void ApplyPlayerAttraction()
+        {
+            if (_transform == null || ParticleManager.Instance.player == null) return;
+
+            Vector3 targetPosition = Position; // Default to current position
+
+            // Decide which point to attract to based on Type
+            if (Type%2 == 0)
+            {
+                // Attract to front point
+                targetPosition = ParticleManager.Instance.player.frontPoint.position;
+            }
+            else if (Type == 1)
+            {
+                // Attract to back point
+                targetPosition = ParticleManager.Instance.player.backPoint.position;
+            }
+            else
+            {
+                // For other types, you can define behavior or return
+                return;
+            }
+
+            // Calculate direction to the target point
+            Vector3 direction = targetPosition - Position;
+
+            // World-space wrapping adjustments, if necessary
+            if (direction.x > ParticleManager.Instance.HalfScreenSpace.x)
+            {
+                direction.x -= ParticleManager.Instance.ScreenSpace.x;
+            }
+            if (direction.x < -ParticleManager.Instance.HalfScreenSpace.x)
+            {
+                direction.x += ParticleManager.Instance.ScreenSpace.x;
+            }
+
+            if (direction.y > ParticleManager.Instance.HalfScreenSpace.y)
+            {
+                direction.y -= ParticleManager.Instance.ScreenSpace.y;
+            }
+            if (direction.y < -ParticleManager.Instance.HalfScreenSpace.y)
+            {
+                direction.y += ParticleManager.Instance.ScreenSpace.y;
+            }
+
+            // Normalize direction and compute force
+            float distance = direction.magnitude;
+            direction.Normalize();
+
+            // Define the attraction force strength
+            float attractionStrength = ParticleManager.Instance.PlayerAttractionStrength;
+
+            // Calculate the force (you may adjust the formula as needed)
+            Vector3 attractionForce = direction * attractionStrength * Map(distance, 0, 10f, 1f, 0f);
+
+            // Apply the force
+            Velocity += attractionForce * Time.deltaTime;
+        }
 
         private float Map(float value, float inMin, float inMax, float outMin, float outMax)
         {

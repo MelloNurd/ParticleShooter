@@ -13,6 +13,10 @@ namespace NaughtyAttributes
     {
         public static ParticleManager Instance { get; private set; }
 
+        public Player player;
+
+        public float PlayerAttractionStrength = 5f; // Adjust as needed
+
         public static List<Particle> Particles { get; private set; } = new List<Particle>();
         public static List<Particle> Food { get; private set; } = new List<Particle>();
         public static List<Cluster> Clusters { get; private set; } = new List<Cluster>();
@@ -78,6 +82,12 @@ namespace NaughtyAttributes
             else
             {
                 Destroy(gameObject);
+            }
+
+            // Assign the player reference if not set
+            if (player == null)
+            {
+                player = FindFirstObjectByType<Player>();
             }
 
             // Make sure the particle prefab is assigned

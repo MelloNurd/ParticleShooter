@@ -160,6 +160,7 @@ namespace NaughtyAttributes
                 p.ApplyInternalForces(this);
                 p.ApplyExternalForces(this);
                 p.ApplyFoodForces(this);
+                p.ApplyPlayerAttraction();
             }
 
             AdjustCenter();

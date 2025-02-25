@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &144687770 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2521185793229651826, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+  m_PrefabInstance: {fileID: 1046205866}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &206990652 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5968707764475774731, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
@@ -277,6 +282,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+      propertyPath: backPoint
+      value: 
+      objectReference: {fileID: 144687770}
+    - target: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+      propertyPath: frontPoint
+      value: 
+      objectReference: {fileID: 1142372477}
     - target: {fileID: 8371855377387520600, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
       propertyPath: m_Name
       value: PlayerShip
@@ -347,6 +360,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+--- !u!4 &1142372477 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6587186072633953767, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+  m_PrefabInstance: {fileID: 1046205866}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1475739694
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,6 +409,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a072be966319c6441bbf3a0bba579f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 1713353514}
+  PlayerAttractionStrength: 2
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
   ScreenSpace: {x: 32, y: 18}
@@ -411,6 +431,17 @@ MonoBehaviour:
   ReproductionEnergy: 500
   StartingEnergy: 400
   MaxFood: 200
+--- !u!114 &1713353514 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+  m_PrefabInstance: {fileID: 1046205866}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fee8136fcd99f744fae2fb7df781e8b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2076855249
 PrefabInstance:
   m_ObjectHideFlags: 0

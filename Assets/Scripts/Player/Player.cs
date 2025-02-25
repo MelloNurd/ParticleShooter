@@ -29,6 +29,9 @@ public class Player : MonoBehaviour
 
     private Slider boostSlider;
 
+    public Transform frontPoint;
+    public Transform backPoint;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -49,6 +52,9 @@ public class Player : MonoBehaviour
         // Get the emission modules for easy control
         leftEmission = leftExhaust.emission;
         rightEmission = rightExhaust.emission;
+
+        frontPoint = transform.Find("FrontAttractor");
+        backPoint = transform.Find("BackAttractor");
     }
 
     void Update()

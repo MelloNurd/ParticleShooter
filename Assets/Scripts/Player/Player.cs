@@ -75,7 +75,6 @@ public class Player : MonoBehaviour
         // Boost logic
         if (isBoosting)
         {
-            Points.Instance.AddPoints(1);
             currentSpeed *= boostMultiplier;
             boostAmount -= boostUsageRate * Time.fixedDeltaTime;
             

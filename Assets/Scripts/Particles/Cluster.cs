@@ -14,7 +14,6 @@ namespace NaughtyAttributes
     public class Cluster : MonoBehaviour
     {
         public List<Particle> Swarm { get; set; } = new List<Particle>();
-
         public int Id { get; set; }
 
         public float[,] InternalForces;
@@ -27,14 +26,9 @@ namespace NaughtyAttributes
         public float MaxInternalRadii { get; set; } = 0;
         public float MaxExternalRadii { get; set; } = 0;
 
-        public int Energy;
-
         public Vector3 Center;
 
-        private Vector3[] positions;
-        int numParticles = 40;
-        int radius; // average distance from center
-
+        public int numParticles = 40;
         private GameObject _particlePrefab;
         private int _numTypes;
 
@@ -42,190 +36,298 @@ namespace NaughtyAttributes
         {
             _numTypes = ParticleManager.Instance.NumberOfTypes;
             _particlePrefab = ParticleManager.Instance.ParticlePrefab;
-
-            Energy = ParticleManager.Instance.StartingEnergy;
         }
 
         public void Initialize(float x, float y)
         {
+            var manager = ParticleManager.Instance;
+            if (manager == null)
+            {
+                Debug.LogError("ParticleManager Instance is null during Cluster initialization.");
+                return;
+            }
+
+            _numTypes = manager.NumberOfTypes; // Ensure _numTypes is set
+
             InternalForces = new float[_numTypes, _numTypes];
             ExternalForces = new float[_numTypes, _numTypes];
             InternalMins = new float[_numTypes, _numTypes];
             ExternalMins = new float[_numTypes, _numTypes];
             InternalRadii = new float[_numTypes, _numTypes];
             ExternalRadii = new float[_numTypes, _numTypes];
-            // Positions are the initial relative positions of all of the particles.
-            // This is critical to cells starting in a 'good' configuration.
-            positions = new Vector3[numParticles];
+
             GenerateNew(x, y);
         }
 
-        // generate the parameters for a new cell
-        // note: all of the random ranges could be tweaked
         private void GenerateNew(float x, float y)
         {
+            var manager = ParticleManager.Instance;
+
+            // Initialize interaction matrices
             for (int i = 0; i < _numTypes; i++)
             {
                 for (int j = 0; j < _numTypes; j++)
                 {
-                    InternalForces[i, j] = UnityEngine.Random.Range(0.1f, 1f); // internal forces are initially attractive, but can mutate
-                    InternalMins[i, j] = UnityEngine.Random.Range(.1f, 1f);
-                    InternalRadii[i, j] = UnityEngine.Random.Range(InternalMins[i, j] * 2, 2f); // minimum 'primary' force range must be twice repulsive range
-                    ExternalForces[i, j] = UnityEngine.Random.Range(-1f, 1f); // external forces could be attractive or repulsive
-                    ExternalMins[i, j] = UnityEngine.Random.Range(1f, 3f);
-                    ExternalRadii[i, j] = UnityEngine.Random.Range(ExternalMins[i, j] * 2f, 7f);
+                    InternalForces[i, j] = UnityEngine.Random.Range(manager.InternalForceRange.x, manager.InternalForceRange.y);
+                    InternalMins[i, j] = UnityEngine.Random.Range(manager.InternalMinDistanceRange.x, manager.InternalMinDistanceRange.y);
+                    InternalRadii[i, j] = UnityEngine.Random.Range(manager.InternalRadiusRange.x, manager.InternalRadiusRange.y);
+
+                    ExternalForces[i, j] = UnityEngine.Random.Range(manager.ExternalForceRange.x, manager.ExternalForceRange.y);
+                    ExternalMins[i, j] = UnityEngine.Random.Range(manager.ExternalMinDistanceRange.x, manager.ExternalMinDistanceRange.y);
+                    ExternalRadii[i, j] = UnityEngine.Random.Range(manager.ExternalRadiusRange.x, manager.ExternalRadiusRange.y);
 
                     if (InternalRadii[i, j] > MaxInternalRadii)
-                    {
                         MaxInternalRadii = InternalRadii[i, j];
-                    }
                     if (ExternalRadii[i, j] > MaxExternalRadii)
-                    {
                         MaxExternalRadii = ExternalRadii[i, j];
-                    }
                 }
             }
 
+            // Instantiate particles
             for (int i = 0; i < numParticles; i++)
             {
-                positions[i] = new Vector3(x + UnityEngine.Random.Range(-0.5f, 0.5f), y + UnityEngine.Random.Range(-0.5f, 0.5f));
+                Vector3 position = new Vector3(
+                    x + UnityEngine.Random.Range(-0.5f, 0.5f),
+                    y + UnityEngine.Random.Range(-0.5f, 0.5f),
+                    0);
 
-                Particle newParticle = Instantiate(_particlePrefab, positions[i], Quaternion.identity, transform).GetComponent<Particle>();
-                newParticle.Position = positions[i];
-                newParticle.Type = 1 + UnityEngine.Random.Range(0, _numTypes - 1);
+                if (manager.ParticlePrefab == null)
+                {
+                    Debug.LogError("ParticlePrefab is not assigned in ParticleManager.");
+                    return;
+                }
+
+                GameObject particleObj = Instantiate(manager.ParticlePrefab, position, Quaternion.identity, transform);
+                Particle newParticle = particleObj.GetComponent<Particle>();
+
+                if (newParticle == null)
+                {
+                    Debug.LogError("Particle component missing on ParticlePrefab.");
+                    continue;
+                }
+
+                newParticle.Position = position;
+                newParticle.Type = UnityEngine.Random.Range(0, _numTypes);
                 newParticle.ParentCluster = this;
-                newParticle.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)newParticle.Type / _numTypes, 1, 1); // color based on type
+
+                // Set color based on type
+                SpriteRenderer sr = newParticle.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.color = Color.HSVToRGB((float)newParticle.Type / _numTypes, 1, 1);
+                }
+                else
+                {
+                    Debug.LogWarning("SpriteRenderer missing on Particle.");
+                }
+
                 Swarm.Add(newParticle);
             }
         }
 
-        // Used to copy the values from a parent cell to a daughter cell.
-        // (I don't trust deep copy when data structures get complex :)
-        public void CopyCell(Cluster colony)
+
+
+        public void GenerateFromSuccessData(Dictionary<int, int> successData)
         {
-            for (int i = 0; i < _numTypes; i++)
+            if (successData == null || successData.Count == 0)
+            {
+                Debug.LogWarning("GenerateFromSuccessData: successData is null or empty. Generating with random types.");
+            }
+
+            // Clear existing particles
+            foreach (var particle in Swarm)
+            {
+                Destroy(particle.gameObject);
+            }
+            Swarm.Clear();
+
+            // Calculate total hits
+            int totalHits = 0;
+            foreach (var count in successData.Values)
+                totalHits += count;
+
+            // Calculate type ratios based on success
+            Dictionary<int, float> typeRatios = new Dictionary<int, float>();
+            foreach (var kvp in successData)
+                typeRatios[kvp.Key] = (float)kvp.Value / totalHits;
+
+            // Instantiate particles based on success data
+            for (int i = 0; i < numParticles; i++)
+            {
+                Vector3 position = Center + new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(-0.5f, 0.5f), 0);
+
+                if (ParticleManager.Instance.ParticlePrefab == null)
+                {
+                    Debug.LogError("ParticlePrefab is not assigned in ParticleManager.");
+                    return;
+                }
+
+                GameObject particleObj = Instantiate(ParticleManager.Instance.ParticlePrefab, position, Quaternion.identity, transform);
+                Particle newParticle = particleObj.GetComponent<Particle>();
+
+                if (newParticle == null)
+                {
+                    Debug.LogError("Particle component missing on ParticlePrefab.");
+                    continue;
+                }
+
+                // Select type based on weighted random
+                float rand = UnityEngine.Random.value;
+                float cumulative = 0f;
+                bool typeAssigned = false;
+                foreach (var kvp in typeRatios)
+                {
+                    cumulative += kvp.Value;
+                    if (rand <= cumulative)
+                    {
+                        newParticle.Type = kvp.Key;
+                        typeAssigned = true;
+                        break;
+                    }
+                }
+
+                if (!typeAssigned)
+                {
+                    newParticle.Type = UnityEngine.Random.Range(0, _numTypes);
+                    Debug.LogWarning("GenerateFromSuccessData: Unable to assign type based on success data. Assigning random type.");
+                }
+
+                newParticle.Position = position;
+                newParticle.ParentCluster = this;
+
+                // Set color based on type
+                SpriteRenderer sr = newParticle.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.color = Color.HSVToRGB((float)newParticle.Type / _numTypes, 1, 1);
+                }
+                else
+                {
+                    Debug.LogWarning("SpriteRenderer missing on Particle.");
+                }
+
+                Swarm.Add(newParticle);
+            }
+
+            // Reinitialize Max radii
+            MaxInternalRadii = 0;
+            MaxExternalRadii = 0;
+            foreach (var particle in Swarm)
             {
                 for (int j = 0; j < _numTypes; j++)
                 {
-                    InternalForces[i, j] = colony.InternalForces[i, j];
-                    InternalMins[i, j] = colony.InternalMins[i, j];
-                    InternalRadii[i, j] = colony.InternalRadii[i, j];
-                    ExternalForces[i, j] = colony.ExternalForces[i, j];
-                    ExternalMins[i, j] = colony.ExternalMins[i, j];
-                    ExternalRadii[i, j] = colony.ExternalRadii[i, j];
+                    if (InternalRadii[particle.Type, j] > MaxInternalRadii)
+                        MaxInternalRadii = InternalRadii[particle.Type, j];
+                    if (ExternalRadii[particle.Type, j] > MaxExternalRadii)
+                        MaxExternalRadii = ExternalRadii[particle.Type, j];
                 }
-            }
-            for (int i = 0; i < numParticles; i++)
-            {
-                Particle p = Swarm[i];
-                p.Position = colony.Swarm[i].Position;
-                p.transform.position = p.Position;
-                p.Type = colony.Swarm[i].Type;
-                p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1); // color based on type
             }
         }
 
-        // When a new cell is created from a 'parent' cell the new cell's values are mutated
-        // This mutates all values a 'little' bit. Mutating a few values by a larger amount could work better
-        public void MutateCell()
+
+
+
+
+        public void UpdateForceParameters()
         {
+            var manager = ParticleManager.Instance;
+
+            MaxInternalRadii = 0;
+            MaxExternalRadii = 0;
+
             for (int i = 0; i < _numTypes; i++)
             {
                 for (int j = 0; j < _numTypes; j++)
                 {
-                    InternalForces[i, j] += UnityEngine.Random.Range(-0.1f, 0.1f);
-                    InternalMins[i, j] += UnityEngine.Random.Range(-0.5f, 0.5f);
-                    InternalRadii[i, j] += UnityEngine.Random.Range(-0.10f, 0.10f);
-                    ExternalForces[i, j] += UnityEngine.Random.Range(-0.1f, 0.1f);
-                    ExternalMins[i, j] += UnityEngine.Random.Range(-0.5f, 0.5f);
-                    ExternalRadii[i, j] += UnityEngine.Random.Range(-0.10f, 0.10f);
+                    InternalForces[i, j] = Mathf.Clamp(InternalForces[i, j], manager.InternalForceRange.x, manager.InternalForceRange.y);
+                    InternalMins[i, j] = Mathf.Clamp(InternalMins[i, j], manager.InternalMinDistanceRange.x, manager.InternalMinDistanceRange.y);
+                    InternalRadii[i, j] = Mathf.Clamp(InternalRadii[i, j], manager.InternalRadiusRange.x, manager.InternalRadiusRange.y);
+
+                    ExternalForces[i, j] = Mathf.Clamp(ExternalForces[i, j], manager.ExternalForceRange.x, manager.ExternalForceRange.y);
+                    ExternalMins[i, j] = Mathf.Clamp(ExternalMins[i, j], manager.ExternalMinDistanceRange.x, manager.ExternalMinDistanceRange.y);
+                    ExternalRadii[i, j] = Mathf.Clamp(ExternalRadii[i, j], manager.ExternalRadiusRange.x, manager.ExternalRadiusRange.y);
+
+                    if (InternalRadii[i, j] > MaxInternalRadii)
+                        MaxInternalRadii = InternalRadii[i, j];
+                    if (ExternalRadii[i, j] > MaxExternalRadii)
+                        MaxExternalRadii = ExternalRadii[i, j];
                 }
             }
-            for (int i = 0; i < numParticles; i++)
-            {
-                positions[i] = new Vector3(positions[i].x + UnityEngine.Random.Range(-5, 5), positions[i].y + UnityEngine.Random.Range(-5, 5));
-                if (UnityEngine.Random.Range(0, 100) < 10)
-                {  // 10% of the time a particle changes type
-                    Particle p = Swarm[i];
-                    p.Type = 1 + UnityEngine.Random.Range(0, _numTypes - 1);
-                    p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1); // color based on type
-                }
-            } // Could also mutate the number of particles in the cell
         }
 
         public void UpdateCluster()
         {
-            foreach (Particle p in Swarm)
-            { // for each particle in this cell
+            // Remove null particles
+            Swarm.RemoveAll(p => p == null);
+
+            // Process remaining particles
+            for (int i = Swarm.Count - 1; i >= 0; i--)
+            {
+                Particle p = Swarm[i];
+                if (p == null)
+                {
+                    Swarm.RemoveAt(i);
+                    continue;
+                }
+
                 p.ApplyInternalForces(this);
                 p.ApplyExternalForces(this);
-                p.ApplyFoodForces(this);
+                p.ApplyCohesion();
                 p.ApplyPlayerAttraction();
+
             }
 
             AdjustCenter();
-
-            Energy -= 1; // cells lose one energy/timestep - should be a variable. Or dependent on forces generated
         }
 
         public void AdjustCenter()
         {
-            Vector2 avg = Vector2.zero;
-            float worldWidth = ParticleManager.Instance.ScreenSpace.x;   // Width of your game world in world units
-            float worldHeight = ParticleManager.Instance.ScreenSpace.y; // Height of your game world in world units
+            if (Swarm.Count == 0) return;
 
-            // Sum positions, adjusting for wrapping
+            Vector3 sum = Vector3.zero;
+            foreach (var p in Swarm)
+            {
+                sum += p.Position;
+            }
+
+            Center = sum / Swarm.Count;
+        }
+
+        // Mutation based on particle success
+        public void MutateCluster(Dictionary<int, int> successData)
+        {
+            // Adjust interaction matrices based on success
+            foreach (var kvp in successData)
+            {
+                int type = kvp.Key;
+                float successRate = (float)kvp.Value / numParticles;
+
+                // Mutate internal forces
+                for (int j = 0; j < _numTypes; j++)
+                {
+                    InternalForces[type, j] += UnityEngine.Random.Range(-0.1f, 0.1f) * successRate;
+                    InternalMins[type, j] += UnityEngine.Random.Range(-0.05f, 0.05f) * successRate;
+                    InternalRadii[type, j] += UnityEngine.Random.Range(-0.05f, 0.05f) * successRate;
+                }
+
+                // Mutate external forces
+                for (int j = 0; j < _numTypes; j++)
+                {
+                    ExternalForces[type, j] += UnityEngine.Random.Range(-0.1f, 0.1f) * successRate;
+                    ExternalMins[type, j] += UnityEngine.Random.Range(-0.05f, 0.05f) * successRate;
+                    ExternalRadii[type, j] += UnityEngine.Random.Range(-0.05f, 0.05f) * successRate;
+                }
+            }
+
+            // Mutate particles
             foreach (Particle p in Swarm)
             {
-                Vector2 pos = p.Position;
-
-                // Calculate the shortest distance in X
-                float dx = pos.x - transform.position.x;
-                if (dx > worldWidth / 2)
-                    dx -= worldWidth;
-                else if (dx < -worldWidth / 2)
-                    dx += worldWidth;
-
-                // Calculate the shortest distance in Y
-                float dy = pos.y - transform.position.y;
-                if (dy > worldHeight / 2)
-                    dy -= worldHeight;
-                else if (dy < -worldHeight / 2)
-                    dy += worldHeight;
-
-                avg += new Vector2(transform.position.x + dx, transform.position.y + dy);
+                if (UnityEngine.Random.value < 0.1f) // 10% chance to change type
+                {
+                    p.Type = UnityEngine.Random.Range(0, _numTypes);
+                    p.GetComponent<SpriteRenderer>().color = Color.HSVToRGB((float)p.Type / _numTypes, 1, 1);
+                }
             }
-
-            avg /= Swarm.Count;
-
-            // Wrap the cluster's position to keep it within bounds
-            avg.x = (avg.x + worldWidth) % worldWidth;
-            avg.y = (avg.y + worldHeight) % worldHeight;
-
-            Center = new Vector3(avg.x, avg.y, transform.position.z);
-        }
-
-        [BurstCompile]
-        public struct ClusterJob : IJobParallelFor
-        {
-            [ReadOnly] public NativeArray<ClusterData> Clusters;
-            public NativeArray<ClusterData> UpdatedClusters;
-            public float DeltaTime;
-
-            public void Execute(int index)
-            {
-                ClusterData cluster = Clusters[index];
-                // Update cluster logic here
-                UpdatedClusters[index] = cluster;
-            }
-        }
-
-        [BurstCompile]
-        public struct ClusterData
-        {
-            public float3 Center;
-            public int Energy;
-            public int Id;
         }
     }
 }

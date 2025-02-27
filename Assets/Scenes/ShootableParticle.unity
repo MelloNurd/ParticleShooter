@@ -423,27 +423,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1713353514}
-  PlayerAttractionStrength: 2
+  PlayerAttractionStrength: 0
+  Clusters: []
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
   ScreenSpace: {x: 32, y: 18}
   HalfScreenSpace: {x: 0, y: 0}
   NumberOfTypes: 5
-  NumberOfParticles: 500
-  ForcesRange: {x: 0.3, y: 1}
-  MinDistancesRange: {x: 1, y: 3}
-  RadiiRange: {x: 3, y: 5}
-  RepulsionEffector: -3
-  Dampening: 0.9
-  Friction: 0.85
+  RepulsionEffector: -5
+  Dampening: 0.95
+  Friction: 0.9
   _timeScale: 1
+  InternalForceRange: {x: 0.5, y: 1}
+  ExternalForceRange: {x: 0, y: 1}
+  InternalMinDistanceRange: {x: 0.1, y: 1}
+  ExternalMinDistanceRange: {x: 1, y: 3}
+  InternalRadiusRange: {x: 0.5, y: 2}
+  ExternalRadiusRange: {x: 2, y: 3}
+  CohesionStrength: 2
   StartPopulation: 20
-  NumFood: 200
-  FoodRange: 0.1
-  FoodEnergy: 100
-  ReproductionEnergy: 500
-  StartingEnergy: 400
-  MaxFood: 200
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}

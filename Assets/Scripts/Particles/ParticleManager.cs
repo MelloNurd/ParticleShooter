@@ -15,57 +15,78 @@ namespace NaughtyAttributes
 
         public Player player;
 
-        public float PlayerAttractionStrength = 5f; // Adjust as needed
+        public float PlayerAttractionStrength = 5f;
 
-        public static List<Particle> Particles { get; private set; } = new List<Particle>();
-        public static List<Particle> Food { get; private set; } = new List<Particle>();
-        public static List<Cluster> Clusters { get; private set; } = new List<Cluster>();
+        public List<Cluster> Clusters = new List<Cluster>();
 
         public GameObject ParticlePrefab;
         public GameObject ClusterPrefab;
-        
-        public static float[,] Forces;
-        public static float[,] MinDistances;
-        public static float[,] Radii;
-        public static bool IsFinishedSpawning { get; set; } = false;
 
-        private GameObject _particleParentObj;
+        [BoxGroup("Simulation Configuration")]
+        [OnValueChanged("Restart")]
+        public Vector2 ScreenSpace = new Vector2(32, 18);
 
-        public static event Action<Vector2> ForcesRangeChanged;
+        [BoxGroup("Simulation Configuration")]
+        [HideInInspector]
+        public Vector2 HalfScreenSpace;
 
-         ////////////////////////////////////////////////////////////////
-        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] public Vector2 ScreenSpace = new Vector2(32, 18);
-        [BoxGroup("Simulation Configuration")] [HideInInspector] public Vector2 HalfScreenSpace;
+        [BoxGroup("Simulation Configuration")]
+        [OnValueChanged("Restart")]
+        [UnityEngine.Range(1, 32)]
+        public int NumberOfTypes = 5;
 
-        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] [UnityEngine.Range(1, 32)] public int NumberOfTypes = 5;
-        [BoxGroup("Simulation Configuration")] [OnValueChanged("Restart")] [UnityEngine.Range(1, 9999)] public int NumberOfParticles = 500;
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        [BoxGroup("Particle Properties")]
+        [UnityEngine.Range(-5, 5)]
+        public float RepulsionEffector = -3f;
 
-        /////////////////////////////////////////////////////////////////////
-        [BoxGroup("Particle Properties")] [OnValueChanged("OnForcesRangeChanged")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 ForcesRange = new Vector2(0.3f, 1f);
-        [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 MinDistancesRange = new Vector2(1f, 3f);
-        [BoxGroup("Particle Properties")] [OnValueChanged("Initialize")] [MinMaxSlider(0.0f, 18.0f)] [SerializeField] public Vector2 RadiiRange = new Vector2(3f, 5f);
-        [BoxGroup("Particle Properties")] [UnityEngine.Range(-5, 5)] [SerializeField] public float RepulsionEffector = -3f;
+        [BoxGroup("Particle Properties")]
+        [UnityEngine.Range(0, 1)]
+        public float Dampening = 0.1f;
 
-        [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 1)] [SerializeField] public float Dampening = 0.05f; // Scale this down if particles are too jumpy
-        [BoxGroup("Particle Properties")] [UnityEngine.Range(0, 2)] [SerializeField] public float Friction = 0.85f;
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        [BoxGroup("Particle Properties")]
+        [UnityEngine.Range(0, 2)]
+        public float Friction = 0.9f;
 
-        /////////////////////////////////////////////////////////////////////
-        [BoxGroup("Unity Settings")] [OnValueChanged("ChangeTimescale")] [UnityEngine.Range(0, 5)] [SerializeField] public float _timeScale = 1f;
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        [BoxGroup("Unity Settings")]
+        [OnValueChanged("ChangeTimescale")]
+        [UnityEngine.Range(0, 5)]
+        public float _timeScale = 1f;
 
-        public int StartPopulation = 50;
-        public int NumFood = 200; // starting amount of food
-        public float FoodRange = 0.1f; // distance to collect food
-        public int FoodEnergy = 100; // energy from food
-        public int ReproductionEnergy = 1000;
-        public int StartingEnergy = 200;
-        public int MaxFood = 200;
+        [BoxGroup("Force Parameters")]
+        [MinMaxSlider(-5f, 5f)]
+        public Vector2 InternalForceRange = new Vector2(2f, 5f);
+
+        [BoxGroup("Force Parameters")]
+        [MinMaxSlider(-5f, 5f)]
+        public Vector2 ExternalForceRange = new Vector2(-5f, 5f);
+
+        [BoxGroup("Force Parameters")]
+        [MinMaxSlider(0.1f, 2f)]
+        public Vector2 InternalMinDistanceRange = new Vector2(0.1f, 0.5f);
+
+        [BoxGroup("Force Parameters")]
+        [MinMaxSlider(1f, 5f)]
+        public Vector2 ExternalMinDistanceRange = new Vector2(1f, 2f);
+
+        [BoxGroup("Force Parameters")]
+        [MinMaxSlider(0.5f, 5f)]
+        public Vector2 InternalRadiusRange = new Vector2(0.5f, 2f);
+
+        [BoxGroup("Force Parameters")]
+        [MinMaxSlider(2f, 7f)]
+        public Vector2 ExternalRadiusRange = new Vector2(2f, 7f);
+
+        [BoxGroup("Force Parameters")]
+        [UnityEngine.Range(0f, 5f)]
+        public float CohesionStrength = 2f;
+
+
+
+        public int StartPopulation = 5;
 
         private int _runningClusterCount = 0;
 
-        private GameObject _foodParent;
+        private Dictionary<int, int> particleHitCounts = new Dictionary<int, int>();
 
         private void ChangeTimescale()
         {
@@ -90,258 +111,167 @@ namespace NaughtyAttributes
                 player = FindFirstObjectByType<Player>();
             }
 
-            // Make sure the particle prefab is assigned
+            // Ensure the particle and cluster prefabs are assigned
             if (ParticlePrefab == null || ClusterPrefab == null)
             {
-                Debug.LogError("One or more prefab is not assigned in the inspector!");
+                Debug.LogError("ParticlePrefab or ClusterPrefab is not assigned in the inspector!");
                 return;
             }
 
-            // Enable running in background so the game does not need to be focused on to run
+            // Enable running in background
             Application.runInBackground = true;
-
-            _foodParent = new GameObject("FoodParent");
         }
 
         private void Start()
         {
             Initialize();
-            //SpawnParticles();
-
-            InvokeRepeating("SpawnFood", 0, 5);
         }
 
         private void Update()
         {
-            // Inputs
-            if(Input.GetKeyDown(KeyCode.R)) // Restart the simulation if the "R" key is pressed
+            // Input handling
+            if (Input.GetKeyDown(KeyCode.R)) // Restart the simulation if the "R" key is pressed
             {
                 Restart();
             }
-            else if (Input.GetKeyDown(KeyCode.T))
-            {
-                SwapForces();
-            }
 
-            // Simulation
-            foreach(Cluster colony in Clusters)
-            {
-                colony.UpdateCluster();
-            }
+            // Check for cluster extinction first
+            CheckForClusterExtinction();
 
-            Die();  // cells die if they run out of energy
-            Eat();  // cells collect nearby food
-            ForceCopy();  // if the pop is below minPop add cells
-            Reproduce();  // cells with lots of energy reproduce
+            // Update all clusters
+            foreach (Cluster cluster in Clusters)
+            {
+                cluster.UpdateCluster();
+            }
         }
 
-        private void SpawnFood()
+
+        private void CheckForClusterExtinction()
         {
-            if(Food.Count < MaxFood)
+            for (int i = Clusters.Count - 1; i >= 0; i--)
             {
-                Food.Add(CreateFoodParticle());
+                Cluster cluster = Clusters[i];
+                if (cluster.Swarm.Count == 0 || cluster.Swarm.Count <= cluster.numParticles * 0.1f) // If cluster is gone or mostly gone
+                {
+                    Debug.Log("Starting spawn of new evolved cluster based on success data.");
+                    SpawnClusterFromSuccessData();
+                    Debug.Log($"Cluster {cluster.Id} has gone extinct! Swarm Count: {cluster.Swarm.Count}");
+                    Clusters.RemoveAt(i);
+                    Destroy(cluster.gameObject);
+                    return;
+                }
             }
         }
 
-        private Particle CreateFoodParticle()
-        {
-            Vector2 pos = GetRandomPointOnScreen();
-
-            Particle temp = Instantiate(ParticlePrefab, pos, Quaternion.identity, _foodParent.transform).GetComponent<Particle>();
-            temp.gameObject.name = "Food Particle";
-
-            temp.Position = pos;
-            temp.Type = 0;
-            temp.ParentCluster = null; // Food should not have a parent cluster
-
-            temp.GetComponent<SpriteRenderer>().color = Color.HSVToRGB(0, 1, 1); // color based on type
-
-            return temp;
-        }
 
         private Cluster CreateCluster()
         {
+            Debug.Log("Creating new cluster.");
             Vector2 pos = GetRandomPointOnScreen();
 
-            Cluster temp = Instantiate(ClusterPrefab).GetComponent<Cluster>(); // make a new cell at a random location
-            temp.Initialize(pos.x, pos.y);
-            temp.Id = _runningClusterCount++;
+            Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
+            newCluster.Initialize(pos.x, pos.y);
+            newCluster.Id = _runningClusterCount++;
 
-            temp.gameObject.name = "Cluster";
+            newCluster.gameObject.name = "Cluster";
 
-            return temp;
+            Clusters.Add(newCluster);
+
+            return newCluster;
         }
 
-        // for dead cells
-        void ConvertToFood(Cluster c)
+        private void OnValidate()
         {
-            foreach (Particle p in c.Swarm)
+            UpdateClusterParameters();
+        }
+
+        public void UpdateClusterParameters()
+        {
+            foreach (var cluster in Clusters)
             {
-                Food.Add(CreateFoodParticle());
+                cluster.UpdateForceParameters();
             }
         }
 
-        void Die() {
-            for (int i = Clusters.Count - 1; i >= 0; i--)
-            { // remove dead (energyless cells)
-                Cluster c = Clusters[i];
-                if (c.Energy <= 0)
-                {
-                    //convertToFood(c);
-                    Clusters.RemoveAt(i);  // could convert to food instead
-                    Destroy(c.gameObject);
-                }
-            }
 
-        }
-
-        void Reproduce()
+        public void SpawnClusterFromSuccessData()
         {
-            Cluster c;
-            for (int i = Clusters.Count - 1; i >= 0; i--)
+            Debug.Log("Spawning new evolved cluster based on success data.");
+            Vector2 pos = GetRandomPointOnScreen();
+
+            Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
+            newCluster.GenerateFromSuccessData(particleHitCounts);
+            newCluster.Initialize(pos.x, pos.y);
+            newCluster.Id = _runningClusterCount++;
+            newCluster.gameObject.name = "Cluster (Evolved)";
+
+            Clusters.Add(newCluster);
+
+            // Clear the hit counts after spawning
+            particleHitCounts.Clear();
+        }
+
+        public void RegisterParticleHit(Particle particle)
+        {
+            if (particleHitCounts.ContainsKey(particle.Type))
             {
-                c = Clusters[i];
-                if (c.Energy > ReproductionEnergy)
-                { // if a cell has enough energy 
-                    Cluster temp = CreateCluster();
-                    temp.gameObject.name = "Cluster (Reproduced)";
-
-                    temp.CopyCell(c); // copy the parent cell's 'DNA'
-
-                    c.Energy -= StartingEnergy;  // parent cell loses energy (child cell recieves it) 
-
-                    temp.MutateCell(); // mutate the child cell
-
-                    Clusters.Add(temp); // Add the child cell to the population
-                }
+                particleHitCounts[particle.Type]++;
             }
-        }
-
-        // If population is below minPopulation add cells by copying and mutating
-        // randomly selected existing cells.
-        // Note: if the population all dies simultanious the program will crash - extinction!
-        void ForceCopy()
-        {
-            if (Clusters.Count > 0 && Clusters.Count < StartPopulation)
+            else
             {
-                Cluster temp = CreateCluster();
-                temp.gameObject.name = "Cluster (Force Copied)";
-
-                if (Clusters.Count > 0) { // As long as there are at least some cells, copy and mutate a random one
-                    int parent = UnityEngine.Random.Range(0, Clusters.Count);
-                    Cluster parentCell = Clusters[parent];
-                    temp.CopyCell(parentCell);
-                    temp.MutateCell();
-                }
-                
-                Clusters.Add(temp);
+                particleHitCounts[particle.Type] = 1;
             }
-        }
 
-        void Eat()
-        {
-            foreach (Cluster c in Clusters)
-            {  // for every cell
-                foreach (Particle p in c.Swarm) // for every particle in every cell
-                { 
-                    if (p.Type != 1) continue; // 1 is the eating type of paricle
-
-                    Collider2D[] nearby = Physics2D.OverlapCircleAll(p.Position, FoodRange); // find nearby colliders (to look for food)
-
-                    foreach (Collider2D f in nearby)
-                    {
-                        if(f.TryGetComponent<Particle>(out Particle food))
-                        {
-                            if(food.Type != 0) continue; // 0 is the food type of particle
-
-                            c.Energy += FoodEnergy; // gain 100 energy for eating food 
-                            Food.Remove(food);
-                            Destroy(food.gameObject);
-                        }
-                    }
-                }
+            // Example condition to spawn a new cluster based on total hits
+            int totalHits = 0;
+            foreach (var count in particleHitCounts.Values)
+            {
+                totalHits += count;
             }
         }
 
         [Button("Restart Simulation", EButtonEnableMode.Playmode)]
         private void Restart()
         {
-            // Restarts the simulation by first clearing all particles and then restarting the process
-            ClearParticles();
+            // Clear all clusters and restart
+            ClearClusters();
             Initialize();
         }
 
         [Button("Reset Values", EButtonEnableMode.Playmode)]
         private void Initialize()
         {
-            // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
             if (!Application.isPlaying) return;
 
-            // Caching this to reduce repeated calculations
+            // Calculate half screen space
             HalfScreenSpace = ScreenSpace * 0.5f;
 
+            // Spawn initial clusters
             for (int i = 0; i < StartPopulation; i++)
             {
-                Clusters.Add(CreateCluster());
-            }
-
-            for (int i = 0; i < NumFood; i++)
-            {
-                Food.Add(CreateFoodParticle());
+                CreateCluster();
             }
         }
 
-        private void OnForcesRangeChanged()
+        private void ClearClusters()
         {
-            Initialize();
-            ForcesRangeChanged?.Invoke(ForcesRange);
-        }
-
-        private void ClearParticles()
-        {
-            // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
-            if (!Application.isPlaying) return;
-            
-            IsFinishedSpawning = false;
-            
-            GameObject temp;
-            for (int i = Particles.Count - 1; i >= 0; i--) // Unsure if necessary, but traversing backwards through the list just in case
+            for (int i = Clusters.Count - 1; i >= 0; i--)
             {
-                temp = Particles[i].gameObject;
-                Particles.Remove(Particles[i]);
-                Destroy(temp);
+                Cluster cluster = Clusters[i];
+                Clusters.RemoveAt(i);
+                Destroy(cluster.gameObject);
             }
 
-            Destroy(_particleParentObj);
-        }
-        private void SwapForces()
-        {
-            // Swap the forces between particle types
-            for (int i = 0; i < NumberOfTypes; i++)
-            {
-                for (int j = i + 1; j < NumberOfTypes; j++)
-                {
-                    float temp = Forces[i, j];
-                    Forces[i, j] = Forces[j, i];
-                    Forces[j, i] = temp;
-                }
-            }
-            Debug.Log("Forces swapped between particle types.");
+            _runningClusterCount = 0;
         }
 
         public Vector3 GetRandomPointOnScreen()
         {
-            return new Vector3(UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
+            return new Vector3(
+                UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
+                UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
+                0);
         }
-
-        public void RemoveParticle(Particle particle)
-        {
-            if (Particles.Contains(particle))
-            {
-                Particles.Remove(particle);
-            }
-        }
-
     }
 
 }

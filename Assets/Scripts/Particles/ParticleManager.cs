@@ -78,6 +78,10 @@ namespace NaughtyAttributes
 
         private int _runningClusterCount = 0;
 
+        // Weights for adjusting the importance of hits and proximity
+        private const float HitsWeight = 1f;
+        private const float ProximityWeight = 0.5f; // Adjust this value based on desired influence
+
         // Method to change the timescale of the simulation
         private void ChangeTimescale()
         {
@@ -170,13 +174,18 @@ namespace NaughtyAttributes
         private Cluster FindMostSuccessfulCluster()
         {
             Cluster mostSuccessful = null;
-            int maxHits = -1;
+            float maxSuccessScore = float.MinValue;
 
             foreach (var cluster in Clusters)
             {
-                if (cluster.HitsToPlayer > maxHits)
+                // Calculate success score
+                float hitsScore = cluster.HitsToPlayer;
+                float proximityScore = cluster.ProximityScore;
+                float successScore = hitsScore * HitsWeight + proximityScore * ProximityWeight;
+
+                if (successScore > maxSuccessScore)
                 {
-                    maxHits = cluster.HitsToPlayer;
+                    maxSuccessScore = successScore;
                     mostSuccessful = cluster;
                 }
             }

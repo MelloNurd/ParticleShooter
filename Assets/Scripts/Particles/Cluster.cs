@@ -27,6 +27,9 @@ namespace NaughtyAttributes
         private GameObject _particlePrefab;
         public int _numTypes;
 
+        public float ProximityScore { get; private set; }
+        public int TotalParticlesDestroyed { get; private set; }
+
         private void Awake()
         {
             // Initialize particle prefab and number of types from ParticleManager
@@ -159,6 +162,14 @@ namespace NaughtyAttributes
             // Update maximum radii in case ranges have changed
             MaxInternalRadii = ParticleManager.Instance.InternalRadiusRange.y;
             MaxExternalRadii = ParticleManager.Instance.ExternalRadiusRange.y;
+        }
+
+        public void ReportParticleProximity(float minimalDistance)
+        {
+            // Invert the minimal distance to make closer distances contribute more to the score
+            float proximityContribution = 1f / (minimalDistance + 0.001f); // Adding a small value to prevent division by zero
+            ProximityScore += proximityContribution;
+            TotalParticlesDestroyed++;
         }
     }
 }

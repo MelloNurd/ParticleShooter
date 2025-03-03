@@ -21,6 +21,10 @@ namespace NaughtyAttributes
         private Transform _transform;
         private SpriteRenderer _spriteRenderer;
 
+        public float MinimalDistanceToPlayer { get; private set; }
+
+        private Transform _playerTransform;
+
         private void Awake()
         {
             // Cache the transform and sprite renderer components
@@ -28,6 +32,9 @@ namespace NaughtyAttributes
             Position = _transform.position;
 
             _spriteRenderer = GetComponent<SpriteRenderer>();
+
+            _playerTransform = ParticleManager.Instance.player.transform;
+            MinimalDistanceToPlayer = float.MaxValue;
         }
 
         public void Initialize(int type, Cluster parentCluster)
@@ -48,7 +55,19 @@ namespace NaughtyAttributes
 
         private void OnDestroy()
         {
-            // Remove the particle from its parent cluster's swarm when destroyed
+            float distanceToPlayer = Vector3.Distance(Position, _playerTransform.position);
+            if (distanceToPlayer < MinimalDistanceToPlayer)
+            {
+                MinimalDistanceToPlayer = distanceToPlayer;
+            }
+
+            // Report minimal distance to parent cluster
+            if (ParentCluster != null)
+            {
+                ParentCluster.ReportParticleProximity(MinimalDistanceToPlayer);
+            }
+
+            // Remove from Swarm
             if (ParentCluster != null && ParentCluster.Swarm != null)
             {
                 ParentCluster.Swarm.Remove(this);

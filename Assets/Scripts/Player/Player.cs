@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,6 +33,9 @@ public class Player : MonoBehaviour
     public Transform frontPoint;
     public Transform backPoint;
 
+    private float xBoundary;
+    private float yBoundary;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -55,6 +59,9 @@ public class Player : MonoBehaviour
 
         frontPoint = transform.Find("FrontAttractor");
         backPoint = transform.Find("BackAttractor");
+
+        xBoundary = ParticleManager.Instance.ScreenSpace.x / 2;
+        yBoundary = ParticleManager.Instance.ScreenSpace.y / 2;
     }
 
     void Update()
@@ -65,6 +72,27 @@ public class Player : MonoBehaviour
         // Check if the player is boosting
         isBoosting = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.B)) && boostAmount > 0;
         boostSlider.value = boostAmount / maxBoost;
+
+            // Screen wrapping
+            Vector3 newPosition = transform.position;
+
+            if(transform.position.x > xBoundary)
+            {
+                newPosition.x = -xBoundary;
+            }
+            else if (transform.position.x < -xBoundary)
+            {
+                newPosition.x = xBoundary;
+            }   
+            if (transform.position.y > yBoundary)
+            {
+                newPosition.y = -yBoundary;
+            }
+            else if (transform.position.y < -yBoundary)
+            {
+                newPosition.y = yBoundary;
+            }
+            transform.position = newPosition;
 
     }
 

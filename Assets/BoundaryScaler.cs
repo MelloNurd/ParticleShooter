@@ -23,5 +23,9 @@ public class BoundaryScaler : MonoBehaviour
             confiner.BoundingShape2D = boxCollider;
             confiner.InvalidateBoundingShapeCache();
         }
+        if(gameObject.transform.localScale.x != ParticleManager.Instance.ScreenSpace.x || gameObject.transform.localScale.y != ParticleManager.Instance.ScreenSpace.y)
+        {
+            gameObject.transform.localScale = new Vector3(ParticleManager.Instance.ScreenSpace.x, ParticleManager.Instance.ScreenSpace.y, 1);
+        }
     }
 }

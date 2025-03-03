@@ -53,14 +53,17 @@ namespace NaughtyAttributes
             SetColorByType();
         }
 
-        private void OnDestroy()
+        public void Update()
         {
             float distanceToPlayer = Vector3.Distance(Position, _playerTransform.position);
             if (distanceToPlayer < MinimalDistanceToPlayer)
             {
                 MinimalDistanceToPlayer = distanceToPlayer;
             }
+        }
 
+        private void OnDestroy()
+        {
             // Report minimal distance to parent cluster
             if (ParentCluster != null)
             {

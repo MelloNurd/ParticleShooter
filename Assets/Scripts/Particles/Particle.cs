@@ -1,37 +1,77 @@
-using NUnit.Framework;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
-using static Unity.Entities.SystemBaseDelegates;
-using UnityEngine.UIElements;
 
 namespace NaughtyAttributes
 {
     public class Particle : MonoBehaviour
     {
         [ShowNativeProperty]
-        public Vector3 Position { get; set; } = Vector3.zero; // Storing manually for easier transition to Data-Oriented Design
+        public Vector3 Position { get; set; } = Vector3.zero;
 
         [ShowNativeProperty]
-        public Vector3 Velocity { get; set; } // Custom physics handling
+        public Vector3 Velocity { get; set; }
 
         [ShowNativeProperty]
-        public int Type { get; set; } // Particle type determining behavior and color
+        public int Type { get; private set; }
 
         [ShowNativeProperty]
-        public int Id { get; set; } // Identifier for specific particles
+        public int Id { get; private set; }
 
         public Cluster ParentCluster;
 
-        private Transform _transform; // Caching the transform for performance
+        private Transform _transform;
+        private SpriteRenderer _spriteRenderer;
 
         private void Awake()
         {
             _transform = GetComponent<Transform>();
             Position = _transform.position;
+
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        public void Initialize(int type, Cluster parentCluster)
+        {
+            Type = type;
+            ParentCluster = parentCluster;
+
+            // Set initial velocity (optional)
+            Velocity = new Vector3(
+                Random.Range(-1f, 1f),
+                Random.Range(-1f, 1f),
+                0
+            );
+
+            SetColorByType();
+        }
+
+
+        private void SetColorByType()
+        {
+            if (_spriteRenderer != null)
+            {
+                int totalTypes = ParticleManager.Instance.NumberOfTypes;
+                Color color = GetColorForType(Type, totalTypes);
+                _spriteRenderer.color = color;
+            }
+            else
+            {
+                Debug.LogWarning($"SpriteRenderer not found on Particle {Id}");
+            }
+        }
+
+        private Color GetColorForType(int type, int totalTypes)
+        {
+            if (totalTypes <= 1)
+            {
+                // Default to red if there's only one type
+                return Color.HSVToRGB(0f, 1f, 1f);
+            }
+
+            float hue = (float)type / (totalTypes - 1);
+
+            Color color = Color.HSVToRGB(hue, 1f, 1f);
+
+            return color;
         }
 
         public void ApplyInternalForces(Cluster cluster)
@@ -95,27 +135,27 @@ namespace NaughtyAttributes
                 {
                     if (particle == null) continue;
 
-                    Vector3 _direction = particle.Position - Position;
+                    Vector3 direction = particle.Position - Position;
 
                     // Screen wrapping adjustments
-                    _direction = ScreenWrapAdjustment(_direction);
+                    direction = ScreenWrapAdjustment(direction);
 
-                    float _distance = _direction.magnitude;
-                    _direction.Normalize();
+                    float distance = direction.magnitude;
+                    direction.Normalize();
 
                     // Repulsive forces
-                    if (_distance < cluster.ExternalMins[Type, particle.Type])
+                    if (distance < cluster.ExternalMins[Type, particle.Type])
                     {
-                        Vector3 force = _direction * Mathf.Abs(cluster.ExternalForces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
-                        force *= Map(_distance, 0, Mathf.Abs(cluster.ExternalMins[Type, particle.Type]), 1, 0) * ParticleManager.Instance.Dampening;
+                        Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
+                        force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[Type, particle.Type]), 1, 0) * ParticleManager.Instance.Dampening;
                         totalForce += force;
                     }
 
                     // Attractive forces (if needed)
-                    if (_distance < cluster.ExternalRadii[Type, particle.Type])
+                    if (distance < cluster.ExternalRadii[Type, particle.Type])
                     {
-                        Vector3 force = _direction * cluster.ExternalForces[Type, particle.Type];
-                        force *= Map(_distance, 0, cluster.ExternalRadii[Type, particle.Type], 1, 0) * ParticleManager.Instance.Dampening;
+                        Vector3 force = direction * cluster.ExternalForces[Type, particle.Type];
+                        force *= Map(distance, 0, cluster.ExternalRadii[Type, particle.Type], 1, 0) * ParticleManager.Instance.Dampening;
                         totalForce += force;
                     }
                 }
@@ -200,8 +240,10 @@ namespace NaughtyAttributes
         {
             if (collision.gameObject.CompareTag("Player"))
             {
-                // Register particle hit with the manager
-                ParticleManager.Instance.RegisterParticleHit(this);
+                // Notify the parent cluster of the hit
+                ParentCluster.HitsToPlayer++;
+
+                // Destroy the particle
                 Destroy(gameObject);
             }
         }
@@ -212,6 +254,7 @@ namespace NaughtyAttributes
             Position += Velocity * Time.deltaTime;
             transform.position = Position;
         }
+
         public void ApplyCohesion()
         {
             if (ParentCluster == null) return;
@@ -232,6 +275,5 @@ namespace NaughtyAttributes
 
             Velocity += cohesionForce * Time.deltaTime;
         }
-
     }
 }

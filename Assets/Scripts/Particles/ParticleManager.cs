@@ -1,11 +1,5 @@
-using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
-using static UnityEngine.ParticleSystem;
 
 namespace NaughtyAttributes
 {
@@ -32,24 +26,24 @@ namespace NaughtyAttributes
 
         [BoxGroup("Simulation Configuration")]
         [OnValueChanged("Restart")]
-        [UnityEngine.Range(1, 32)]
+        [Range(1, 32)]
         public int NumberOfTypes = 5;
 
         [BoxGroup("Particle Properties")]
-        [UnityEngine.Range(-5, 5)]
+        [Range(-5, 5)]
         public float RepulsionEffector = -3f;
 
         [BoxGroup("Particle Properties")]
-        [UnityEngine.Range(0, 1)]
+        [Range(0, 1)]
         public float Dampening = 0.1f;
 
         [BoxGroup("Particle Properties")]
-        [UnityEngine.Range(0, 2)]
+        [Range(0, 2)]
         public float Friction = 0.9f;
 
         [BoxGroup("Unity Settings")]
         [OnValueChanged("ChangeTimescale")]
-        [UnityEngine.Range(0, 5)]
+        [Range(0, 5)]
         public float _timeScale = 1f;
 
         [BoxGroup("Force Parameters")]
@@ -77,16 +71,12 @@ namespace NaughtyAttributes
         public Vector2 ExternalRadiusRange = new Vector2(2f, 7f);
 
         [BoxGroup("Force Parameters")]
-        [UnityEngine.Range(0f, 5f)]
+        [Range(0f, 5f)]
         public float CohesionStrength = 2f;
-
-
 
         public int StartPopulation = 5;
 
         private int _runningClusterCount = 0;
-
-        private Dictionary<int, int> particleHitCounts = new Dictionary<int, int>();
 
         private void ChangeTimescale()
         {
@@ -135,7 +125,7 @@ namespace NaughtyAttributes
                 Restart();
             }
 
-            // Check for cluster extinction first
+            // Check for cluster extinction
             CheckForClusterExtinction();
 
             // Update all clusters
@@ -145,24 +135,100 @@ namespace NaughtyAttributes
             }
         }
 
-
         private void CheckForClusterExtinction()
         {
             for (int i = Clusters.Count - 1; i >= 0; i--)
             {
                 Cluster cluster = Clusters[i];
-                if (cluster.Swarm.Count == 0 || cluster.Swarm.Count <= cluster.numParticles * 0.1f) // If cluster is gone or mostly gone
+                if (cluster.Swarm.Count == 0 || cluster.Swarm.Count <= cluster.numParticles * 0.1f)
                 {
-                    Debug.Log("Starting spawn of new evolved cluster based on success data.");
-                    SpawnClusterFromSuccessData();
-                    Debug.Log($"Cluster {cluster.Id} has gone extinct! Swarm Count: {cluster.Swarm.Count}");
+                    // Find the most successful cluster
+                    Cluster mostSuccessfulCluster = FindMostSuccessfulCluster();
+
+                    if (mostSuccessfulCluster != null)
+                    {
+                        // Spawn a mutated version of the most successful cluster
+                        SpawnMutatedCluster(mostSuccessfulCluster);
+                        Debug.Log($"Cluster {cluster.Id} has gone extinct! Spawning mutated cluster based on Cluster {mostSuccessfulCluster.Id}.");
+                    }
+                    else
+                    {
+                        // If no successful cluster exists, create a new random cluster
+                        CreateCluster();
+                        Debug.Log($"Cluster {cluster.Id} has gone extinct! No successful cluster found. Creating a new random cluster.");
+                    }
+
                     Clusters.RemoveAt(i);
                     Destroy(cluster.gameObject);
-                    return;
                 }
             }
         }
 
+        private Cluster FindMostSuccessfulCluster()
+        {
+            Cluster mostSuccessful = null;
+            int maxHits = -1;
+
+            foreach (var cluster in Clusters)
+            {
+                if (cluster.HitsToPlayer > maxHits)
+                {
+                    maxHits = cluster.HitsToPlayer;
+                    mostSuccessful = cluster;
+                }
+            }
+
+            return mostSuccessful;
+        }
+
+        private void SpawnMutatedCluster(Cluster baseCluster)
+        {
+            Debug.Log($"Spawning new mutated cluster based on Cluster {baseCluster.Id}.");
+
+            Vector2 pos = GetRandomPointOnScreen();
+            Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
+
+            // Copy the base cluster's properties
+            newCluster.numParticles = baseCluster.numParticles;
+            newCluster.MaxInternalRadii = baseCluster.MaxInternalRadii;
+            newCluster.MaxExternalRadii = baseCluster.MaxExternalRadii;
+
+            // Ensure _numTypes is set
+            newCluster._numTypes = baseCluster._numTypes;
+
+            // Copy and mutate the force matrices
+            newCluster.InternalForces = MutateForceMatrix(baseCluster.InternalForces);
+            newCluster.ExternalForces = MutateForceMatrix(baseCluster.ExternalForces);
+            newCluster.InternalMins = MutateForceMatrix(baseCluster.InternalMins);
+            newCluster.ExternalMins = MutateForceMatrix(baseCluster.ExternalMins);
+            newCluster.InternalRadii = MutateForceMatrix(baseCluster.InternalRadii);
+            newCluster.ExternalRadii = MutateForceMatrix(baseCluster.ExternalRadii);
+
+            newCluster.Initialize(pos.x, pos.y);
+            newCluster.Id = _runningClusterCount++;
+            newCluster.gameObject.name = $"Cluster (Mutated from {baseCluster.Id})";
+
+            Clusters.Add(newCluster);
+        }
+
+
+        private float[,] MutateForceMatrix(float[,] matrix)
+        {
+            int size0 = matrix.GetLength(0);
+            int size1 = matrix.GetLength(1);
+            float[,] mutatedMatrix = new float[size0, size1];
+
+            for (int i = 0; i < size0; i++)
+            {
+                for (int j = 0; j < size1; j++)
+                {
+                    float mutation = Random.Range(-0.1f, 0.1f); // Adjust mutation range as needed
+                    mutatedMatrix[i, j] = matrix[i, j] + mutation;
+                }
+            }
+
+            return mutatedMatrix;
+        }
 
         private Cluster CreateCluster()
         {
@@ -193,42 +259,6 @@ namespace NaughtyAttributes
             }
         }
 
-
-        public void SpawnClusterFromSuccessData()
-        {
-            Debug.Log("Spawning new evolved cluster based on success data.");
-            Vector2 pos = GetRandomPointOnScreen();
-
-            Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
-            newCluster.GenerateFromSuccessData(particleHitCounts);
-            newCluster.Initialize(pos.x, pos.y);
-            newCluster.Id = _runningClusterCount++;
-            newCluster.gameObject.name = "Cluster (Evolved)";
-
-            Clusters.Add(newCluster);
-
-            // Clear the hit counts after spawning
-            particleHitCounts.Clear();
-        }
-
-        public void RegisterParticleHit(Particle particle)
-        {
-            if (particleHitCounts.ContainsKey(particle.Type))
-            {
-                particleHitCounts[particle.Type]++;
-            }
-            else
-            {
-                particleHitCounts[particle.Type] = 1;
-            }
-
-            // Example condition to spawn a new cluster based on total hits
-            int totalHits = 0;
-            foreach (var count in particleHitCounts.Values)
-            {
-                totalHits += count;
-            }
-        }
 
         [Button("Restart Simulation", EButtonEnableMode.Playmode)]
         private void Restart()
@@ -268,10 +298,9 @@ namespace NaughtyAttributes
         public Vector3 GetRandomPointOnScreen()
         {
             return new Vector3(
-                UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
-                UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
+                Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
+                Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
                 0);
         }
     }
-
 }

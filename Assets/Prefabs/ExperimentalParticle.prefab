@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8401487593879834752}
   - component: {fileID: -6154581062664968211}
   - component: {fileID: 1788390239782810131}
+  - component: {fileID: 7793839721720781861}
   m_Layer: 0
   m_Name: ExperimentalParticle
   m_TagString: Particle
@@ -138,3 +139,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ParentCluster: {fileID: 0}
+--- !u!114 &7793839721720781861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5191945715267185580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 701ed2cee2818b84cbfc236a62c48db4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

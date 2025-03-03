@@ -44,6 +44,13 @@ namespace NaughtyAttributes
             SetColorByType();
         }
 
+        private void OnDestroy()
+        {
+            if (ParentCluster != null && ParentCluster.Swarm != null)
+            {
+                ParentCluster.Swarm.Remove(this);
+            }
+        }
 
         private void SetColorByType()
         {

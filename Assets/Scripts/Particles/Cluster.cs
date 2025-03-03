@@ -106,6 +106,8 @@ namespace NaughtyAttributes
 
         public void UpdateCluster()
         {
+            Swarm.RemoveAll(p => p == null);
+
             AdjustCenter();
 
             foreach (Particle particle in Swarm)
@@ -118,8 +120,6 @@ namespace NaughtyAttributes
                 particle.ApplyCohesion();
             }
         }
-
-        // Existing methods...
 
 
 

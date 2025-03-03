@@ -78,6 +78,7 @@ namespace NaughtyAttributes
 
         private int _runningClusterCount = 0;
 
+        // Method to change the timescale of the simulation
         private void ChangeTimescale()
         {
             Time.timeScale = _timeScale;
@@ -135,6 +136,7 @@ namespace NaughtyAttributes
             }
         }
 
+        // Method to check for cluster extinction and handle it
         private void CheckForClusterExtinction()
         {
             for (int i = Clusters.Count - 1; i >= 0; i--)
@@ -164,6 +166,7 @@ namespace NaughtyAttributes
             }
         }
 
+        // Method to find the most successful cluster based on hits to the player
         private Cluster FindMostSuccessfulCluster()
         {
             Cluster mostSuccessful = null;
@@ -181,6 +184,7 @@ namespace NaughtyAttributes
             return mostSuccessful;
         }
 
+        // Method to spawn a mutated cluster based on a base cluster
         private void SpawnMutatedCluster(Cluster baseCluster)
         {
             Debug.Log($"Spawning new mutated cluster based on Cluster {baseCluster.Id}.");
@@ -211,7 +215,7 @@ namespace NaughtyAttributes
             Clusters.Add(newCluster);
         }
 
-
+        // Method to mutate a force matrix
         private float[,] MutateForceMatrix(float[,] matrix)
         {
             int size0 = matrix.GetLength(0);
@@ -222,7 +226,7 @@ namespace NaughtyAttributes
             {
                 for (int j = 0; j < size1; j++)
                 {
-                    float mutation = Random.Range(-0.1f, 0.1f); // Adjust mutation range as needed
+                    float mutation = Random.Range(-0.1f, 0.1f);
                     mutatedMatrix[i, j] = matrix[i, j] + mutation;
                 }
             }
@@ -230,6 +234,7 @@ namespace NaughtyAttributes
             return mutatedMatrix;
         }
 
+        // Method to create a new cluster
         private Cluster CreateCluster()
         {
             Debug.Log("Creating new cluster.");
@@ -251,6 +256,7 @@ namespace NaughtyAttributes
             UpdateClusterParameters();
         }
 
+        // Method to update force parameters for all clusters
         public void UpdateClusterParameters()
         {
             foreach (var cluster in Clusters)
@@ -259,7 +265,7 @@ namespace NaughtyAttributes
             }
         }
 
-
+        // Method to restart the simulation
         [Button("Restart Simulation", EButtonEnableMode.Playmode)]
         private void Restart()
         {
@@ -268,6 +274,7 @@ namespace NaughtyAttributes
             Initialize();
         }
 
+        // Method to initialize the simulation
         [Button("Reset Values", EButtonEnableMode.Playmode)]
         private void Initialize()
         {
@@ -283,6 +290,7 @@ namespace NaughtyAttributes
             }
         }
 
+        // Method to clear all clusters
         private void ClearClusters()
         {
             for (int i = Clusters.Count - 1; i >= 0; i--)
@@ -295,6 +303,7 @@ namespace NaughtyAttributes
             _runningClusterCount = 0;
         }
 
+        // Method to get a random point on the screen
         public Vector3 GetRandomPointOnScreen()
         {
             return new Vector3(

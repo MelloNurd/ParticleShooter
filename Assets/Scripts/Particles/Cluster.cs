@@ -29,12 +29,14 @@ namespace NaughtyAttributes
 
         private void Awake()
         {
+            // Initialize particle prefab and number of types from ParticleManager
             _particlePrefab = ParticleManager.Instance.ParticlePrefab;
             _numTypes = ParticleManager.Instance.NumberOfTypes;
         }
 
         public void Initialize(float x, float y)
         {
+            // Initialize force matrices and generate new particles
             InitializeForceMatrices();
             GenerateNew(x, y);
         }
@@ -70,13 +72,14 @@ namespace NaughtyAttributes
 
         private void GenerateNew(float x, float y)
         {
+            // Clear the current swarm and generate new particles
             Swarm = new List<Particle>();
 
             for (int i = 0; i < numParticles; i++)
             {
                 // Generate a small random offset
                 Vector3 randomOffset = new Vector3(
-                    Random.Range(-0.5f, 0.5f),  // Adjust the range as needed
+                    Random.Range(-0.5f, 0.5f), 
                     Random.Range(-0.5f, 0.5f),
                     0
                 );
@@ -97,19 +100,19 @@ namespace NaughtyAttributes
                 Swarm.Add(newParticle);
             }
 
+            // Adjust the center of the cluster
             AdjustCenter();
         }
 
-
-
-
-
         public void UpdateCluster()
         {
+            // Remove null particles from the swarm
             Swarm.RemoveAll(p => p == null);
 
+            // Adjust the center of the cluster
             AdjustCenter();
 
+            // Apply forces and behaviors to each particle
             foreach (Particle particle in Swarm)
             {
                 if (particle == null) continue;
@@ -121,10 +124,9 @@ namespace NaughtyAttributes
             }
         }
 
-
-
         public void AdjustCenter()
         {
+            // Adjust the center of the cluster based on the positions of the particles
             if (Swarm.Count == 0) return;
 
             Vector3 sum = Vector3.zero;
@@ -158,6 +160,5 @@ namespace NaughtyAttributes
             MaxInternalRadii = ParticleManager.Instance.InternalRadiusRange.y;
             MaxExternalRadii = ParticleManager.Instance.ExternalRadiusRange.y;
         }
-
     }
 }

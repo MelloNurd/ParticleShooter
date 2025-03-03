@@ -23,6 +23,7 @@ namespace NaughtyAttributes
 
         private void Awake()
         {
+            // Cache the transform and sprite renderer components
             _transform = GetComponent<Transform>();
             Position = _transform.position;
 
@@ -34,18 +35,20 @@ namespace NaughtyAttributes
             Type = type;
             ParentCluster = parentCluster;
 
-            // Set initial velocity (optional)
+            // Set initial velocity 
             Velocity = new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
                 0
             );
 
+            // Set the color of the particle based on its type
             SetColorByType();
         }
 
         private void OnDestroy()
         {
+            // Remove the particle from its parent cluster's swarm when destroyed
             if (ParentCluster != null && ParentCluster.Swarm != null)
             {
                 ParentCluster.Swarm.Remove(this);
@@ -158,7 +161,7 @@ namespace NaughtyAttributes
                         totalForce += force;
                     }
 
-                    // Attractive forces (if needed)
+                    // Attractive forces 
                     if (distance < cluster.ExternalRadii[Type, particle.Type])
                     {
                         Vector3 force = direction * cluster.ExternalForces[Type, particle.Type];

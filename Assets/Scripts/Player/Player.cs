@@ -70,7 +70,7 @@ public class Player : MonoBehaviour
         vertMovement = Input.GetAxisRaw("Vertical");
 
         // Check if the player is boosting
-        isBoosting = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.B)) && boostAmount > 0;
+        isBoosting = Input.GetKey(KeyCode.LeftShift) && boostAmount > 0 && vertMovement != 0;
         boostSlider.value = boostAmount / maxBoost;
 
             // Screen wrapping
@@ -163,6 +163,12 @@ public class Player : MonoBehaviour
         fireBlaster.SetActive(false);
         iceBlaster.SetActive(false);
         electricBlaster.SetActive(false);
+    }
+
+    public void InitializeSpace()
+    {
+        xBoundary = ParticleManager.Instance.ScreenSpace.x / 2;
+        yBoundary = ParticleManager.Instance.ScreenSpace.y / 2;
     }
 
     public void swapBlaster(int blasterType)

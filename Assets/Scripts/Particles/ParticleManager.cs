@@ -281,6 +281,7 @@ namespace NaughtyAttributes
             // Clear all clusters and restart
             ClearClusters();
             Initialize();
+            player.InitializeSpace();
         }
 
         // Method to initialize the simulation

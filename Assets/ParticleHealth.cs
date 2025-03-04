@@ -111,9 +111,9 @@ public class ParticleHealth : MonoBehaviour, IDamageable
         }
     }
 
-    private void Die()
+    public void Die()
     {
-        Particle particle = GetComponent<Particle>();
+        // Particle particle = GetComponent<Particle>();
         Destroy(gameObject);
     }
 

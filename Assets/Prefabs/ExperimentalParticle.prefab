@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -6154581062664968211}
   - component: {fileID: 1788390239782810131}
   - component: {fileID: 7793839721720781861}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: ExperimentalParticle
   m_TagString: Particle
   m_Icon: {fileID: 0}
@@ -120,7 +120,7 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -151,3 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 701ed2cee2818b84cbfc236a62c48db4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 10

@@ -137,10 +137,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BoundingShape2D: {fileID: 295986931}
-  Damping: 0.5
-  SlowingDistance: 5
+  Damping: 0
+  SlowingDistance: 0
   OversizeWindow:
-    Enabled: 1
+    Enabled: 0
     MaxWindowSize: 0
     Padding: 0
   m_LegacyMaxWindowSize: -2
@@ -437,13 +437,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 52870308151370003, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: DefaultBlend.Style
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 756597367235707833, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 756597367235707833, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1068266682060012621, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: orthographic size
+      value: 8.75
+      objectReference: {fileID: 0}
     - target: {fileID: 2232457486414446184, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2232457486414446184, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 2736305882067119724, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: Target.TrackingTarget
@@ -494,8 +510,20 @@ PrefabInstance:
       value: Cameras
       objectReference: {fileID: 0}
     - target: {fileID: 3795437809192488691, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: Lookahead.Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3795437809192488691, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: Composition.DeadZone.Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3795437809192488691, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: Composition.HardLimits.Size.x
-      value: 0.2
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3795437809192488691, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: Composition.HardLimits.Size.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3795437809192488691, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: Composition.HardLimits.Enabled
@@ -564,7 +592,7 @@ MonoBehaviour:
   Clusters: []
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
-  ScreenSpace: {x: 32, y: 18}
+  ScreenSpace: {x: 64, y: 18}
   HalfScreenSpace: {x: 0, y: 0}
   NumberOfTypes: 5
   RepulsionEffector: -5

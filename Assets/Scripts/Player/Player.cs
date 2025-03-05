@@ -19,12 +19,16 @@ public class Player : MonoBehaviour
     public bool exhaustActive;
     public int blasterType = 0;
 
+    public float currentHealth = 100;
+    public float maxHealth = 100;
+
     private GameObject standardBlaster;
     private GameObject fireBlaster;
     private GameObject iceBlaster;
     private GameObject electricBlaster;
 
     private Slider boostSlider;
+    private Slider healthSlider;
 
     public Transform frontPoint;
     public Transform backPoint;
@@ -44,6 +48,7 @@ public class Player : MonoBehaviour
         electricBlaster = transform.Find("ElectricBlaster").gameObject;
 
         boostSlider = GameObject.Find("PlayerBoost").GetComponent<Slider>();
+        healthSlider = GameObject.Find("PlayerHealth").GetComponent<Slider>();
 
         frontPoint = transform.Find("FrontAttractor");
         backPoint = transform.Find("BackAttractor");
@@ -61,26 +66,28 @@ public class Player : MonoBehaviour
         isBoosting = Input.GetKey(KeyCode.LeftShift) && boostAmount > 0 && vertMovement != 0;
         boostSlider.value = boostAmount / maxBoost;
 
-            // Screen wrapping
-            Vector3 newPosition = transform.position;
+        healthSlider.value = currentHealth / maxHealth;
 
-            if(transform.position.x > xBoundary)
-            {
-                newPosition.x = -xBoundary;
-            }
-            else if (transform.position.x < -xBoundary)
-            {
-                newPosition.x = xBoundary;
-            }   
-            if (transform.position.y > yBoundary)
-            {
-                newPosition.y = -yBoundary;
-            }
-            else if (transform.position.y < -yBoundary)
-            {
-                newPosition.y = yBoundary;
-            }
-            transform.position = newPosition;
+        // Screen wrapping
+        Vector3 newPosition = transform.position;
+
+        if(transform.position.x > xBoundary)
+        {
+            newPosition.x = -xBoundary;
+        }
+        else if (transform.position.x < -xBoundary)
+        {
+            newPosition.x = xBoundary;
+        }   
+        if (transform.position.y > yBoundary)
+        {
+            newPosition.y = -yBoundary;
+        }
+        else if (transform.position.y < -yBoundary)
+        {
+            newPosition.y = yBoundary;
+        }
+        transform.position = newPosition;
 
     }
 

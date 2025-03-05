@@ -36,7 +36,8 @@ public class LazerBeam : MonoBehaviour
             alphaKeys = new GradientAlphaKey[]
             {
                 new GradientAlphaKey(0.4f, 0),
-                new GradientAlphaKey(0.7f, 1)
+                new GradientAlphaKey(0.7f, 0.99f),
+                new GradientAlphaKey(0f, 1)
             }
         };
     }
@@ -63,17 +64,21 @@ public class LazerBeam : MonoBehaviour
 
         _lr.SetPosition(0, transform.position);
 
-        // If there are no hits, we use the fireRange from the player. If there are hits, we use the distance to the first hit.
-        Vector3 hitPoint = hits.Length > 0 ? hits[0].point : transform.position + transform.up * _fireRange;
-        _lr.SetPosition(1, hitPoint);
+        Vector3 hitPoint = transform.position + transform.up * _fireRange;
 
         for (int i = 0; i < hits.Length; i++)
         {
-            if(i >= _maxHits) break; // Only hit the first _maxHits particles, instead of just going through all
+            if (i >= _maxHits) {
+                hitPoint = hits[i - 1].point;
+                break; // Only hit the first _maxHits particles, instead of just going through all
+            }
 
             if (hits[i].transform.TryGetComponent(out ParticleHealth particle)) {
                 particle.Damage(2);
             }
         }
+
+        // If there are no hits, we use the fireRange from the player. If there are hits, we use the distance to the last hit.
+        _lr.SetPosition(1, hitPoint);
     }
 }

@@ -6,8 +6,8 @@ public class LazerBeam : MonoBehaviour
 
     public bool IsAttacking = false;
 
-    [SerializeField] private float _fireRange;
-    [SerializeField] private int _maxHits; // How many particles the beam can hit, aka pierce
+    [SerializeField] private float _fireRange = 8;
+    [SerializeField] private int _maxHits = 1; // How many particles the beam can hit, aka pierce
 
     private int _particleLayer;
 

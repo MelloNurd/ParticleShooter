@@ -30,11 +30,14 @@ namespace NaughtyAttributes
         public float ProximityScore { get; private set; }
         public int TotalParticlesDestroyed { get; private set; }
 
+        private Player _player;
+
         private void Awake()
         {
             // Initialize particle prefab and number of types from ParticleManager
             _particlePrefab = ParticleManager.Instance.ParticlePrefab;
             _numTypes = ParticleManager.Instance.NumberOfTypes;
+            _player = FindFirstObjectByType<Player>();
         }
 
         public void Initialize(float x, float y)
@@ -80,17 +83,26 @@ namespace NaughtyAttributes
 
             for (int i = 0; i < numParticles; i++)
             {
-                // Generate a small random offset
-                Vector3 randomOffset = new Vector3(
-                    Random.Range(-0.5f, 0.5f), 
-                    Random.Range(-0.5f, 0.5f),
-                    0
-                );
+                Vector3 spawnPos;
+
+                do
+                {
+                    // Generate a small random offset
+                    Vector3 randomOffset = new Vector3(
+                        Random.Range(-0.5f, 0.5f),
+                        Random.Range(-0.5f, 0.5f),
+                        0
+                    );
+
+                    spawnPos = new Vector3(x, y, 0) + randomOffset;
+                }
+                while (Vector2.Distance(spawnPos, _player.transform.position) < 2); // Continue generating new positions if they are too close to the player
+
 
                 // Instantiate the particle at the cluster position plus the random offset
                 GameObject particleObj = Instantiate(
                     _particlePrefab,
-                    new Vector3(x, y, 0) + randomOffset,
+                    spawnPos,
                     Quaternion.identity
                 );
                 Particle newParticle = particleObj.GetComponent<Particle>();

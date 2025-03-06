@@ -14,7 +14,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
         if (health <= 0)
         {
-            Points.Instance.AddPoints(10);
+            PlayerExp.Instance.AddExp(10);
             Die();
         }
     }

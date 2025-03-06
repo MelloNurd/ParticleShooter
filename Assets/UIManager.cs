@@ -16,9 +16,7 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         timer = GameObject.Find("Timer").GetComponent<TextMeshProUGUI>();
-        score = GameObject.Find("Points").GetComponent<TextMeshProUGUI>();
         endMenu = transform.Find("GameOver").gameObject;
-        finalScore = endMenu.transform.Find("FinalPoints").GetComponent<TextMeshProUGUI>();
         finalTimer = endMenu.transform.Find("FinalTimer").GetComponent<TextMeshProUGUI>();
         player = FindFirstObjectByType<Player>();
         player.onDeath.AddListener(GameOver);
@@ -34,9 +32,7 @@ public class UIManager : MonoBehaviour
     {
         endMenu.SetActive(true);
         finalTimer.text = timer.text;
-        finalScore.text = score.text;
         timer.gameObject.SetActive(false);
-        score.gameObject.SetActive(false);
     }
 
 }

@@ -241,7 +241,7 @@ public class Player : MonoBehaviour
         }
         if (collision.CompareTag("HealthPack"))
         {
-            currentHealth += 10;
+            currentHealth += maxHealth * 0.2f;
             if (currentHealth > maxHealth)
             {
                 currentHealth = maxHealth;

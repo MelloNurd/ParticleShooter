@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: BoostUsageRate
   m_EditorClassIdentifier: 
-  UpgradeType: 5
+  UpgradeType: 6
   AdjustType: Multiplicative
   AdjustValue: 0.75
   UseTypeAsName: 1

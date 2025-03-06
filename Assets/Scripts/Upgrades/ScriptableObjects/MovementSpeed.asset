@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: MovementSpeed
   m_EditorClassIdentifier: 
-  UpgradeType: 1
+  UpgradeType: 2
   AdjustType: Additive
-  AdjustValue: 0.5
+  AdjustValue: 0.7
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Increases the base movement speed of the player.

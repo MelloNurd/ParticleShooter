@@ -311,7 +311,7 @@ namespace NaughtyAttributes
         }
 
         // Method to get a random point on the screen
-        public Vector3 GetRandomPointOnScreen()
+        public Vector3 GetRandomPointOnScreen(bool awayFromPlayer = true)
         {
             Vector3 newPos;
 
@@ -322,7 +322,7 @@ namespace NaughtyAttributes
                     Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
                 0);
             } 
-            while (Vector2.Distance(newPos, player.transform.position) < 2); // Continue generating new positions if they are too close to the player
+            while (Vector2.Distance(newPos, player.transform.position) < 6 && awayFromPlayer); // Continue generating new positions if they are too close to the player
 
             return newPos;
         }

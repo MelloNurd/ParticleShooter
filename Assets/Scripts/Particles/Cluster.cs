@@ -85,19 +85,14 @@ namespace NaughtyAttributes
             {
                 Vector3 spawnPos;
 
-                do
-                {
-                    // Generate a small random offset
-                    Vector3 randomOffset = new Vector3(
-                        Random.Range(-0.5f, 0.5f),
-                        Random.Range(-0.5f, 0.5f),
-                        0
-                    );
+                // Generate a small random offset
+                Vector3 randomOffset = new Vector3(
+                    Random.Range(-0.5f, 0.5f),
+                    Random.Range(-0.5f, 0.5f),
+                    0
+                );
 
-                    spawnPos = new Vector3(x, y, 0) + randomOffset;
-                }
-                while (Vector2.Distance(spawnPos, _player.transform.position) < 2); // Continue generating new positions if they are too close to the player
-
+                spawnPos = new Vector3(x, y, 0) + randomOffset;
 
                 // Instantiate the particle at the cluster position plus the random offset
                 GameObject particleObj = Instantiate(

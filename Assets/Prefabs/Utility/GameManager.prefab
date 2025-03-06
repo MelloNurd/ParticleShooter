@@ -45,3 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneName: Game
+  Medkit: {fileID: 8170909986034849097, guid: b8b3ad347b3069542a3235df14c96625, type: 3}
+  Expkit: {fileID: 4684208086277503105, guid: 3ba4d7f78c94242458e155c50cd10ac6, type: 3}

@@ -10,7 +10,7 @@ public class PlayerExp : MonoBehaviour
     public float ExpMultiplier = 1f;
 
     private float currentExp = 0;
-    private float levelExp = 100;
+    public float levelExp = 100;
     private Slider expSlider;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

@@ -12,54 +12,45 @@ public class Upgrade : ScriptableObject
     [TextArea(5, 20)] public string UpgradeDescription;
     public Rarity Rarity;
 
-    // References to any needed scripts for upgrading
-    private Player _player;
-    private ParticleManager _particleManager;
-    private List<LazerBeam> _beamList = new();
-
-    private void Awake()
-    {
-        _player = FindFirstObjectByType<Player>();
-        _particleManager = FindFirstObjectByType<ParticleManager>();
-        _beamList = _player.GetComponentsInChildren<LazerBeam>().ToList();
-    }
-
     public void ApplyUpgrade()
     {
-        if(_player == null || _particleManager == null) return;
+        if (StatsManager.Instance == null || StatsManager.CheckForNulls()) return;
+
+        Debug.Log("Upgrade type: " + UpgradeType);
 
         // Might be a more efficient way of doing this, but this works fine for what the game is
         switch (UpgradeType)
         {
             case UpgradeType.MovementSpeed:
-                _player.movementSpeed += 1;
+                StatsManager.Player.movementSpeed += 1;
                 break;
             case UpgradeType.BoostSpeed:
-                _player.boostMultiplier += 1;
+                StatsManager.Player.boostMultiplier += 1;
                 break;
             case UpgradeType.MaxBoost:
-                _player.maxBoost += 50;
+                StatsManager.Player.maxBoost += 50;
                 break;
             case UpgradeType.BoostUsageRate:
-                _player.boostUsageRate -= 5;
+                StatsManager.Player.boostUsageRate -= 5;
                 break;
             case UpgradeType.BoostRechargeRate:
-                _player.boostRechargeRate += 1;
+                Debug.Log("Upgrading recharge rate.");
+                StatsManager.Player.boostRechargeRate += 1;
                 break;
             case UpgradeType.AttackRange:
-                foreach (var beam in _beamList)
+                foreach (var beam in StatsManager.BeamList)
                 {
                     beam.fireRange += 1;
                 }
                 break;
             case UpgradeType.AttackPierce:
-                foreach (var beam in _beamList)
+                foreach (var beam in StatsManager.BeamList)
                 {
                     beam.pierce += 1;
                 }
                 break;
             case UpgradeType.AttackDamage:
-                foreach (var beam in _beamList)
+                foreach (var beam in StatsManager.BeamList)
                 {
                     beam.damage += 1;
                 }

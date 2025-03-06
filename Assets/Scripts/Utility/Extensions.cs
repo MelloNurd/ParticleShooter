@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 public static class Extensions
@@ -87,6 +88,38 @@ public static class Extensions
     {
         return new string(value?.Where(c => char.IsLetterOrDigit(c)).ToArray());
     }
+
+    /// <summary>
+    /// Takes a string with camelCase or PascalCase and adds spaces between the words.
+    /// </summary>
+    /// <param name="excludeFirstChar">Set this to false to also add a space at the beginning if the first char is capitalized.</param>
+    /// <returns>The new string with spaces between each word.</returns>
+    public static string AsSentence(this string value, bool excludeFirstChar)
+    {
+        if (string.IsNullOrEmpty(value))
+            return value;
+
+        var newText = new StringBuilder(value.Length * 2);
+        newText.Append(value[0]);
+
+        int startIndex = excludeFirstChar ? 1 : 0;
+        for (int i = startIndex; i < value.Length; i++)
+        {
+            if (char.IsUpper(value[i]) && !char.IsWhiteSpace(value[i - 1]))
+            {
+                newText.Append(' ');
+            }
+            newText.Append(value[i]);
+        }
+
+        return newText.ToString();
+    }
+    /// <summary>
+    /// Takes a string with camelCase or PascalCase and adds spaces between the words.
+    /// </summary>
+    /// <returns>The new string with spaces between each word.</returns>
+    public static string AsSentence(this string value) { return AsSentence(value, true); }
+
     #endregion
 
     #region List Extensions

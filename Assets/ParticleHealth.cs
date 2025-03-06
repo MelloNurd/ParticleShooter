@@ -10,7 +10,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
     public void Damage(float amount)
     {
         health -= amount;
-        Debug.Log($"Particle took {amount} damage. Health left: {health}");
+        //Debug.Log($"Particle took {amount} damage. Health left: {health}");
 
         if (health <= 0)
         {

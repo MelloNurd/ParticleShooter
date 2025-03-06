@@ -15,6 +15,5 @@ MonoBehaviour:
   UpgradeType: 4
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
-  UpgradeDescription: This is a placeholder, test upgrade. This should never be used
-    in the game.
-  Rarity: 2
+  UpgradeDescription: Increases the rate at which the player's boost recharges at.
+  Rarity: 3

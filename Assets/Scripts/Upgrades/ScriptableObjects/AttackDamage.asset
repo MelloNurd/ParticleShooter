@@ -15,5 +15,6 @@ MonoBehaviour:
   UpgradeType: 7
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
-  UpgradeDescription: Increases damage that the lazer beam does
-  Rarity: 2
+  UpgradeDescription: Increases damage that the player's attack does to the particles
+    it hits.
+  Rarity: 3

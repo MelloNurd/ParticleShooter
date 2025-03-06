@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BoostUsageRate
   m_EditorClassIdentifier: 
   UpgradeType: 3
+  UseTypeAsName: 1
   UpgradeName: Test Upgrade
-  UpgradeDescription: This is a placeholder, test upgrade. This should never be used
-    in the game.
-  Rarity: 2
+  UpgradeDescription: Lowers the amount of boost that the player uses up while boosting.
+  Rarity: 4

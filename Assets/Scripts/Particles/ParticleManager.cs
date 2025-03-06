@@ -246,7 +246,7 @@ namespace NaughtyAttributes
         // Method to create a new cluster
         private Cluster CreateCluster()
         {
-            Debug.Log("Creating new cluster.");
+            //Debug.Log("Creating new cluster.");
             Vector2 pos = GetRandomPointOnScreen();
 
             Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();

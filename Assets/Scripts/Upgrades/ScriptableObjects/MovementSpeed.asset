@@ -15,6 +15,5 @@ MonoBehaviour:
   UpgradeType: 0
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
-  UpgradeDescription: This is a placeholder, test upgrade. This should never be used
-    in the game.
-  Rarity: 2
+  UpgradeDescription: Increases the base movement speed of the player.
+  Rarity: 1

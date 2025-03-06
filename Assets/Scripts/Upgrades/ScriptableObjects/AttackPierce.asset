@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AttackPierce
   m_EditorClassIdentifier: 
   UpgradeType: 6
+  UseTypeAsName: 1
   UpgradeName: Test Upgrade
-  UpgradeDescription: This is a placeholder, test upgrade. This should never be used
-    in the game.
-  Rarity: 2
+  UpgradeDescription: Increases how many particles each attack can hit at once.
+  Rarity: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MaxBoost
   m_EditorClassIdentifier: 
   UpgradeType: 2
+  UseTypeAsName: 1
   UpgradeName: Test Upgrade
-  UpgradeDescription: This is a placeholder, test upgrade. This should never be used
-    in the game.
-  Rarity: 2
+  UpgradeDescription: Increases the maximum amount of boost the player can store.
+  Rarity: 0

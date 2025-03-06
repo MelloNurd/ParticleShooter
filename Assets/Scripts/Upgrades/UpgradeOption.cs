@@ -10,25 +10,24 @@ public class UpgradeOption : MonoBehaviour
 
     private TMP_Text _upgradeTitle;
     private TMP_Text _upgradeDescription;
-    private Button _upgradeButton;
+    public Button UpgradeButton;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void Initialize()
     {
         _upgradeTitle = transform.Find("Frame").Find("Title").GetComponentInChildren<TMP_Text>();
         _upgradeDescription = transform.Find("Frame").Find("Description").GetComponentInChildren<TMP_Text>();
-        _upgradeButton = transform.Find("Purchase Button").GetComponent<Button>();
+        UpgradeButton = transform.Find("Purchase Button").GetComponent<Button>();
 
-        InitializePanel();
+        SetVisuals();
     }
 
-    private void InitializePanel()
+    private void SetVisuals()
     {
         if (upgrade == null || !Application.isPlaying) return;
 
-        _upgradeTitle.text = upgrade.UseTypeAsName ? upgrade.UpgradeType.ToString() : upgrade.UpgradeName;
+        _upgradeTitle.text = upgrade.UseTypeAsName ? upgrade.UpgradeType.ToString().AsSentence() : upgrade.UpgradeName;
         _upgradeDescription.text = upgrade.UpgradeDescription;
 
-        _upgradeButton.GetComponentInChildren<TMP_Text>().color = upgrade.Rarity.GetColor();
+        UpgradeButton.GetComponentInChildren<TMP_Text>().color = upgrade.Rarity.GetColor();
     }
 }

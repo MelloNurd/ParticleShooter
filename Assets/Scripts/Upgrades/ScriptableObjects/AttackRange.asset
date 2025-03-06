@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
-  m_Name: Test
+  m_Name: AttackRange
   m_EditorClassIdentifier: 
-  upgradeType: 1
-  upgradeName: Test Upgrade
-  upgradeDescription: This is a placeholder, test upgrade.
-  upgradeBaseCost: 5
+  UpgradeType: 5
+  UpgradeName: Test Upgrade
+  UpgradeDescription: This is a placeholder, test upgrade. This should never be used
+    in the game.
+  Rarity: 2

@@ -6,6 +6,7 @@ using UnityEngine;
 public class ParticleHealth : MonoBehaviour, IDamageable
 {
     public float health = 10f;
+    public float expReward = 3f;
 
     public void Damage(float amount)
     {
@@ -14,7 +15,7 @@ public class ParticleHealth : MonoBehaviour, IDamageable
 
         if (health <= 0)
         {
-            PlayerExp.Instance.AddExp(10);
+            PlayerExp.Instance.AddExp(expReward);
             Die();
         }
     }

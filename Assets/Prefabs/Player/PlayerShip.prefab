@@ -11541,9 +11541,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee8136fcd99f744fae2fb7df781e8b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationSpeed: 0.75
-  movementSpeed: 5
-  boostMultiplier: 1.75
+  rotationSpeed: 0.5
+  movementSpeed: 3
+  boostMultiplier: 1.2
   maxBoost: 100
   boostUsageRate: 20
   boostRechargeRate: 2
@@ -11645,6 +11645,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d51ad26d8b78b74f84ec1dd5e95b69a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Level: 1
 --- !u!1 &8764104388685577030
 GameObject:
   m_ObjectHideFlags: 0

@@ -921,8 +921,9 @@ GameObject:
   - component: {fileID: 7143404469182760630}
   - component: {fileID: 3101456642036328755}
   - component: {fileID: 5390616013656414573}
+  - component: {fileID: 2316759388808952835}
+  - component: {fileID: 1171890763104503484}
   - component: {fileID: 3884435327152721569}
-  - component: {fileID: 3781137331585677630}
   m_Layer: 0
   m_Name: StandardBlaster
   m_TagString: Untagged
@@ -1015,7 +1016,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 4668056550244128058, guid: 593b3131e4b96704684ade5e3925a71a, type: 3}
   bulletPoolType: 0
---- !u!114 &3884435327152721569
+--- !u!114 &2316759388808952835
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1028,10 +1029,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsAttacking: 0
-  fireRange: 3
+  fireRange: 8
   pierce: 1
-  damage: 1
---- !u!120 &3781137331585677630
+  damage: 2
+--- !u!120 &1171890763104503484
 LineRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
@@ -1138,6 +1139,22 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &3884435327152721569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5449931805518395528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddc4c3e4058b8de4da36436677ec768d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsAttacking: 0
+  fireRange: 8
+  pierce: 1
+  damage: 2
 --- !u!1 &5562748678163863705
 GameObject:
   m_ObjectHideFlags: 0

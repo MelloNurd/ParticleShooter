@@ -37,6 +37,9 @@ public class Upgrade : ScriptableObject
 
         switch (UpgradeType)
         {
+            case UpgradeType.MaxHealth:
+                ApplyAdjustment(ref StatsManager.Player.maxHealth);
+                break;
             case UpgradeType.MovementSpeed:
                 ApplyAdjustment(ref StatsManager.Player.movementSpeed);
                 break;
@@ -82,6 +85,7 @@ public class Upgrade : ScriptableObject
 
 public enum UpgradeType
 {
+    MaxHealth,
     MovementSpeed,
     TurnSpeed,
     BoostSpeed,

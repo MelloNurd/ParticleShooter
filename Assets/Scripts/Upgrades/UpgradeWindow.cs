@@ -104,9 +104,9 @@ public class UpgradeWindow : MonoBehaviour
         return rarity switch
         {
             Rarity.Common => 1f,
-            Rarity.Uncommon => 0.6f,
-            Rarity.Rare => 0.3f,
-            Rarity.Epic => 0.2f,
+            Rarity.Uncommon => 0.7f,
+            Rarity.Rare => 0.5f,
+            Rarity.Epic => 0.25f,
             Rarity.Legendary => 0.1f,
             _ => 1f, // default
         };

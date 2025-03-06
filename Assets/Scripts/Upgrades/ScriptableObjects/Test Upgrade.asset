@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: Test Upgrade
   m_EditorClassIdentifier: 
-  UpgradeType: 0
+  UpgradeType: 1
+  AdjustType: Additive
+  AdjustValue: 0
   UseTypeAsName: 0
   UpgradeName: Test Upgrade
   UpgradeDescription: This is a placeholder, test upgrade. This should never be used

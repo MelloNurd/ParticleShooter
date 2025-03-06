@@ -228,6 +228,20 @@ public class Player : MonoBehaviour
                 gameObject.SetActive(false);
             }
         }
+        if (collision.CompareTag("HealthPack"))
+        {
+            currentHealth += 10;
+            if (currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+            Destroy(collision.gameObject);
+        }
+        if(collision.CompareTag("ExpPack"))
+        {
+            PlayerExp.Instance.AddExp(PlayerExp.Instance.levelExp * .1f);
+            Destroy(collision.gameObject);
+        }
     }
 
     

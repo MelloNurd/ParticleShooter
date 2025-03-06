@@ -241,7 +241,7 @@ namespace NaughtyAttributes
         }
 
         // Method to create a new cluster
-        private Cluster CreateCluster()
+        public Cluster CreateCluster()
         {
             //Debug.Log("Creating new cluster.");
             Vector2 pos = GetRandomPointOnScreen();

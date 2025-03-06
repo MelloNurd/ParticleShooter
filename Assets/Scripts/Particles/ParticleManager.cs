@@ -155,13 +155,11 @@ namespace NaughtyAttributes
                     {
                         // Spawn a mutated version of the most successful cluster
                         SpawnMutatedCluster(mostSuccessfulCluster);
-                        Debug.Log($"Cluster {cluster.Id} has gone extinct! Spawning mutated cluster based on Cluster {mostSuccessfulCluster.Id}.");
                     }
                     else
                     {
                         // If no successful cluster exists, create a new random cluster
                         CreateCluster();
-                        Debug.Log($"Cluster {cluster.Id} has gone extinct! No successful cluster found. Creating a new random cluster.");
                     }
 
                     Clusters.RemoveAt(i);
@@ -196,7 +194,6 @@ namespace NaughtyAttributes
         // Method to spawn a mutated cluster based on a base cluster
         private void SpawnMutatedCluster(Cluster baseCluster)
         {
-            Debug.Log($"Spawning new mutated cluster based on Cluster {baseCluster.Id}.");
 
             Vector2 pos = GetRandomPointOnScreen();
             Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();

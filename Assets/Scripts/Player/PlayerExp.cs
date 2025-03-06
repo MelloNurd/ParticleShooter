@@ -7,6 +7,7 @@ public class PlayerExp : MonoBehaviour
     public static PlayerExp Instance { get; private set; }
 
     public int Level = 1;
+    public float ExpMultiplier = 1f;
 
     private float currentExp = 0;
     private float levelExp = 100;
@@ -29,18 +30,19 @@ public class PlayerExp : MonoBehaviour
 
     public void AddExp(float amount)
     {
-        currentExp += amount;
+        currentExp += amount * ExpMultiplier;
         if (currentExp >= levelExp)
         {
             // Wrap around remaining exp (don't set to zero because they might have some still left over)
             currentExp -= levelExp;
-            levelExp *= 1.2f; // Increase exp needed for next level
+            if (Level < 5) levelExp *= 1.2f; // Increase exp needed for next level (amount based on current level)
+            else levelExp *= 1.4f;
 
             // Increment level
             Level++;
 
             // Offer upgrades based on level (2 upgrades offered before level 5, 3 after)
-            if (Level <= 5) UpgradeWindow.Instance.OfferUpgrades(2);
+            if (Level < 5) UpgradeWindow.Instance.OfferUpgrades(2);
             else UpgradeWindow.Instance.OfferUpgrades(3);
         }
         UpdateSlider();

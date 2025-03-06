@@ -24,6 +24,9 @@ public class Upgrade : ScriptableObject
             case UpgradeType.MovementSpeed:
                 StatsManager.Player.movementSpeed += 1;
                 break;
+            case UpgradeType.TurnSpeed:
+                StatsManager.Player.rotationSpeed *= 1.1f;
+                break;
             case UpgradeType.BoostSpeed:
                 StatsManager.Player.boostMultiplier += 1;
                 break;
@@ -55,6 +58,9 @@ public class Upgrade : ScriptableObject
                     beam.damage += 1;
                 }
                 break;
+            case UpgradeType.ExpGain:
+                PlayerExp.Instance.ExpMultiplier += 0.1f;
+                break;
         }
     }
 }
@@ -62,13 +68,15 @@ public class Upgrade : ScriptableObject
 public enum UpgradeType
 {
     MovementSpeed,
+    TurnSpeed,
     BoostSpeed,
     MaxBoost,
     BoostUsageRate,
     BoostRechargeRate,
     AttackRange,
     AttackPierce,
-    AttackDamage
+    AttackDamage,
+    ExpGain
 }
 
 public enum Rarity

@@ -4,13 +4,13 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float rotationSpeed;
-    public float movementSpeed;
-    public float boostMultiplier = 2f;  // Boost increases speed
-    public float maxBoost = 100f;
-    public float boostAmount;
-    public float boostUsageRate = 20f;
-    public float boostRechargeRate = 10f;
+    public float rotationSpeed = 0.75f;
+    public float movementSpeed = 5f;
+    public float boostMultiplier = 1.75f;  // Boost increases speed
+    public float maxBoost = 100f; // Total amount of boost the player has
+    public float boostUsageRate = 20f; // How fast the boost depletes
+    public float boostRechargeRate = 2; // How fast the boost recharges
+    private float boostAmount; // Handles the current amount of boost the player has (how filled the bar is)
 
     private float vertMovement;
     private float horzMovement;

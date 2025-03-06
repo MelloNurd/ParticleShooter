@@ -6,8 +6,9 @@ public class LazerBeam : MonoBehaviour
 
     public bool IsAttacking = false;
 
-    [SerializeField] private float _fireRange = 8;
-    [SerializeField] private int _maxHits = 1; // How many particles the beam can hit, aka pierce
+    public float fireRange = 8;
+    public int pierce = 1; // How many particles the beam can hit, aka pierce
+    public int damage = 2;
 
     private int _particleLayer;
 
@@ -60,21 +61,21 @@ public class LazerBeam : MonoBehaviour
     private void FireBeam()
     {
         // Cast a beam from the player. This returns all objects hit, in order from distance.
-        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, 0.5f), 0, transform.up, _fireRange, _particleLayer);
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, 0.5f), 0, transform.up, fireRange, _particleLayer);
 
         _lr.SetPosition(0, transform.position);
 
-        Vector3 hitPoint = transform.position + transform.up * _fireRange;
+        Vector3 hitPoint = transform.position + transform.up * fireRange;
 
         for (int i = 0; i < hits.Length; i++)
         {
-            if (i >= _maxHits) {
+            if (i >= pierce) {
                 hitPoint = hits[i - 1].point;
                 break; // Only hit the first _maxHits particles, instead of just going through all
             }
 
             if (hits[i].transform.TryGetComponent(out ParticleHealth particle)) {
-                particle.Damage(2);
+                particle.Damage(damage);
             }
         }
 

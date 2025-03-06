@@ -9,6 +9,27 @@ public static class Extensions
     // This is a collection of extension  methods made for using within the Unity Game Engine.
     // These are here simply to make code a little easier to read and write. You can use them as you would with any other function on the specified type.
 
+    #region Project Specific Extensions
+    public static Color GetColor(this Rarity rarity)
+    {
+        switch (rarity)
+        {
+            case Rarity.Common:
+                return Color.white;
+            case Rarity.Uncommon:
+                return Color.green;
+            case Rarity.Rare:
+                return Color.blue;
+            case Rarity.Epic:
+                return Color.magenta;
+            case Rarity.Legendary:
+                return Color.yellow;
+            default:
+                return Color.white;
+        }
+    }
+    #endregion
+
     #region String Extensions
     /// <summary>
     /// Gets the first x characters of a string.

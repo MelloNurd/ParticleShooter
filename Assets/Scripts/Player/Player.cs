@@ -1,5 +1,6 @@
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -35,6 +36,9 @@ public class Player : MonoBehaviour
 
     private float xBoundary;
     private float yBoundary;
+
+    public UnityEvent onDeath;
+    private bool hasDied;
 
     private void Start()
     {
@@ -188,4 +192,20 @@ public class Player : MonoBehaviour
                 break;
         }
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Particle"))
+        {
+            currentHealth -= 10;
+            if (currentHealth <= 0 && !hasDied)
+            {
+                onDeath?.Invoke();
+                hasDied = true;
+                gameObject.SetActive(false);
+            }
+        }
+    }
+
+    
 }

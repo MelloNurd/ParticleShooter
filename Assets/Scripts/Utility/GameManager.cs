@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        lastSpawnTime = -2f; // Initialize to ensure the first spawn happens immediately
+        lastSpawnTime = 1f; // Initialize to ensure the first spawn happens immediately
     }
 
     // Update is called once per frame

@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
 
     public float currentHealth = 100;
     public float maxHealth = 100;
+    public float healthRegenRate = 1f;
 
     private GameObject standardBlaster;
     private GameObject fireBlaster;
@@ -79,6 +80,16 @@ public class Player : MonoBehaviour
         boostSlider.value = boostAmount / maxBoost;
 
         healthSlider.value = currentHealth / maxHealth;
+
+        // Health regeneration
+        if (currentHealth < maxHealth)
+        {
+            currentHealth += healthRegenRate * Time.deltaTime;
+            if (currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+        }
 
         // Screen wrapping
         Vector3 newPosition = transform.position;

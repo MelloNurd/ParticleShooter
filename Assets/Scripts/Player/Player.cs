@@ -40,6 +40,11 @@ public class Player : MonoBehaviour
     public UnityEvent onDeath;
     private bool hasDied;
 
+    public float invincibilityTime = .1f;
+    private float currentInvincibilityTime = 2f;
+    GameObject overShield;
+    public float knockbackForce = 20f;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -59,6 +64,9 @@ public class Player : MonoBehaviour
 
         xBoundary = ParticleManager.Instance.ScreenSpace.x / 2;
         yBoundary = ParticleManager.Instance.ScreenSpace.y / 2;
+
+        overShield = transform.Find("OverShield").gameObject;
+        overShield.SetActive(true);
     }
 
     void Update()
@@ -92,7 +100,14 @@ public class Player : MonoBehaviour
             newPosition.y = yBoundary;
         }
         transform.position = newPosition;
-
+        if (currentInvincibilityTime > 0)
+        {
+            currentInvincibilityTime -= Time.deltaTime;
+        }
+        else
+        {
+            overShield.SetActive(false);
+        }
     }
 
     private void FixedUpdate()
@@ -195,11 +210,19 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Particle"))
+        if (collision.CompareTag("Particle") && currentInvincibilityTime <= 0)
         {
+            currentInvincibilityTime = invincibilityTime;
+            overShield.SetActive(true);
             currentHealth -= 10;
+
+            // Calculate knockback direction
+            Vector2 difference = (transform.position - collision.transform.position).normalized;
+            rb.AddForce(difference * knockbackForce, ForceMode2D.Impulse);
+
             if (currentHealth <= 0 && !hasDied)
             {
+                healthSlider.value = 0;
                 onDeath?.Invoke();
                 hasDied = true;
                 gameObject.SetActive(false);

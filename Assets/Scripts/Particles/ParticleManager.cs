@@ -271,8 +271,6 @@ namespace NaughtyAttributes
             }
         }
 
-        // Method to restart the simulation
-        [Button("Restart Simulation", EButtonEnableMode.Playmode)]
         private void Restart()
         {
             // Clear all clusters and restart
@@ -281,8 +279,6 @@ namespace NaughtyAttributes
             player.InitializeSpace();
         }
 
-        // Method to initialize the simulation
-        [Button("Reset Values", EButtonEnableMode.Playmode)]
         private void Initialize()
         {
             if (!Application.isPlaying) return;

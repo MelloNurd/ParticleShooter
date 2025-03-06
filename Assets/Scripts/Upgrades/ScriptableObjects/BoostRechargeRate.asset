@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: BoostRechargeRate
   m_EditorClassIdentifier: 
-  UpgradeType: 4
+  UpgradeType: 5
+  AdjustType: Additive
+  AdjustValue: 1
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Increases the rate at which the player's boost recharges at.

@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: AttackDamage
   m_EditorClassIdentifier: 
-  UpgradeType: 7
+  UpgradeType: 8
+  AdjustType: Additive
+  AdjustValue: 0.5
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Increases damage that the player's attack does to the particles
     it hits.
-  Rarity: 3
+  Rarity: 2

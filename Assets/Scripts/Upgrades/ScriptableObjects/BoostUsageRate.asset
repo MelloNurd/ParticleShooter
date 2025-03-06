@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: BoostUsageRate
   m_EditorClassIdentifier: 
-  UpgradeType: 3
+  UpgradeType: 4
+  AdjustType: Multiplicative
+  AdjustValue: 0.75
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Lowers the amount of boost that the player uses up while boosting.

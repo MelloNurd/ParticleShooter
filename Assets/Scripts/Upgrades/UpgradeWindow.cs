@@ -34,6 +34,8 @@ public class UpgradeWindow : MonoBehaviour
 
     public void OfferUpgrades(int upgradesAmount)
     {
+        StatsManager.Instance.StopAttacking();
+
         _window.SetActive(true);
         Time.timeScale = 0f;
 

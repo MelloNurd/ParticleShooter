@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: MovementSpeed
   m_EditorClassIdentifier: 
   UpgradeType: 0
+  AdjustType: Additive
+  AdjustValue: 0.5
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Increases the base movement speed of the player.

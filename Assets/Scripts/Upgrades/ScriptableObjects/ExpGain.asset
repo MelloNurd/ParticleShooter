@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ExpGain
   m_EditorClassIdentifier: 
   UpgradeType: 9
+  AdjustType: Multiplicative
+  AdjustValue: 1.1
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Increases the rate at which the player gains Exp.

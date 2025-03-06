@@ -7,8 +7,8 @@ public class LazerBeam : MonoBehaviour
     public bool IsAttacking = false;
 
     public float fireRange = 8;
-    public int pierce = 1; // How many particles the beam can hit, aka pierce
-    public int damage = 2;
+    public float pierce = 1; // How many particles the beam can hit, aka pierce
+    public float damage = 2;
 
     private int _particleLayer;
 

@@ -7,59 +7,74 @@ using UnityEngine;
 public class Upgrade : ScriptableObject
 {
     public UpgradeType UpgradeType;
+    [Dropdown("adjustType")] public string AdjustType;
+    public float AdjustValue;
+
+    [Space(5)]
     public bool UseTypeAsName = true;
     [HideIf("UseTypeAsName")] public string UpgradeName;
-    [TextArea(5, 20)] public string UpgradeDescription;
+    [TextArea(3, 20)] public string UpgradeDescription;
     public Rarity Rarity;
+
+    private string[] adjustType = new string[] { "Additive", "Multiplicative" }; // This is used for the dropdown
 
     public void ApplyUpgrade()
     {
         if (StatsManager.Instance == null || StatsManager.CheckForNulls()) return;
 
-        Debug.Log("Upgrade type: " + UpgradeType);
+        void ApplyAdjustment(ref float stat)
+        {
+            switch (AdjustType)
+            {
+                case "Additive":
+                    stat += AdjustValue;
+                    break;
+                case "Multiplicative":
+                    stat *= AdjustValue;
+                    break;
+            }
+        }
 
-        // Might be a more efficient way of doing this, but this works fine for what the game is
         switch (UpgradeType)
         {
             case UpgradeType.MovementSpeed:
-                StatsManager.Player.movementSpeed += 1;
+                ApplyAdjustment(ref StatsManager.Player.movementSpeed);
                 break;
             case UpgradeType.TurnSpeed:
-                StatsManager.Player.rotationSpeed *= 1.1f;
+                ApplyAdjustment(ref StatsManager.Player.rotationSpeed);
                 break;
             case UpgradeType.BoostSpeed:
-                StatsManager.Player.boostMultiplier += 1;
+                ApplyAdjustment(ref StatsManager.Player.boostMultiplier);
                 break;
             case UpgradeType.MaxBoost:
-                StatsManager.Player.maxBoost += 50;
+                ApplyAdjustment(ref StatsManager.Player.maxBoost);
                 break;
             case UpgradeType.BoostUsageRate:
-                StatsManager.Player.boostUsageRate -= 5;
+                ApplyAdjustment(ref StatsManager.Player.boostUsageRate);
                 break;
             case UpgradeType.BoostRechargeRate:
-                Debug.Log("Upgrading recharge rate.");
-                StatsManager.Player.boostRechargeRate += 1;
+                ApplyAdjustment(ref StatsManager.Player.boostRechargeRate);
                 break;
             case UpgradeType.AttackRange:
                 foreach (var beam in StatsManager.BeamList)
                 {
-                    beam.fireRange += 1;
+                    ApplyAdjustment(ref beam.fireRange);
                 }
                 break;
             case UpgradeType.AttackPierce:
                 foreach (var beam in StatsManager.BeamList)
                 {
-                    beam.pierce += 1;
+                    ApplyAdjustment(ref beam.pierce);
                 }
                 break;
             case UpgradeType.AttackDamage:
                 foreach (var beam in StatsManager.BeamList)
                 {
-                    beam.damage += 1;
+                    ApplyAdjustment(ref beam.damage);
                 }
                 break;
             case UpgradeType.ExpGain:
-                PlayerExp.Instance.ExpMultiplier += 0.1f;
+                ApplyAdjustment(ref PlayerExp.Instance.ExpMultiplier);
                 break;
         }
     }

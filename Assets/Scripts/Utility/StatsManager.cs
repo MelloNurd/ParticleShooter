@@ -30,6 +30,15 @@ public class StatsManager : MonoBehaviour
         beamList = Player.GetComponentsInChildren<LazerBeam>().ToList();
     }
 
+    public void StopAttacking()
+    {
+        // This is so when the menu opens, the player is forced to stop attacking
+        foreach (var beam in BeamList)
+        {
+            beam.IsAttacking = false;
+        }
+    }
+
     // Used this to make sure no references are null when applying upgrades
     public static bool CheckForNulls()
     {

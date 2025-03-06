@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b37f3fa8df19ec4da0246d026b904ff, type: 3}
   m_Name: MaxBoost
   m_EditorClassIdentifier: 
-  UpgradeType: 2
+  UpgradeType: 3
+  AdjustType: Additive
+  AdjustValue: 50
   UseTypeAsName: 1
   UpgradeName: Test Upgrade
   UpgradeDescription: Increases the maximum amount of boost the player can store.

@@ -30,6 +30,7 @@ public class StatsManager : MonoBehaviour
         beamList = Player.GetComponentsInChildren<LazerBeam>().ToList();
     }
 
+    // Used this to make sure no references are null when applying upgrades
     public static bool CheckForNulls()
     {
         if (Player == null)

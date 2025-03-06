@@ -5,10 +5,18 @@ using UnityEngine;
 
 public class UpgradeWindow : MonoBehaviour
 {
+    public static UpgradeWindow Instance;
+
     public GameObject upgradeOptionPrefab;
     public List<Upgrade> upgrades = new();
 
     private GameObject _window;
+
+    private void Awake()
+    {
+        if (Instance == null) Instance = this; 
+        else Destroy(gameObject); 
+    }
 
     private void Start()
     {

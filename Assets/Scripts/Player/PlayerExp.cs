@@ -5,9 +5,11 @@ using UnityEngine.UI;
 public class PlayerExp : MonoBehaviour
 {
     public static PlayerExp Instance { get; private set; }
+
+    public int Level = 1;
+
     private float currentExp = 0;
     private float levelExp = 100;
-    private int level = 1;
     private Slider expSlider;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -25,21 +27,21 @@ public class PlayerExp : MonoBehaviour
         UpdateSlider();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void AddExp(float amount)
     {
         currentExp += amount;
         if (currentExp >= levelExp)
         {
+            // Wrap around remaining exp (don't set to zero because they might have some still left over)
             currentExp -= levelExp;
-            level++;
-            levelExp = levelExp * 1.2f;
-            // LEVEL UP & INCREASE SLIDER VALUE
+            levelExp *= 1.2f; // Increase exp needed for next level
+
+            // Increment level
+            Level++;
+
+            // Offer upgrades based on level (2 upgrades offered before level 5, 3 after)
+            if (Level <= 5) UpgradeWindow.Instance.OfferUpgrades(2);
+            else UpgradeWindow.Instance.OfferUpgrades(3);
         }
         UpdateSlider();
     }

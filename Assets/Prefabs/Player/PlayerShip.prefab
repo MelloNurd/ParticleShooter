@@ -1201,7 +1201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddc4c3e4058b8de4da36436677ec768d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsAttacking: 0
+  IsAttacking: 1
   fireRange: 3
   pierce: 1
   damage: 1

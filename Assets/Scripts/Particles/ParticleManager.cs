@@ -10,6 +10,7 @@ namespace NaughtyAttributes
         public Player player;
 
         public float PlayerAttractionStrength = 5f;
+        public float ParticleDamage = 10f;  
 
         public List<Cluster> Clusters = new List<Cluster>();
 

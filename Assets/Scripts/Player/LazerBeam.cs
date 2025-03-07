@@ -46,13 +46,14 @@ public class LazerBeam : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        IsAttacking = Input.GetMouseButton(0);
+        //IsAttacking = Input.GetMouseButton(0);
         if(IsAttacking)
         {
             FireBeam();
         }
         else
         {
+            IsAttacking = true;
             _lr.SetPosition(0, transform.position);
             _lr.SetPosition(1, transform.position);
         }

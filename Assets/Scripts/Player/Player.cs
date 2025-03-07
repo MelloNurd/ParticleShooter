@@ -29,6 +29,9 @@ public class Player : MonoBehaviour
     private GameObject iceBlaster;
     private GameObject electricBlaster;
 
+    private GameObject leftExhhaust;
+    private GameObject rightExhaust;
+
     private Slider boostSlider;
     private Slider healthSlider;
 
@@ -62,6 +65,11 @@ public class Player : MonoBehaviour
 
         frontPoint = transform.Find("FrontAttractor");
         backPoint = transform.Find("BackAttractor");
+
+        leftExhhaust = transform.Find("LeftThruster").transform.Find("LeftExhaust").gameObject;
+        rightExhaust = transform.Find("RightThruster").transform.Find("RightExhaust").gameObject;
+        leftExhhaust.SetActive(false);
+        rightExhaust.SetActive(false);
 
         xBoundary = ParticleManager.Instance.ScreenSpace.x / 2;
         yBoundary = ParticleManager.Instance.ScreenSpace.y / 2;
@@ -138,21 +146,20 @@ public class Player : MonoBehaviour
         }
 
         // Forward and backward movement
-        if (vertMovement > 0)
-        {
+
             rb.AddForce(transform.up * vertMovement * currentSpeed);
-        }
+        
 
         // Activate exhaust when moving forward
         if (exhaustActive && vertMovement > 0)
         {
-            //leftEmission.rateOverTime = isBoosting ? 40 : 20; // More exhaust when boosting
-            //rightEmission.rateOverTime = isBoosting ? 40 : 20;
+            leftExhhaust.SetActive(true);
+            rightExhaust.SetActive(true);
         }
         else
         {
-            //leftEmission.rateOverTime = 0;
-            //rightEmission.rateOverTime = 0;
+            leftExhhaust.SetActive(false);
+            rightExhaust.SetActive(false);
         }
 
         // Rotation
@@ -164,18 +171,18 @@ public class Player : MonoBehaviour
         // Thruster activation based on rotation
         if (horzMovement > 0 && exhaustActive && vertMovement == 0) // Turning Right
         {
-            //leftEmission.rateOverTime = 10;
-            //rightEmission.rateOverTime = 0;
+            leftExhhaust.SetActive(true);
+            rightExhaust.SetActive(false);
         }
         else if (horzMovement < 0 && exhaustActive && vertMovement == 0) // Turning Left
         {
-            //rightEmission.rateOverTime = 10;
-            //leftEmission.rateOverTime = 0;
+            rightExhaust.SetActive(true);
+            leftExhhaust.SetActive(false);
         }
         else if (horzMovement == 0 && vertMovement == 0) // If stationary, no thrusters
         {
-            //leftEmission.rateOverTime = 0;
-            //rightEmission.rateOverTime = 0;
+            leftExhhaust.SetActive(false);
+            rightExhaust.SetActive(false);
         }
 
         // Clamp boost amount within bounds
@@ -225,7 +232,7 @@ public class Player : MonoBehaviour
         {
             currentInvincibilityTime = invincibilityTime;
             overShield.SetActive(true);
-            currentHealth -= 10;
+            currentHealth -= ParticleManager.Instance.ParticleDamage;
 
             // Calculate knockback direction
             Vector2 difference = (transform.position - collision.transform.position).normalized;

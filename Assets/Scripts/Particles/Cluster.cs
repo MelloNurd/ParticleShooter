@@ -19,6 +19,7 @@ namespace NaughtyAttributes
         public float MaxInternalRadii { get; set; }
         public float MaxExternalRadii { get; set; }
         public Vector3 Center;
+        public float ActiveRadius; // Basically the distance of furthest particle from center
 
         public int HitsToPlayer { get; set; } = 0;
 
@@ -128,7 +129,7 @@ namespace NaughtyAttributes
                 if (particle == null) continue;
 
                 particle.ApplyInternalForces(this);
-                particle.ApplyExternalForces(this);
+                //particle.ApplyExternalForces(this);
                 particle.ApplyPlayerAttraction();
                 particle.ApplyCohesion();
             }
@@ -148,6 +149,48 @@ namespace NaughtyAttributes
             }
 
             Center = sum / Swarm.Count;
+
+            // Update the active radius based on the furthest particle from the center
+            ActiveRadius = 0f;
+            foreach (Particle p in Swarm)
+            {
+                if (p == null) continue;
+
+                float distance = Vector3.Distance(Center, p.Position);
+                if (distance > ActiveRadius)
+                {
+                    ActiveRadius = distance;
+                }
+            }
+        }
+
+        // Draw debug lines and circles
+        private void OnDrawGizmos()
+        {
+            if (Swarm == null) return;
+
+            // Draw lines between particles
+            if (ParticleManager.Instance.DrawParticleLines)
+            {
+                for (int i = 0; i < Swarm.Count; i++)
+                {
+                    for (int j = i + 1; j < Swarm.Count; j++)
+                    {
+                        if (Swarm[i] == null || Swarm[j] == null) continue;
+                        Gizmos.color = Color.white;
+                        Gizmos.DrawLine(Swarm[i].Position, Swarm[j].Position);
+                    }
+                }
+            }
+
+            // Draw circles visualizing radius
+            if (ParticleManager.Instance.DrawClusterCircles)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(Center, ActiveRadius);
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(Center, 0.1f);
+            }
         }
 
         public void UpdateForceParameters()

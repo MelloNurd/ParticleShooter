@@ -38,9 +38,6 @@ public class Player : MonoBehaviour
     public Transform frontPoint;
     public Transform backPoint;
 
-    private float xBoundary;
-    private float yBoundary;
-
     public UnityEvent onDeath;
     private bool hasDied;
 
@@ -56,9 +53,6 @@ public class Player : MonoBehaviour
 
         // Get the blaster objects
         standardBlaster = transform.Find("StandardBlaster").gameObject;
-        fireBlaster = transform.Find("FireBlaster").gameObject;
-        iceBlaster = transform.Find("IceBlaster").gameObject;
-        electricBlaster = transform.Find("ElectricBlaster").gameObject;
 
         boostSlider = GameObject.Find("PlayerBoost").GetComponent<Slider>();
         healthSlider = GameObject.Find("PlayerHealth").GetComponent<Slider>();
@@ -71,25 +65,28 @@ public class Player : MonoBehaviour
         leftExhhaust.SetActive(false);
         rightExhaust.SetActive(false);
 
-        xBoundary = ParticleManager.Instance.ScreenSpace.x / 2;
-        yBoundary = ParticleManager.Instance.ScreenSpace.y / 2;
-
         overShield = transform.Find("OverShield").gameObject;
         overShield.SetActive(true);
     }
 
     void Update()
     {
+        // Movement input
         horzMovement = Input.GetAxisRaw("Horizontal");
         vertMovement = Input.GetAxisRaw("Vertical");
 
-        // Check if the player is boosting
+        // Boosting input
         isBoosting = Input.GetKey(KeyCode.LeftShift) && boostAmount > 0 && vertMovement != 0;
         boostSlider.value = boostAmount / maxBoost;
 
+        RegenHealth();
+        OvershieldCooldown();
+    }
+
+    private void RegenHealth()
+    {
         healthSlider.value = currentHealth / maxHealth;
 
-        // Health regeneration
         if (currentHealth < maxHealth)
         {
             currentHealth += healthRegenRate * Time.deltaTime;
@@ -98,27 +95,10 @@ public class Player : MonoBehaviour
                 currentHealth = maxHealth;
             }
         }
+    }
 
-        // Screen wrapping
-        Vector3 newPosition = transform.position;
-
-        if(transform.position.x > xBoundary)
-        {
-            newPosition.x = -xBoundary;
-        }
-        else if (transform.position.x < -xBoundary)
-        {
-            newPosition.x = xBoundary;
-        }   
-        if (transform.position.y > yBoundary)
-        {
-            newPosition.y = -yBoundary;
-        }
-        else if (transform.position.y < -yBoundary)
-        {
-            newPosition.y = yBoundary;
-        }
-        transform.position = newPosition;
+    private void OvershieldCooldown()
+    {
         if (currentInvincibilityTime > 0)
         {
             currentInvincibilityTime -= Time.deltaTime;
@@ -131,6 +111,12 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        ApplyMovementAndRotation();
+        ThrusterVisualization();
+    }
+
+    private void ApplyMovementAndRotation()
+    {
         float currentSpeed = movementSpeed;
 
         // Boost logic
@@ -138,7 +124,7 @@ public class Player : MonoBehaviour
         {
             currentSpeed *= boostMultiplier;
             boostAmount -= boostUsageRate * Time.fixedDeltaTime;
-            
+
         }
         else if (boostAmount < maxBoost) // Recharge boost
         {
@@ -146,10 +132,20 @@ public class Player : MonoBehaviour
         }
 
         // Forward and backward movement
+        rb.AddForce(transform.up * vertMovement * currentSpeed);
 
-            rb.AddForce(transform.up * vertMovement * currentSpeed);
-        
+        // Rotation
+        if (horzMovement != 0)
+        {
+            rb.AddTorque(-horzMovement * rotationSpeed);
+        }
 
+        // Clamp boost amount within bounds
+        boostAmount = Mathf.Clamp(boostAmount, 0, maxBoost);
+    }
+
+    private void ThrusterVisualization()
+    {
         // Activate exhaust when moving forward
         if (exhaustActive && vertMovement > 0)
         {
@@ -160,12 +156,6 @@ public class Player : MonoBehaviour
         {
             leftExhhaust.SetActive(false);
             rightExhaust.SetActive(false);
-        }
-
-        // Rotation
-        if (horzMovement != 0)
-        {
-            rb.AddTorque(-horzMovement * rotationSpeed);
         }
 
         // Thruster activation based on rotation
@@ -184,9 +174,6 @@ public class Player : MonoBehaviour
             leftExhhaust.SetActive(false);
             rightExhaust.SetActive(false);
         }
-
-        // Clamp boost amount within bounds
-        boostAmount = Mathf.Clamp(boostAmount, 0, maxBoost);
     }
 
     private void disableBlasters()
@@ -195,12 +182,6 @@ public class Player : MonoBehaviour
         fireBlaster.SetActive(false);
         iceBlaster.SetActive(false);
         electricBlaster.SetActive(false);
-    }
-
-    public void InitializeSpace()
-    {
-        xBoundary = ParticleManager.Instance.ScreenSpace.x / 2;
-        yBoundary = ParticleManager.Instance.ScreenSpace.y / 2;
     }
 
     public void swapBlaster(int blasterType)
@@ -261,6 +242,4 @@ public class Player : MonoBehaviour
             Destroy(collision.gameObject);
         }
     }
-
-    
 }

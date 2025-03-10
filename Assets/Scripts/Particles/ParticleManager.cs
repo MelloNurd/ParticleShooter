@@ -7,6 +7,12 @@ namespace NaughtyAttributes
     {
         public static ParticleManager Instance { get; private set; }
 
+
+        [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
+        public bool DrawParticleLines = false;
+        [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
+        public bool DrawClusterCircles = false;
+
         public Player player;
 
         public float PlayerAttractionStrength = 5f;
@@ -277,7 +283,6 @@ namespace NaughtyAttributes
             // Clear all clusters and restart
             ClearClusters();
             Initialize();
-            player.InitializeSpace();
         }
 
         private void Initialize()

@@ -4,11 +4,9 @@ namespace NaughtyAttributes
 {
     public class Particle : MonoBehaviour
     {
-        [ShowNativeProperty]
-        public Vector3 Position { get; set; } = Vector3.zero;
+        public Vector3 Position = Vector3.zero;
 
-        [ShowNativeProperty]
-        public Vector3 Velocity { get; set; }
+        public Vector3 Velocity;
 
         [ShowNativeProperty]
         public int Type { get; private set; }
@@ -118,9 +116,6 @@ namespace NaughtyAttributes
 
                 Vector3 direction = particle.Position - Position;
 
-                // Screen wrapping adjustments
-                direction = ScreenWrapAdjustment(direction);
-
                 float distance = direction.magnitude;
                 direction.Normalize();
 
@@ -146,7 +141,7 @@ namespace NaughtyAttributes
             Position += Velocity * Time.deltaTime;
             Velocity *= ParticleManager.Instance.Friction;
 
-            WrapPosition();
+            ConstrainPosition();
 
             if (_transform != null)
                 _transform.position = Position;
@@ -168,9 +163,6 @@ namespace NaughtyAttributes
                     if (particle == null) continue;
 
                     Vector3 direction = particle.Position - Position;
-
-                    // Screen wrapping adjustments
-                    direction = ScreenWrapAdjustment(direction);
 
                     float distance = direction.magnitude;
                     direction.Normalize();
@@ -198,7 +190,7 @@ namespace NaughtyAttributes
             Position += Velocity * Time.deltaTime;
             Velocity *= ParticleManager.Instance.Friction;
 
-            WrapPosition();
+            ConstrainPosition();
 
             if (_transform != null)
                 _transform.position = Position;
@@ -220,9 +212,6 @@ namespace NaughtyAttributes
 
             Vector3 direction = targetPosition - Position;
 
-            // Screen wrapping adjustments
-            direction = ScreenWrapAdjustment(direction);
-
             float distance = direction.magnitude;
             direction.Normalize();
 
@@ -233,39 +222,14 @@ namespace NaughtyAttributes
 
             // Apply force
             Velocity += attractionForce * Time.deltaTime;
-        }
 
-        private Vector3 ScreenWrapAdjustment(Vector3 direction)
-        {
-            if (direction.x > ParticleManager.Instance.HalfScreenSpace.x)
-                direction.x -= ParticleManager.Instance.ScreenSpace.x;
-            if (direction.x < -ParticleManager.Instance.HalfScreenSpace.x)
-                direction.x += ParticleManager.Instance.ScreenSpace.x;
-            if (direction.y > ParticleManager.Instance.HalfScreenSpace.y)
-                direction.y -= ParticleManager.Instance.ScreenSpace.y;
-            if (direction.y < -ParticleManager.Instance.HalfScreenSpace.y)
-                direction.y += ParticleManager.Instance.ScreenSpace.y;
-
-            return direction;
+            ConstrainPosition();
         }
 
         private float Map(float value, float inMin, float inMax, float outMin, float outMax)
         {
             value = Mathf.Clamp(value, inMin, inMax);
             return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
-        }
-
-        private void WrapPosition()
-        {
-            if (Position.x < -ParticleManager.Instance.HalfScreenSpace.x)
-                Position = new Vector3(ParticleManager.Instance.HalfScreenSpace.x, Position.y, Position.z);
-            else if (Position.x > ParticleManager.Instance.HalfScreenSpace.x)
-                Position = new Vector3(-ParticleManager.Instance.HalfScreenSpace.x, Position.y, Position.z);
-
-            if (Position.y < -ParticleManager.Instance.HalfScreenSpace.y)
-                Position = new Vector3(Position.x, ParticleManager.Instance.HalfScreenSpace.y, Position.z);
-            else if (Position.y > ParticleManager.Instance.HalfScreenSpace.y)
-                Position = new Vector3(Position.x, -ParticleManager.Instance.HalfScreenSpace.y, Position.z);
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -293,9 +257,6 @@ namespace NaughtyAttributes
 
             Vector3 direction = ParentCluster.Center - Position;
 
-            // Screen wrapping adjustments
-            direction = ScreenWrapAdjustment(direction);
-
             float distance = direction.magnitude;
             direction.Normalize();
 
@@ -307,5 +268,45 @@ namespace NaughtyAttributes
 
             Velocity += cohesionForce * Time.deltaTime;
         }
+
+        // This is used to keep the particles within the defined game-boundaries
+        private void ConstrainPosition()
+        {
+            float halfX = ParticleManager.Instance.HalfScreenSpace.x;
+            float halfY = ParticleManager.Instance.HalfScreenSpace.y;
+
+            // --- Optional: apply a border repulsion force if too close to the edge ---
+            float borderThreshold = 1.0f;     // distance from the border at which to start repelling
+            float repulsionStrength = 10.0f;    // adjust this to change how strongly particles are pushed inward
+            Vector3 borderForce = Vector3.zero;
+
+            // Check left border
+            if (Position.x - (-halfX) < borderThreshold)
+                borderForce.x += repulsionStrength * (1 - (Position.x - (-halfX)) / borderThreshold);
+            // Check right border
+            if (halfX - Position.x < borderThreshold)
+                borderForce.x -= repulsionStrength * (1 - (halfX - Position.x) / borderThreshold);
+            // Check bottom border
+            if (Position.y - (-halfY) < borderThreshold)
+                borderForce.y += repulsionStrength * (1 - (Position.y - (-halfY)) / borderThreshold);
+            // Check top border
+            if (halfY - Position.y < borderThreshold)
+                borderForce.y -= repulsionStrength * (1 - (halfY - Position.y) / borderThreshold);
+
+            // Apply the repulsion force (scaled by deltaTime for consistency)
+            Velocity += borderForce * Time.deltaTime;
+
+            // --- Clamp the position so particles never go out-of-bounds ---
+            float clampedX = Mathf.Clamp(Position.x, -halfX, halfX);
+            float clampedY = Mathf.Clamp(Position.y, -halfY, halfY);
+            Position = new Vector3(clampedX, clampedY, Position.z);
+
+            // Reset velocity in a direction if the particle is at the boundary and moving further out
+            if (clampedX == -halfX && Velocity.x < 0) Velocity.x = 0;
+            if (clampedX == halfX && Velocity.x > 0) Velocity.x = 0;
+            if (clampedY == -halfY && Velocity.y < 0) Velocity.y = 0;
+            if (clampedY == halfY && Velocity.y > 0) Velocity.y = 0;
+        }
+
     }
 }

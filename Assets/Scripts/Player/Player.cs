@@ -113,6 +113,7 @@ public class Player : MonoBehaviour
     {
         ApplyMovementAndRotation();
         ThrusterVisualization();
+        ClampPosition();
     }
 
     private void ApplyMovementAndRotation()
@@ -242,4 +243,19 @@ public class Player : MonoBehaviour
             Destroy(collision.gameObject);
         }
     }
+
+    private void ClampPosition()
+    {
+        if (ParticleManager.Instance != null)
+        {
+            Vector2 halfScreen = ParticleManager.Instance.HalfScreenSpace;
+            Vector3 position = transform.position;
+
+            position.x = Mathf.Clamp(position.x, -halfScreen.x, halfScreen.x);
+            position.y = Mathf.Clamp(position.y, -halfScreen.y, halfScreen.y);
+
+            transform.position = position;
+        }
+    }
+
 }

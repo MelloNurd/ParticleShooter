@@ -147,7 +147,6 @@ namespace NaughtyAttributes
             }
         }
 
-        // Method to check for cluster extinction and handle it
         private void CheckForClusterExtinction()
         {
             for (int i = Clusters.Count - 1; i >= 0; i--)
@@ -155,28 +154,19 @@ namespace NaughtyAttributes
                 Cluster cluster = Clusters[i];
                 if (cluster.Swarm.Count == 0 || cluster.Swarm.Count <= cluster.numParticles * 0.1f)
                 {
-                    // Find the most successful cluster
-                    Cluster mostSuccessfulCluster = FindMostSuccessfulCluster();
-
-                    if (mostSuccessfulCluster != null)
-                    {
-                        // Spawn a mutated version of the most successful cluster
-                        SpawnMutatedCluster(mostSuccessfulCluster);
-                    }
-                    else
-                    {
-                        // If no successful cluster exists, create a new random cluster
-                        CreateCluster();
-                    }
+                    // Find and spawn mutated versions of the most successful cluster
+                    FindMostSuccessfulClusterAndSpawn();
 
                     Clusters.RemoveAt(i);
                     Destroy(cluster.gameObject);
+                    RemoveLeastSuccessfulCluster();
                 }
             }
         }
 
-        // Method to find the most successful cluster based on hits to the player
-        private Cluster FindMostSuccessfulCluster()
+
+        // Method to find the most successful cluster and spawn mutated versions
+        public void FindMostSuccessfulClusterAndSpawn()
         {
             Cluster mostSuccessful = null;
             float maxSuccessScore = float.MinValue;
@@ -195,8 +185,49 @@ namespace NaughtyAttributes
                 }
             }
 
-            return mostSuccessful;
+            if (mostSuccessful != null)
+            {
+                // Spawn mutated versions of the most successful cluster
+                SpawnMutatedCluster(mostSuccessful);
+                SpawnMutatedCluster(mostSuccessful);
+            }
+            else
+            {
+                // If no successful cluster exists, create a new random cluster
+                CreateCluster();
+            }
         }
+
+
+        public void RemoveLeastSuccessfulCluster()
+        {
+            if (Clusters.Count == 0)
+                return;
+
+            Cluster leastSuccessful = null;
+            float minSuccessScore = float.MaxValue;
+
+            foreach (var cluster in Clusters)
+            {
+                // Calculate success score
+                float hitsScore = cluster.HitsToPlayer;
+                float proximityScore = cluster.ProximityScore;
+                float successScore = hitsScore * HitsWeight + proximityScore * ProximityWeight;
+
+                if (successScore < minSuccessScore)
+                {
+                    minSuccessScore = successScore;
+                    leastSuccessful = cluster;
+                }
+            }
+
+            if (leastSuccessful != null)
+            {
+                Clusters.Remove(leastSuccessful);
+                Destroy(leastSuccessful.gameObject);
+            }
+        }
+
 
         // Method to spawn a mutated cluster based on a base cluster
         private void SpawnMutatedCluster(Cluster baseCluster)

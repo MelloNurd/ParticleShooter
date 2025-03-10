@@ -61,6 +61,8 @@ public class GameManager : MonoBehaviour
             lastAggressionIncrease = Timer.Instance.elapsedTime;
             ParticleManager.Instance.PlayerAttractionStrength += .5f;
             ParticleManager.Instance.ParticleDamage += 1;
+            ParticleManager.Instance.RemoveLeastSuccessfulCluster();
+            ParticleManager.Instance.FindMostSuccessfulClusterAndSpawn();
         }
     }
 

@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
         boostAmount = maxBoost;
 
         // Get the blaster objects
-        standardBlaster = transform.Find("StandardBlaster").gameObject;
+        standardBlaster = transform.Find("Weapon").gameObject;
 
         boostSlider = GameObject.Find("PlayerBoost").GetComponent<Slider>();
         healthSlider = GameObject.Find("PlayerHealth").GetComponent<Slider>();

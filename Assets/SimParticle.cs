@@ -22,7 +22,7 @@ namespace NaughtyAttributes
             _transform = GetComponent<Transform>();
         }
 
-        public void ApplyInternalForces(Cluster cluster)
+        public void ApplyInternalForces(SimCluster cluster)
         {
             Vector3 totalForce = Vector3.zero;
             Vector3 acceleration = Vector3.zero;
@@ -109,133 +109,7 @@ namespace NaughtyAttributes
         {
             Vector3 totalForce = Vector3.zero;
 
-            foreach (Cluster otherColoy in SimParticleManager.Clusters)
-            {
-                if (otherColoy == cluster) return;
-                if (Vector2.Distance(cluster.Center, otherColoy.transform.position) > cluster.MaxExternalRadii) continue;
-
-                foreach (SimParticle particle in otherColoy.Swarm)
-                {
-                    // Skip the current particle
-                    if (particle == this) continue;
-
-                    // Calculate the direction and squared distance to the other particle
-                    Vector3 _direction = particle.Position - Position;
-
-                    // Wrapping world-space fixes for distance calculations
-                    if (_direction.x > SimParticleManager.Instance.HalfScreenSpace.x)
-                    {
-                        _direction.x -= SimParticleManager.Instance.ScreenSpace.x;
-                    }
-                    if (_direction.x < -SimParticleManager.Instance.HalfScreenSpace.x)
-                    {
-                        _direction.x += SimParticleManager.Instance.ScreenSpace.x;
-                    }
-
-                    if (_direction.y > SimParticleManager.Instance.HalfScreenSpace.y)
-                    {
-                        _direction.y -= SimParticleManager.Instance.ScreenSpace.y;
-                    }
-                    if (_direction.y < -SimParticleManager.Instance.HalfScreenSpace.y)
-                    {
-                        _direction.y += SimParticleManager.Instance.ScreenSpace.y;
-                    }
-
-                    float _distance = _direction.magnitude;
-                    _direction.Normalize();
-
-                    // Calculate repulsive forces
-                    if (_distance < cluster.ExternalMins[Type, particle.Type])
-                    {
-                        Vector3 force = _direction;
-                        force *= Mathf.Abs(cluster.ExternalForces[Type, particle.Type]) * SimParticleManager.Instance.RepulsionEffector;
-                        force *= Map(_distance, 0, Mathf.Abs(cluster.ExternalMins[Type, particle.Type]), 1, 0);
-                        force *= SimParticleManager.Instance.Dampening;
-                        totalForce += force;
-                    }
-
-                    // Calculate attractive forces
-                    if (_distance < cluster.ExternalRadii[Type, particle.Type])
-                    {
-                        Vector3 force = _direction;
-                        force *= cluster.ExternalForces[Type, particle.Type];
-                        force *= Map(_distance, 0, cluster.ExternalRadii[Type, particle.Type], 1, 0);
-                        force *= SimParticleManager.Instance.Dampening;
-                        totalForce += force;
-                    }
-                }
-            }
-
-            // Apply all forces after calculating with all particles
-            Velocity += totalForce * Time.deltaTime;
-            Position += Velocity *= Time.deltaTime;
-            Velocity *= SimParticleManager.Instance.Friction;
-
-            // World-space wrapping (This can probably be cleaned up)
-            if (Position.x < -SimParticleManager.Instance.HalfScreenSpace.x)
-            {
-                Position = Position.WithX(SimParticleManager.Instance.HalfScreenSpace.x);
-            }
-            if (Position.x > SimParticleManager.Instance.HalfScreenSpace.x)
-            {
-                Position = Position.WithX(-SimParticleManager.Instance.HalfScreenSpace.x);
-            }
-
-            if (Position.y < -SimParticleManager.Instance.HalfScreenSpace.y)
-            {
-                Position = Position.WithY(SimParticleManager.Instance.HalfScreenSpace.y);
-            }
-            if (Position.y > SimParticleManager.Instance.HalfScreenSpace.y)
-            {
-                Position = Position.WithY(-SimParticleManager.Instance.HalfScreenSpace.y);
-            }
-
-            _transform.position = Position;
-        }
-
-        public void ApplyFoodForces(Cluster cluster)
-        {
-            Vector3 totalForce = Vector3.zero;
-
-            foreach (SimParticle food in SimParticleManager.Food)
-            {
-                if (Vector2.Distance(cluster.Center, food.Position) > cluster.MaxExternalRadii) continue;
-
-                // Calculate the direction and squared distance to the other particle
-                Vector3 _direction = food.Position - Position;
-
-                // Wrapping world-space fixes for distance calculations
-                if (_direction.x > SimParticleManager.Instance.HalfScreenSpace.x)
-                {
-                    _direction.x -= SimParticleManager.Instance.ScreenSpace.x;
-                }
-                if (_direction.x < -SimParticleManager.Instance.HalfScreenSpace.x)
-                {
-                    _direction.x += SimParticleManager.Instance.ScreenSpace.x;
-                }
-
-                if (_direction.y > SimParticleManager.Instance.HalfScreenSpace.y)
-                {
-                    _direction.y -= SimParticleManager.Instance.ScreenSpace.y;
-                }
-                if (_direction.y < -SimParticleManager.Instance.HalfScreenSpace.y)
-                {
-                    _direction.y += SimParticleManager.Instance.ScreenSpace.y;
-                }
-
-                float _distance = _direction.magnitude;
-                _direction.Normalize();
-
-                // Calculate attractive forces
-                if (_distance < cluster.ExternalRadii[Type, food.Type])
-                {
-                    Vector3 force = _direction;
-                    force *= cluster.ExternalForces[Type, food.Type];
-                    force *= Map(_distance, 0, cluster.ExternalRadii[Type, food.Type], 1, 0);
-                    force *= SimParticleManager.Instance.Dampening;
-                    totalForce += force;
-                }
-            }
+            
 
             // Apply all forces after calculating with all particles
             Velocity += totalForce * Time.deltaTime;

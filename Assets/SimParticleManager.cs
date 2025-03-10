@@ -12,7 +12,7 @@ namespace NaughtyAttributes
 
         public static List<SimParticle> Particles { get; private set; } = new List<SimParticle>();
 
-        [SerializeField] private GameObject _particlePrefab;
+        [SerializeField] public GameObject ParticlePrefab;
 
         public static float[,] Forces;
         public static float[,] MinDistances;
@@ -62,7 +62,7 @@ namespace NaughtyAttributes
             }
 
             // Make sure the particle prefab is assigned
-            if (_particlePrefab == null)
+            if (ParticlePrefab == null)
             {
                 Debug.LogError("Particle prefab is not assigned in the inspector.");
                 return;
@@ -150,7 +150,7 @@ namespace NaughtyAttributes
                 Vector3 randomPos = new Vector3(Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x), Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y), 0);
 
                 // Create the particle, rename it, and put it under the parent GameObject
-                GameObject particle = Instantiate(_particlePrefab, randomPos, Quaternion.identity);
+                GameObject particle = Instantiate(ParticlePrefab, randomPos, Quaternion.identity);
                 particle.name = "Particle " + i;
                 particle.transform.parent = _particleParentObj.transform;
 

@@ -109,7 +109,17 @@ namespace NaughtyAttributes
                 );
                 Particle newParticle = particleObj.GetComponent<Particle>();
 
-                int particleType = Random.Range(0, _numTypes);
+                int particleType;
+
+                // Ensure a certain percentage of particles are of the projectile type
+                if (Random.value < 0.2f) // 20% chance to be the projectile type
+                {
+                    particleType = 0; // Projectile type
+                }
+                else
+                {
+                    particleType = Random.Range(1, _numTypes); // Other types
+                }
 
                 // Initialize the particle
                 newParticle.Initialize(particleType, this);
@@ -120,6 +130,7 @@ namespace NaughtyAttributes
             // Adjust the center of the cluster
             AdjustCenter();
         }
+
 
         public void UpdateCluster()
         {
@@ -146,13 +157,24 @@ namespace NaughtyAttributes
             // Check if the cluster is near the player and ready to attack
             if (_attackTimer <= 0f && Vector3.Distance(Center, _player.transform.position) <= _attackRange)
             {
-                // Launch a particle at the player
-                LaunchParticleAtPlayer(5f, 15f);
+                // Check if there are any projectile particles available
+                if (Swarm.Exists(p => p.Type == 0))
+                {
+                    // Launch a particle at the player
+                    LaunchParticleAtPlayer(5f, 15f);
 
-                // Reset the attack timer
-                _attackTimer = _attackCooldown;
+                    // Reset the attack timer
+                    _attackTimer = _attackCooldown;
+                }
+                else
+                {
+                    // No projectile particles left, optionally adjust behavior
+                    // For example, set a shorter cooldown before checking again
+                    _attackTimer = 1f;
+                }
             }
         }
+
 
 
         public void AdjustCenter()
@@ -246,9 +268,19 @@ namespace NaughtyAttributes
         {
             if (Swarm.Count == 0) return;
 
-            // Select the last particle in the swarm
-            Particle particleToLaunch = Swarm[Swarm.Count - 1];
-            Swarm.RemoveAt(Swarm.Count - 1);
+            int projectileType = 0; // The particle type designated as the projectile
+
+            // Find a particle of the projectile type in the swarm
+            Particle particleToLaunch = Swarm.Find(p => p.Type == projectileType);
+
+            if (particleToLaunch == null)
+            {
+                // No particles of the projectile type are available
+                return;
+            }
+
+            // Remove the particle from the swarm
+            Swarm.Remove(particleToLaunch);
 
             // Detach the particle from the cluster
             particleToLaunch.transform.parent = null;
@@ -265,5 +297,6 @@ namespace NaughtyAttributes
             // Mark the particle as a projectile
             particleToLaunch.IsProjectile = true;
         }
+
     }
 }

@@ -23,6 +23,20 @@ namespace NaughtyAttributes
 
         private Transform _playerTransform;
 
+        private bool _isLaunched = false;
+        private float _maxTravelDistance;
+        private Vector3 _launchPosition;
+        public bool IsProjectile { get; set; } = false;
+
+        public void SetColor(Color color)
+        {
+            if (_spriteRenderer != null)
+            {
+                _spriteRenderer.color = color;
+            }
+        }
+
+
         private void Awake()
         {
             // Cache the transform and sprite renderer components
@@ -51,13 +65,21 @@ namespace NaughtyAttributes
             SetColorByType();
         }
 
-        public void Update()
+        private void Update()
         {
-            float distanceToPlayer = Vector3.Distance(Position, _playerTransform.position);
-            if (distanceToPlayer < MinimalDistanceToPlayer)
+            if (_isLaunched)
             {
-                MinimalDistanceToPlayer = distanceToPlayer;
+                // Check if the particle has traveled the maximum distance
+                float distanceTraveled = Vector3.Distance(_launchPosition, Position);
+                if (distanceTraveled >= _maxTravelDistance)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
             }
+
+            UpdatePosition();
+            ConstrainPosition();
         }
 
         private void OnDestroy()
@@ -77,6 +99,8 @@ namespace NaughtyAttributes
 
         private void SetColorByType()
         {
+            if (IsProjectile) return; // Do not change color if it's a projectile
+
             if (_spriteRenderer != null)
             {
                 int totalTypes = ParticleManager.Instance.NumberOfTypes;
@@ -88,6 +112,7 @@ namespace NaughtyAttributes
                 Debug.LogWarning($"SpriteRenderer not found on Particle {Id}");
             }
         }
+
 
         private Color GetColorForType(int type, int totalTypes)
         {
@@ -306,6 +331,16 @@ namespace NaughtyAttributes
             if (clampedX == halfX && Velocity.x > 0) Velocity.x = 0;
             if (clampedY == -halfY && Velocity.y < 0) Velocity.y = 0;
             if (clampedY == halfY && Velocity.y > 0) Velocity.y = 0;
+        }
+
+        public void Launch(Vector3 direction, float speed, float maxDistance)
+        {
+            Debug.Log("Particle launched!");
+            _isLaunched = true;
+            _launchPosition = Position;
+            _maxTravelDistance = maxDistance;
+            Velocity = direction * speed;
+            IsProjectile = true; // Mark as a projectile
         }
 
     }

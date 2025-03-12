@@ -33,6 +33,12 @@ namespace NaughtyAttributes
 
         private Player _player;
 
+        // Add these fields to manage attack timing
+        private float _attackCooldown = 2f; // Time between attacks
+        private float _attackTimer = 0f;    // Timer to track cooldown
+        private float _attackRange = 10f;   // Range within which the cluster can attack
+
+
         private void Awake()
         {
             // Initialize particle prefab and number of types from ParticleManager
@@ -129,11 +135,25 @@ namespace NaughtyAttributes
                 if (particle == null) continue;
 
                 particle.ApplyInternalForces(this);
-                //particle.ApplyExternalForces(this);
+                // particle.ApplyExternalForces(this);
                 particle.ApplyPlayerAttraction();
                 particle.ApplyCohesion();
             }
+
+            // Update the attack timer
+            _attackTimer -= Time.deltaTime;
+
+            // Check if the cluster is near the player and ready to attack
+            if (_attackTimer <= 0f && Vector3.Distance(Center, _player.transform.position) <= _attackRange)
+            {
+                // Launch a particle at the player
+                LaunchParticleAtPlayer(5f, 15f);
+
+                // Reset the attack timer
+                _attackTimer = _attackCooldown;
+            }
         }
+
 
         public void AdjustCenter()
         {
@@ -220,6 +240,30 @@ namespace NaughtyAttributes
             float proximityContribution = 1f / (minimalDistance + 0.001f); // Adding a small value to prevent division by zero
             ProximityScore += proximityContribution;
             TotalParticlesDestroyed++;
+        }
+
+        public void LaunchParticleAtPlayer(float launchSpeed, float maxTravelDistance)
+        {
+            if (Swarm.Count == 0) return;
+
+            // Select the last particle in the swarm
+            Particle particleToLaunch = Swarm[Swarm.Count - 1];
+            Swarm.RemoveAt(Swarm.Count - 1);
+
+            // Detach the particle from the cluster
+            particleToLaunch.transform.parent = null;
+
+            // Calculate the direction towards the player
+            Vector3 direction = (_player.transform.position - particleToLaunch.Position).normalized;
+
+            // Launch the particle
+            particleToLaunch.Launch(direction, launchSpeed, maxTravelDistance);
+
+            // Set the particle's color to white
+            particleToLaunch.SetColor(Color.white);
+
+            // Mark the particle as a projectile
+            particleToLaunch.IsProjectile = true;
         }
     }
 }

@@ -27,15 +27,43 @@ namespace NaughtyAttributes
         private float _maxTravelDistance;
         private Vector3 _launchPosition;
         public bool IsProjectile { get; set; } = false;
+        public bool IsNeutral { get; set; } = false;
+        private Vector3 _launchStartPosition;
+
 
         public void SetColor(Color color)
         {
-            if (_spriteRenderer != null)
+            if (IsNeutral)
+            {
+                _spriteRenderer.color = Color.gray; // Neutral color
+            }
+            else
             {
                 _spriteRenderer.color = color;
             }
         }
 
+        public void SetColorByType()
+        {
+            Color color = GetColorForType(Type, ParentCluster._numTypes);
+            SetColor(color);
+        }
+
+        //private void SetColorByType()
+        //{
+        //    if (IsProjectile) return; // Do not change color if it's a projectile
+
+        //    if (_spriteRenderer != null)
+        //    {
+        //        int totalTypes = ParticleManager.Instance.NumberOfTypes;
+        //        Color color = GetColorForType(Type, totalTypes);
+        //        _spriteRenderer.color = color;
+        //    }
+        //    else
+        //    {
+        //        Debug.LogWarning($"SpriteRenderer not found on Particle {Id}");
+        //    }
+        //}
 
         private void Awake()
         {
@@ -53,34 +81,57 @@ namespace NaughtyAttributes
         {
             Type = type;
             ParentCluster = parentCluster;
-
+            IsNeutral = false;
+            SetColorByType();
             // Set initial velocity 
             Velocity = new Vector3(
                 Random.Range(-1f, 1f),
                 Random.Range(-1f, 1f),
                 0
             );
-
-            // Set the color of the particle based on its type
-            SetColorByType();
         }
 
         private void Update()
         {
             if (_isLaunched)
             {
-                // Check if the particle has traveled the maximum distance
-                float distanceTraveled = Vector3.Distance(_launchPosition, Position);
-                if (distanceTraveled >= _maxTravelDistance)
+                float traveledDistance = Vector3.Distance(Position, _launchStartPosition);
+                if (traveledDistance >= _maxTravelDistance)
                 {
-                    Destroy(gameObject);
-                    return;
+                    _isLaunched = false;
+                    IsNeutral = true;
+                    Velocity = Vector3.zero;
+
+                    // Remove from the previous cluster
+                    if (ParentCluster != null)
+                    {
+                        ParentCluster.Swarm.Remove(this);
+                        ParentCluster = null;
+                    }
+
+                    // Set neutral color
+                    SetColor(Color.gray);
                 }
             }
+            else if (IsNeutral)
+            {
+                // Optional: Add subtle movement or let them drift
+                Velocity *= 0.99f; // Slow down over time
+            }
+            else
+            {
+                // Original behavior for active particles
+                ApplyInternalForces(ParentCluster);
+                ApplyExternalForces(ParentCluster);
+                ApplyPlayerAttraction();
+                ApplyCohesion();
+            }
 
-            UpdatePosition();
             ConstrainPosition();
+            Position += Velocity * Time.deltaTime;
+            _transform.position = Position;
         }
+
 
         private void OnDestroy()
         {
@@ -94,22 +145,6 @@ namespace NaughtyAttributes
             if (ParentCluster != null && ParentCluster.Swarm != null)
             {
                 ParentCluster.Swarm.Remove(this);
-            }
-        }
-
-        private void SetColorByType()
-        {
-            if (IsProjectile) return; // Do not change color if it's a projectile
-
-            if (_spriteRenderer != null)
-            {
-                int totalTypes = ParticleManager.Instance.NumberOfTypes;
-                Color color = GetColorForType(Type, totalTypes);
-                _spriteRenderer.color = color;
-            }
-            else
-            {
-                Debug.LogWarning($"SpriteRenderer not found on Particle {Id}");
             }
         }
 
@@ -335,12 +370,11 @@ namespace NaughtyAttributes
 
         public void Launch(Vector3 direction, float speed, float maxDistance)
         {
-            Debug.Log("Particle launched!");
             _isLaunched = true;
-            _launchPosition = Position;
+            IsNeutral = false;
             _maxTravelDistance = maxDistance;
-            Velocity = direction * speed;
-            IsProjectile = true; // Mark as a projectile
+            _launchStartPosition = Position;
+            Velocity = direction.normalized * speed;
         }
 
     }

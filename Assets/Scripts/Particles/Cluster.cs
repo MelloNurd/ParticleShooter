@@ -173,6 +173,7 @@ namespace NaughtyAttributes
                     _attackTimer = 1f;
                 }
             }
+            PickUpNeutralParticles();
         }
 
 
@@ -296,6 +297,28 @@ namespace NaughtyAttributes
 
             // Mark the particle as a projectile
             particleToLaunch.IsProjectile = true;
+        }
+
+        private void PickUpNeutralParticles()
+        {
+            float pickUpRadius = 2.0f; // Adjust as needed
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(Center, pickUpRadius);
+            foreach (var collider in colliders)
+            {
+                Particle particle = collider.GetComponent<Particle>();
+                if (particle != null && particle.IsNeutral)
+                {
+                    // Assign the particle to this cluster
+                    particle.IsNeutral = false;
+                    particle.ParentCluster = this;
+
+                    // Set the particle's color based on this cluster's type
+                    particle.SetColorByType();
+
+                    // Add the particle to the swarm
+                    Swarm.Add(particle);
+                }
+            }
         }
 
     }

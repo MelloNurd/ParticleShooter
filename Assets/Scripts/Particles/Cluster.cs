@@ -34,8 +34,8 @@ namespace NaughtyAttributes
         private Player _player;
 
         // Add these fields to manage attack timing
-        private float _attackCooldown = 2f; // Time between attacks
-        private float _attackTimer = 0f;    // Timer to track cooldown
+        private float _attackCooldown = 3f; // Time between attacks
+        private float _attackTimer = 3f;    // Timer to track cooldown
         private float _attackRange = 10f;   // Range within which the cluster can attack
 
 
@@ -129,6 +129,8 @@ namespace NaughtyAttributes
 
             // Adjust the center of the cluster
             AdjustCenter();
+
+            _attackTimer = Random.Range(3f, 7f); // Add some randomness to the cooldown
         }
 
 
@@ -165,6 +167,7 @@ namespace NaughtyAttributes
 
                     // Reset the attack timer
                     _attackTimer = _attackCooldown;
+                    _attackTimer += Random.Range(3f, 7f); // Add some randomness to the cooldown
                 }
                 else
                 {

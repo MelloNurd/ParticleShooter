@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
-// Matches generic types that inherit/implement Array2D<>
 [CustomPropertyDrawer(typeof(Array2D<>), true)]
 public class Array2DPropertyDrawer : PropertyDrawer
 {
@@ -11,25 +10,26 @@ public class Array2DPropertyDrawer : PropertyDrawer
 
     private const float VerticalSpacing = 2f;
     private const float HorizontalSpacing = 5f;
+    private const float HeaderWidth = 40f; // fixed width for row header
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         // Check if we are folded out
         bool show = IsFoldedOut(property);
-
-        // If not showing, just one line for the foldout
         if (!show)
             return EditorGUIUtility.singleLineHeight + VerticalSpacing;
 
-        // Otherwise, compute height for all rows
         SerializedProperty rowsProp = property.FindPropertyRelative("Array");
         if (rowsProp == null || !rowsProp.isArray)
             return EditorGUIUtility.singleLineHeight + VerticalSpacing;
 
-        // One line for the foldout label itself
-        float totalHeight = EditorGUIUtility.singleLineHeight + VerticalSpacing;
+        // Height for:
+        // - foldout line
+        // - column header row
+        // - each row in the grid
+        float totalHeight = EditorGUIUtility.singleLineHeight + VerticalSpacing; // foldout
+        totalHeight += EditorGUIUtility.singleLineHeight + VerticalSpacing; // column headers
 
-        // Then one line per row
         for (int i = 0; i < rowsProp.arraySize; i++)
         {
             totalHeight += EditorGUIUtility.singleLineHeight + VerticalSpacing;
@@ -46,84 +46,100 @@ public class Array2DPropertyDrawer : PropertyDrawer
         bool newShow = EditorGUI.Foldout(foldoutRect, show, label, true);
         SetFoldout(property, newShow);
 
-        // Move below the foldout
+        // Move below foldout
         position.y += EditorGUIUtility.singleLineHeight + VerticalSpacing;
-
-        // If not expanded, skip drawing the rest
         if (!newShow)
             return;
 
         EditorGUI.indentLevel++;
 
-        // Get the rows property
         SerializedProperty rowsProp = property.FindPropertyRelative("Array");
-        if (rowsProp != null && rowsProp.isArray)
+        if (rowsProp != null && rowsProp.isArray && rowsProp.arraySize > 0)
         {
-            // For each row
-            for (int rowIndex = 0; rowIndex < rowsProp.arraySize; rowIndex++)
+            // Use the row count as the number of types
+            int numTypes = rowsProp.arraySize;
+
+            // --- Draw Column Headers ---
+            // We get the number of columns from the first row.
+            SerializedProperty firstRowProp = rowsProp.GetArrayElementAtIndex(0);
+            SerializedProperty firstRowArrayProp = firstRowProp.FindPropertyRelative("row");
+            int columns = firstRowArrayProp != null && firstRowArrayProp.isArray ? firstRowArrayProp.arraySize : 0;
+
+            // Calculate available width for the cells (excluding row header)
+            float remainingWidth = position.width - HeaderWidth;
+            float columnWidth = (columns > 0) ? (remainingWidth - HorizontalSpacing * (columns - 1)) / columns : 0f;
+
+            for (int colIndex = 0; colIndex < columns; colIndex++)
+            {
+                // X offset includes header width plus spacing for each prior column
+                float xOffset = position.x + HeaderWidth + colIndex * (columnWidth + HorizontalSpacing);
+                Rect headerRect = new Rect(xOffset, position.y, columnWidth, EditorGUIUtility.singleLineHeight);
+                Color headerColor = GetColorForType(colIndex, numTypes);
+                EditorGUI.DrawRect(headerRect, headerColor);
+
+                // Centered label showing the type index (or you could use "Type " + colIndex)
+                GUIStyle centeredStyle = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = TextAnchor.MiddleCenter
+                };
+                EditorGUI.LabelField(headerRect, colIndex.ToString(), centeredStyle);
+            }
+
+            // Move down past the column header row
+            position.y += EditorGUIUtility.singleLineHeight + VerticalSpacing;
+
+            // --- Draw Each Row (with row header and cells) ---
+            for (int rowIndex = 0; rowIndex < numTypes; rowIndex++)
             {
                 SerializedProperty rowProp = rowsProp.GetArrayElementAtIndex(rowIndex);
-                if (rowProp == null) continue;
+                if (rowProp == null)
+                    continue;
 
-                // The "row" field in each Row, which is an array of T
                 SerializedProperty rowArrayProp = rowProp.FindPropertyRelative("row");
-                if (rowArrayProp == null || !rowArrayProp.isArray) continue;
+                if (rowArrayProp == null || !rowArrayProp.isArray)
+                    continue;
 
-                // Prepare a rect for the row
-                Rect rowRect = new Rect(
-                    position.x,
-                    position.y,
-                    position.width,
-                    EditorGUIUtility.singleLineHeight
-                );
+                // Draw the row header (first cell in the row)
+                Rect rowHeaderRect = new Rect(position.x, position.y, HeaderWidth, EditorGUIUtility.singleLineHeight);
+                Color rowHeaderColor = GetColorForType(rowIndex, numTypes);
+                EditorGUI.DrawRect(rowHeaderRect, rowHeaderColor);
+                GUIStyle centeredStyle = new GUIStyle(EditorStyles.label)
+                {
+                    alignment = TextAnchor.MiddleCenter
+                };
+                EditorGUI.LabelField(rowHeaderRect, rowIndex.ToString(), centeredStyle);
 
-                int columns = rowArrayProp.arraySize;
+                // Now draw the rest of the cells in the row
+                int currentColumns = rowArrayProp.arraySize;
+                float totalSpacing = HorizontalSpacing * (currentColumns - 1);
+                float cellWidth = (position.width - HeaderWidth - totalSpacing) / Mathf.Max(currentColumns, 1);
 
-                // Calculate column width to fit them evenly with some spacing
-                float totalSpacing = HorizontalSpacing * (columns - 1);
-                float columnWidth = (position.width - totalSpacing) / Mathf.Max(columns, 1);
-
-                // Temporarily remove indent so each cell lines up
+                // Temporarily remove indent so each cell lines up properly
                 int oldIndent = EditorGUI.indentLevel;
                 EditorGUI.indentLevel = 0;
 
-                // Draw each column side by side
-                for (int colIndex = 0; colIndex < columns; colIndex++)
+                for (int colIndex = 0; colIndex < currentColumns; colIndex++)
                 {
                     SerializedProperty elementProp = rowArrayProp.GetArrayElementAtIndex(colIndex);
+                    float xOffset = position.x + HeaderWidth + colIndex * (cellWidth + HorizontalSpacing);
+                    Rect cellRect = new Rect(xOffset, position.y, cellWidth, EditorGUIUtility.singleLineHeight);
 
-                    // X offset includes column width + spacing for each prior column
-                    float xOffset = rowRect.x + colIndex * (columnWidth + HorizontalSpacing);
-
-                    Rect cellRect = new Rect(
-                        xOffset,
-                        rowRect.y,
-                        columnWidth,
-                        EditorGUIUtility.singleLineHeight
-                    );
-
-                    // If it's a float, draw a draggable float field
+                    // If the element is a float, use a draggable float field; otherwise use default drawing.
                     if (elementProp.propertyType == SerializedPropertyType.Float)
                     {
                         float oldLabelWidth = EditorGUIUtility.labelWidth;
-                        EditorGUIUtility.labelWidth = 12f; // small label area to drag on
-
+                        EditorGUIUtility.labelWidth = 12f;
                         float newVal = EditorGUI.FloatField(cellRect, " ", elementProp.floatValue);
                         elementProp.floatValue = newVal;
-
                         EditorGUIUtility.labelWidth = oldLabelWidth;
                     }
                     else
                     {
-                        // Fallback: draw normally for other types
                         EditorGUI.PropertyField(cellRect, elementProp, GUIContent.none);
                     }
                 }
 
-                // Restore indent
                 EditorGUI.indentLevel = oldIndent;
-
-                // Move down for next row
                 position.y += EditorGUIUtility.singleLineHeight + VerticalSpacing;
             }
         }
@@ -131,9 +147,6 @@ public class Array2DPropertyDrawer : PropertyDrawer
         EditorGUI.indentLevel--;
     }
 
-    /// <summary>
-    /// Checks if the given property is currently folded out (expanded).
-    /// </summary>
     private bool IsFoldedOut(SerializedProperty property)
     {
         bool show = false;
@@ -141,11 +154,20 @@ public class Array2DPropertyDrawer : PropertyDrawer
         return show;
     }
 
-    /// <summary>
-    /// Sets the foldout state for the given property.
-    /// </summary>
     private void SetFoldout(SerializedProperty property, bool show)
     {
         foldoutStates[property.propertyPath] = show;
+    }
+
+    // This method calculates a color based on type index and total types.
+    private Color GetColorForType(int type, int totalTypes)
+    {
+        if (totalTypes <= 1)
+        {
+            return Color.HSVToRGB(0f, 1f, 1f);
+        }
+        float hue = (float)type / (totalTypes);
+        Color color = Color.HSVToRGB(hue, 1f, 1f);
+        return color;
     }
 }

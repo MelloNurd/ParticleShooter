@@ -614,6 +614,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerShip
       objectReference: {fileID: 0}
+    - target: {fileID: 8371855377387520600, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -795,6 +799,7 @@ MonoBehaviour:
   ScreenSpace: {x: 32, y: 32}
   HalfScreenSpace: {x: 0, y: 0}
   NumberOfTypes: 5
+  RunGame: 0
   RepulsionEffector: -5
   Dampening: 0.95
   Friction: 0.9
@@ -806,7 +811,7 @@ MonoBehaviour:
   InternalRadiusRange: {x: 0.5, y: 2}
   ExternalRadiusRange: {x: 2, y: 3}
   CohesionStrength: 2
-  StartPopulation: 20
+  StartPopulation: 1
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}

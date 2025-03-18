@@ -51,6 +51,9 @@ public class GameManager : MonoBehaviour
                 Instantiate(Expkit, ParticleManager.Instance.GetRandomPointOnScreen(), Quaternion.identity);
             }
         }
+
+        if (!ParticleManager.Instance.RunGame) return;
+
         if(Timer.Instance.elapsedTime - lastClusterSpawnTime >= clusterSpawnRate && ParticleManager.Instance.Clusters.Count < 40)
         {
             lastClusterSpawnTime= Timer.Instance.elapsedTime;

@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 311369362}
   - component: {fileID: 311369361}
   m_Layer: 0
-  m_Name: Manager
+  m_Name: Player Cluster Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,9 +150,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ParticleRadius: 0.9
   Friction: 0.99
-  ParticleSpeed: 8
+  ParticleSpeed: 4
   ParticleMaxSpeed: 15
-  ParticleSteeringStrength: 6.33
+  ParticleSteeringStrength: 6.5
   AttractionMatrix:
     Array:
     - row:
@@ -175,10 +175,14 @@ MonoBehaviour:
       - 0.41710734
       - 0.19301647
       - 0.40143996
-  controlSpeed: 5
+  PlayerControlSpeed: 5
   NumberOfTypes: 4
   StartPopulation: 60
   _particlePrefab: {fileID: 5674980600679151536, guid: 2e48096bb79fe6d428b40bb10d80342b, type: 3}
+  Particles: []
+  ParticleTypeCounts:
+    m_Keys: 
+    m_Values: 
 --- !u!4 &311369362
 Transform:
   m_ObjectHideFlags: 0

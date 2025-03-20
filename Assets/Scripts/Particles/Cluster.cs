@@ -1,324 +1,147 @@
+using NaughtyAttributes;
+using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
+
+public enum ParticleTypes
+{
+    Defense,
+    Speed,
+    Attack,
+    Projectile
+}
 
 public class Cluster : MonoBehaviour
 {
-    public List<Particle> Swarm { get; set; } = new List<Particle>();
-    public int Id { get; set; }
+    public static Cluster Instance;
 
-    public Array2D<float> InternalForces;
-    public Array2D<float> ExternalForces;
-    public Array2D<float> InternalMins;
-    public Array2D<float> ExternalMins;
-    public Array2D<float> InternalRadii;
-    public Array2D<float> ExternalRadii;
+    [SerializeField] private GameObject _particlePrefab;
 
-    public float MaxInternalRadii { get; set; }
-    public float MaxExternalRadii { get; set; }
-    public Vector3 Center;
-    public float ActiveRadius; // Basically the distance of furthest particle from center
+    [BoxGroup("Cluster Settings")] public float PlayerControlSpeed = 5f; // Speed at which the target moves based on player input
+    [BoxGroup("Cluster Settings")] public int NumberOfTypes = 4;
+    [BoxGroup("Cluster Settings")] public int StartPopulation = 200;
+    [BoxGroup("Cluster Settings")] public SerializedDictionary<ParticleTypes, int> ParticleTypeCounts = new SerializedDictionary<ParticleTypes, int>();
+    
+    [HideInInspector] public List<Particle> Particles = new List<Particle>(); // List to hold all particles in the cluster
+    [ShowNativeProperty] public int ParticleCount => Particles.Count;
 
-    public int HitsToPlayer { get; set; } = 0;
+    [BoxGroup("Particle Physics")] public float ParticleRadius = 0.3f; // Radius for particle interactions
+    [BoxGroup("Particle Physics")] public float Friction = 0.9f;
+    [BoxGroup("Particle Physics")] public float ParticleSpeed = 3f;
+    [BoxGroup("Particle Physics")] public float ParticleMaxSpeed = 5f; // Maximum speed for particles
+    [BoxGroup("Particle Physics")] public float ParticleSteeringStrength = 1f; // Maximum speed for particles
+    [BoxGroup("Particle Physics")] public Array2D<float> AttractionMatrix;
 
-    public int numParticles = 40;
-
-    private GameObject _particlePrefab;
-    public int _numTypes;
-
-    public float ProximityScore { get; private set; }
-    public int TotalParticlesDestroyed { get; private set; }
-
-    private Player _player;
-
-    // Add these fields to manage attack timing
-    private float _attackCooldown = 3f; // Time between attacks
-    private float _attackTimer = 3f;    // Timer to track cooldown
-    private float _attackRange = 10f;   // Range within which the cluster can attack
-
+    private GameObject particleParent; // Parent object to hold all particles, NOT this gameObject
 
     private void Awake()
     {
-        // Initialize particle prefab and number of types from ParticleManager
-        _particlePrefab = ParticleManager.Instance.ParticlePrefab;
-        _numTypes = ParticleManager.Instance.NumberOfTypes;
-        _player = FindFirstObjectByType<Player>();
-    }
-
-    public void Initialize(float x, float y)
-    {
-        // Initialize force matrices and generate new particles
-        InitializeForceMatrices();
-        GenerateNew(x, y);
-    }
-
-    private void InitializeForceMatrices()
-    {
-        // Initialize the force matrices based on the number of types
-        InternalForces = new Array2D<float>(_numTypes, _numTypes);
-        ExternalForces = new Array2D<float>(_numTypes, _numTypes);
-        InternalMins = new Array2D<float>(_numTypes, _numTypes);
-        ExternalMins = new Array2D<float>(_numTypes, _numTypes);
-        InternalRadii = new Array2D<float>(_numTypes, _numTypes);
-        ExternalRadii = new Array2D<float>(_numTypes, _numTypes);
-
-        // Initialize with default or random values
-        for (int i = 0; i < _numTypes; i++)
+        // Singleton Implementation
+        if (Instance == null)
         {
-            for (int j = 0; j < _numTypes; j++)
-            {
-                InternalForces[i, j] = Random.Range(ParticleManager.Instance.InternalForceRange.x, ParticleManager.Instance.InternalForceRange.y);
-                ExternalForces[i, j] = Random.Range(ParticleManager.Instance.ExternalForceRange.x, ParticleManager.Instance.ExternalForceRange.y);
-                InternalMins[i, j] = Random.Range(ParticleManager.Instance.InternalMinDistanceRange.x, ParticleManager.Instance.InternalMinDistanceRange.y);
-                ExternalMins[i, j] = Random.Range(ParticleManager.Instance.ExternalMinDistanceRange.x, ParticleManager.Instance.ExternalMinDistanceRange.y);
-                InternalRadii[i, j] = Random.Range(ParticleManager.Instance.InternalRadiusRange.x, ParticleManager.Instance.InternalRadiusRange.y);
-                ExternalRadii[i, j] = Random.Range(ParticleManager.Instance.ExternalRadiusRange.x, ParticleManager.Instance.ExternalRadiusRange.y);
-            }
+            Instance = this;
         }
-
-        // Set the maximum radii for quick reference
-        MaxInternalRadii = ParticleManager.Instance.InternalRadiusRange.y;
-        MaxExternalRadii = ParticleManager.Instance.ExternalRadiusRange.y;
-    }
-
-    private void GenerateNew(float x, float y)
-    {
-        // Clear the current swarm and generate new particles
-        Swarm = new List<Particle>();
-
-        for (int i = 0; i < numParticles; i++)
+        else
         {
-            Vector3 spawnPos;
-
-            // Generate a small random offset
-            Vector3 randomOffset = new Vector3(
-                Random.Range(-0.5f, 0.5f),
-                Random.Range(-0.5f, 0.5f),
-                0
-            );
-
-            spawnPos = new Vector3(x, y, 0) + randomOffset;
-
-            // Instantiate the particle at the cluster position plus the random offset
-            GameObject particleObj = Instantiate(
-                _particlePrefab,
-                spawnPos,
-                Quaternion.identity
-            );
-            Particle newParticle = particleObj.GetComponent<Particle>();
-
-            int particleType;
-
-            // Ensure a certain percentage of particles are of the projectile type
-            if (Random.value < 0.2f) // 20% chance to be the projectile type
-            {
-                particleType = 0; // Projectile type
-            }
-            else
-            {
-                particleType = Random.Range(1, _numTypes); // Other types
-            }
-
-            // Initialize the particle
-            newParticle.Initialize(particleType, this);
-            newParticle.transform.parent = this.transform;
-            Swarm.Add(newParticle);
-        }
-
-        // Adjust the center of the cluster
-        AdjustCenter();
-
-        _attackTimer = Random.Range(3f, 7f); // Add some randomness to the cooldown
-    }
-
-
-    public void UpdateCluster()
-    {
-        // Remove null particles from the swarm
-        Swarm.RemoveAll(p => p == null);
-
-        // Adjust the center of the cluster
-        AdjustCenter();
-
-        // Apply forces and behaviors to each particle
-        foreach (Particle particle in Swarm)
-        {
-            if (particle == null) continue;
-
-            particle.ApplyInternalForces(this);
-            // particle.ApplyExternalForces(this);
-            particle.ApplyPlayerAttraction();
-            particle.ApplyCohesion();
-        }
-
-        // Update the attack timer
-        _attackTimer -= Time.deltaTime;
-
-        // Check if the cluster is near the player and ready to attack
-        if (_attackTimer <= 0f && Vector3.Distance(Center, _player.transform.position) <= _attackRange)
-        {
-            // Check if there are any projectile particles available
-            if (Swarm.Exists(p => p.Type == 0))
-            {
-                // Launch a particle at the player
-                LaunchParticleAtPlayer(5f, 15f);
-
-                // Reset the attack timer
-                _attackTimer = _attackCooldown;
-                _attackTimer += Random.Range(3f, 7f); // Add some randomness to the cooldown
-            }
-            else
-            {
-                // No projectile particles left, optionally adjust behavior
-                // For example, set a shorter cooldown before checking again
-                _attackTimer = 1f;
-            }
-        }
-        PickUpNeutralParticles();
-    }
-
-
-
-    public void AdjustCenter()
-    {
-        // Adjust the center of the cluster based on the positions of the particles
-        if (Swarm.Count == 0) return;
-
-        Vector3 sum = Vector3.zero;
-
-        foreach (Particle p in Swarm)
-        {
-            if (p == null) continue;
-            sum += p.Position;
-        }
-
-        Center = sum / Swarm.Count;
-
-        // Update the active radius based on the furthest particle from the center
-        ActiveRadius = 0f;
-        foreach (Particle p in Swarm)
-        {
-            if (p == null) continue;
-
-            float distance = Vector3.Distance(Center, p.Position);
-            if (distance > ActiveRadius)
-            {
-                ActiveRadius = distance;
-            }
-        }
-    }
-
-    // Draw debug lines and circles
-    private void OnDrawGizmos()
-    {
-        if (Swarm == null) return;
-
-        // Draw lines between particles
-        if (ParticleManager.Instance.DrawParticleLines)
-        {
-            for (int i = 0; i < Swarm.Count; i++)
-            {
-                for (int j = i + 1; j < Swarm.Count; j++)
-                {
-                    if (Swarm[i] == null || Swarm[j] == null) continue;
-                    Gizmos.color = Color.white;
-                    Gizmos.DrawLine(Swarm[i].Position, Swarm[j].Position);
-                }
-            }
-        }
-
-        // Draw circles visualizing radius
-        if (ParticleManager.Instance.DrawClusterCircles)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(Center, ActiveRadius);
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(Center, 0.1f);
-        }
-    }
-
-    public void UpdateForceParameters()
-    {
-        // Update the force matrices based on current ranges from ParticleManager
-        for (int i = 0; i < _numTypes; i++)
-        {
-            for (int j = 0; j < _numTypes; j++)
-            {
-                InternalForces[i, j] = Random.Range(ParticleManager.Instance.InternalForceRange.x, ParticleManager.Instance.InternalForceRange.y);
-                ExternalForces[i, j] = Random.Range(ParticleManager.Instance.ExternalForceRange.x, ParticleManager.Instance.ExternalForceRange.y);
-                InternalMins[i, j] = Random.Range(ParticleManager.Instance.InternalMinDistanceRange.x, ParticleManager.Instance.InternalMinDistanceRange.y);
-                ExternalMins[i, j] = Random.Range(ParticleManager.Instance.ExternalMinDistanceRange.x, ParticleManager.Instance.ExternalMinDistanceRange.y);
-                InternalRadii[i, j] = Random.Range(ParticleManager.Instance.InternalRadiusRange.x, ParticleManager.Instance.InternalRadiusRange.y);
-                ExternalRadii[i, j] = Random.Range(ParticleManager.Instance.ExternalRadiusRange.x, ParticleManager.Instance.ExternalRadiusRange.y);
-            }
-        }
-
-        // Update maximum radii in case ranges have changed
-        MaxInternalRadii = ParticleManager.Instance.InternalRadiusRange.y;
-        MaxExternalRadii = ParticleManager.Instance.ExternalRadiusRange.y;
-    }
-
-    public void ReportParticleProximity(float minimalDistance)
-    {
-        // Invert the minimal distance to make closer distances contribute more to the score
-        float proximityContribution = 1f / (minimalDistance + 0.001f); // Adding a small value to prevent division by zero
-        ProximityScore += proximityContribution;
-        TotalParticlesDestroyed++;
-    }
-
-    public void LaunchParticleAtPlayer(float launchSpeed, float maxTravelDistance)
-    {
-        if (Swarm.Count == 0) return;
-
-        int projectileType = 0; // The particle type designated as the projectile
-
-        // Find a particle of the projectile type in the swarm
-        Particle particleToLaunch = Swarm.Find(p => p.Type == projectileType);
-
-        if (particleToLaunch == null)
-        {
-            // No particles of the projectile type are available
+            Destroy(gameObject);
             return;
         }
 
-        // Remove the particle from the swarm
-        Swarm.Remove(particleToLaunch);
+        // Initialize the attraction matrix with some random values
+        AttractionMatrix = new Array2D<float>(NumberOfTypes, NumberOfTypes);
+        for (int i = 0; i < NumberOfTypes; i++)
+        {
+            for (int j = 0; j < NumberOfTypes; j++)
+            {
+                AttractionMatrix[i, j] = Random.Range(0.01f, 1f);
+            }
 
-        // Detach the particle from the cluster
-        particleToLaunch.transform.parent = null;
-
-        // Calculate the direction towards the player
-        Vector3 direction = (_player.transform.position - particleToLaunch.Position).normalized;
-
-        // Launch the particle
-        particleToLaunch.Launch(direction, launchSpeed, maxTravelDistance);
-
-        // Set the particle's color to white
-        particleToLaunch.SetColor(Color.white);
-
-        // Mark the particle as a projectile
-        particleToLaunch.IsProjectile = true;
+            // Also using this loop to initialize the particle type counts
+            ParticleTypeCounts.Add(Particle.ParticleTypeToEnum(i), 0); // Initialize count for each type
+        }
     }
 
-    private void PickUpNeutralParticles()
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        float pickUpRadius = 2.0f; // Adjust as needed
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(Center, pickUpRadius);
-        foreach (var collider in colliders)
+        particleParent = new GameObject("Player Particles Holder");
+
+        for (int i = 0; i < StartPopulation; i++)
         {
-            Particle particle = collider.GetComponent<Particle>();
-            if (particle != null && particle.IsNeutral)
+            // Instantiate a new particle and set its type
+            GameObject newParticle = Instantiate(_particlePrefab, Random.insideUnitCircle, Quaternion.identity, particleParent.transform);
+            ParticleTypes randomType = Particle.ParticleTypeToEnum(Random.Range(0, NumberOfTypes));
+            newParticle.name = $"Particle {i} ({randomType.ToString()})";
+            Particle particleComponent = newParticle.GetComponent<Particle>();
+            if (particleComponent != null)
             {
-                // Assign the particle to this cluster
-                particle.IsNeutral = false;
-                particle.ParentCluster = this;
+                particleComponent.SetType(randomType); // Assuming NewParticle has a Type property
+                particleComponent.Id = i;
 
-                // Set the particle's color based on this cluster's type
-                particle.SetColorByType();
-
-                // Add the particle to the swarm
-                Swarm.Add(particle);
+                particleComponent.Cluster = this;
             }
         }
     }
 
+    void Update()
+    {
+        // Example: using keyboard input to control the cluster's target position
+        float moveX = Input.GetAxis("Horizontal");
+        float moveY = Input.GetAxis("Vertical");
+        Vector3 input = new Vector3(moveX, moveY, 0);
+
+        int speedParticleCount = ParticleTypeCounts[ParticleTypes.Speed];
+        float speedBonusPerParticle = 0.1f; // 10% bonus per speed particle, adjust as needed
+
+        // Compute a multiplier so that more type 2 particles boost the speed.
+        float speedMultiplier = 1.0f + (speedParticleCount * speedBonusPerParticle);
+
+        // Update the cluster target smoothly based on input
+        transform.position += input * Time.deltaTime * PlayerControlSpeed * speedMultiplier;
+
+        if(Input.GetKeyDown(KeyCode.P))
+        {
+            PrintTypes();
+        }
+    }
+
+    public void ResetParticleCounts()
+    {
+        Particles.Clear();
+        ParticleTypeCounts.Clear(); // Clear previous counts
+        for(int i = 0; i < particleParent.transform.childCount; i++)
+        {
+            Particle temp = particleParent.transform.GetChild(i).GetComponent<Particle>();
+            if (temp != null)
+            {
+                ParticleTypeCounts[temp.Type]++; // Increment the count for this type
+                Particles.Add(temp); // Add the particle to the cluster's list
+            }
+        }
+    }
+
+    private void PrintTypes()
+    {
+        foreach (var kvp in ParticleTypeCounts)
+        {
+            Debug.Log($"Type {kvp.Key}: {kvp.Value} particles");
+        }
+    }
+
+    public static Color GetColorByType(int type)
+    {
+        if (Instance.NumberOfTypes <= 1)
+        {
+            // Default to red if there's only one type
+            return Color.HSVToRGB(0f, 1f, 1f);
+        }
+
+        float hue = (float)type / Instance.NumberOfTypes;
+
+        Color color = Color.HSVToRGB(hue, 1f, 1f);
+
+        return color;
+    }
 }

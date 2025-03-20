@@ -1,379 +1,136 @@
+using Mono.Cecil;
+using System;
 using UnityEngine;
-using NaughtyAttributes;
 
 public class Particle : MonoBehaviour
 {
-    public Vector3 Position = Vector3.zero;
+    public ParticleTypes Type;
+    public int Id;
+    public float Health = 10f; // Health of the particle
 
-    public Vector3 Velocity;
+    private Rigidbody2D _rb;
 
-    [ShowNativeProperty]
-    public int Type { get; private set; }
+    private Vector2 force;
 
-    [ShowNativeProperty]
-    public int Id { get; private set; }
+    public Cluster Cluster;
 
-    public Cluster ParentCluster;
-
-    private Transform _transform;
-    private SpriteRenderer _spriteRenderer;
-
-    public float MinimalDistanceToPlayer { get; private set; }
-
-    private Transform _playerTransform;
-
-    private bool _isLaunched = false;
-    private float _maxTravelDistance;
-    private Vector3 _launchPosition;
-    public bool IsProjectile { get; set; } = false;
-    public bool IsNeutral { get; set; } = false;
-    private Vector3 _launchStartPosition;
-
-
-    public void SetColor(Color color)
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        if (IsNeutral)
+        _rb = GetComponent<Rigidbody2D>();
+
+        Initialize();
+    }
+
+    public void Initialize()
+    {
+        if(Cluster == null)
         {
-            _spriteRenderer.color = Color.gray; // Neutral color
+            // Cluster = NewCluster.Instance; // We want to avoid this if possible. If this is happening, we're doing something wrong.
+            Debug.LogError("Cluster is not set for the particle. Please assign it in the inspector or through code.");
+            return;
         }
-        else
+        Cluster.Particles.Add(this); // Add this particle to the cluster's list
+        Cluster.ParticleTypeCounts[Type]++; // Increment the count for this type
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        // Compute forces from nearby particles as before
+        force = Vector2.zero;
+
+        // 1. Compute the natural attraction forces from neighboring particles.
+        Vector2 interactionForce = Vector2.zero;
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 2);
+        foreach (Collider2D collider in colliders)
         {
-            _spriteRenderer.color = color;
-        }
-    }
-
-    public void SetColorByType()
-    {
-        Color color = GetColorForType(Type, ParentCluster._numTypes);
-        SetColor(color);
-    }
-
-    //private void SetColorByType()
-    //{
-    //    if (IsProjectile) return; // Do not change color if it's a projectile
-
-    //    if (_spriteRenderer != null)
-    //    {
-    //        int totalTypes = ParticleManager.Instance.NumberOfTypes;
-    //        Color color = GetColorForType(Type, totalTypes);
-    //        _spriteRenderer.color = color;
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning($"SpriteRenderer not found on Particle {Id}");
-    //    }
-    //}
-
-    private void Awake()
-    {
-        // Cache the transform and sprite renderer components
-        _transform = GetComponent<Transform>();
-        Position = _transform.position;
-
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-
-        _playerTransform = ParticleManager.Instance.player.transform;
-        MinimalDistanceToPlayer = float.MaxValue;
-    }
-
-    public void Initialize(int type, Cluster parentCluster)
-    {
-        Type = type;
-        ParentCluster = parentCluster;
-        IsNeutral = false;
-        SetColorByType();
-        // Set initial velocity 
-        Velocity = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
-            0
-        );
-    }
-
-    private void Update()
-    {
-        if (_isLaunched)
-        {
-            float traveledDistance = Vector3.Distance(Position, _launchStartPosition);
-            if (traveledDistance >= _maxTravelDistance)
+            if (collider.TryGetComponent(out Particle otherParticle))
             {
-                _isLaunched = false;
-                IsNeutral = true;
-                Velocity = Vector3.zero;
-
-                // Remove from the previous cluster
-                if (ParentCluster != null)
-                {
-                    ParentCluster.Swarm.Remove(this);
-                    ParentCluster = null;
-                }
-
-                // Set neutral color
-                SetColor(Color.gray);
+                float distance = Vector2.Distance(transform.position, otherParticle.transform.position);
+                Vector2 direction = (otherParticle.transform.position - transform.position).normalized;
+                interactionForce += direction * CalculateForce(distance, Cluster.AttractionMatrix[(int)Type, (int)otherParticle.Type]);
             }
         }
-        else if (IsNeutral)
+
+        // 2. Compute the arrival steering force based on distance to the cluster's target.
+        Vector2 targetPos = (Vector2)Cluster.transform.position;
+        Vector2 toTarget = targetPos - (Vector2)transform.position;
+        float distanceToTarget = toTarget.magnitude;
+
+        // Compute the base desired speed
+        float baseDesiredSpeed = distanceToTarget * Cluster.ParticleSpeed;
+
+        // Get the global count of speed particles (type 2)
+        int speedParticleCount = Cluster.ParticleTypeCounts[ParticleTypes.Speed];
+        float speedBonusPerParticle = 0.2f; // 10% bonus per speed particle, adjust as needed
+
+        // Compute a multiplier so that more type 2 particles boost the speed.
+        float speedMultiplier = 1.0f + (speedParticleCount * speedBonusPerParticle);
+
+        // Calculate the final desired speed with bonus, clamped by maxSpeed.
+        float desiredSpeed = Mathf.Min(baseDesiredSpeed * speedMultiplier, Cluster.ParticleMaxSpeed * speedMultiplier);
+
+        if(Id == 2)
         {
-            // Optional: Add subtle movement or let them drift
-            Velocity *= 0.99f; // Slow down over time
-        }
-        else
-        {
-            // Original behavior for active particles
-            ApplyInternalForces(ParentCluster);
-            ApplyExternalForces(ParentCluster);
-            ApplyPlayerAttraction();
-            ApplyCohesion();
+            Debug.Log($"Id: {Id}, SpeedParticleCount: {speedParticleCount}, SpeedMultiplier: {speedMultiplier}, DesiredSpeed: {desiredSpeed}");
         }
 
-        ConstrainPosition();
-        Position += Velocity * Time.deltaTime;
-        _transform.position = Position;
+        // Compute the desired velocity vector.
+        Vector2 desiredVelocity = toTarget.normalized * desiredSpeed;
+
+        // Compute the steering force (PD control could be used here if desired)
+        Vector2 steeringForce = (desiredVelocity - _rb.linearVelocity) * Cluster.ParticleSteeringStrength;
+
+        // 3. Combine the natural interaction force with a weighted arrival force.
+        float arrivalWeight = 0.1f; // Lower weight to ensure natural cell behavior remains dominant
+        Vector2 combinedForce = interactionForce + (steeringForce * arrivalWeight);
+
+        force = combinedForce;
     }
 
+    private void FixedUpdate()
+    {
+        _rb.AddForce(force, ForceMode2D.Force);
+        _rb.linearVelocity *= Cluster.Friction; // Apply friction to slow down the particles
+    }
+
+    private float CalculateForce(float distance, float attractionValue)
+    {
+        float radius = Cluster.ParticleRadius;
+
+        if (distance < radius)
+        {
+            return (distance / radius) - 1;
+        }
+        else if (radius < distance && distance < 1)
+        {
+            return attractionValue * (1 - Mathf.Abs(2 * distance - 1 - radius) / (1 - radius));
+        }
+
+        return 0;
+    }
+
+    public void SetType(int type) { SetType(ParticleTypeToEnum(type)); }
+    public void SetType(ParticleTypes newType)
+    {
+        // Set type and also color based on type
+        Color color = Cluster.GetColorByType((int)newType);
+        GetComponent<SpriteRenderer>().color = color;
+
+        Type = newType;
+    }
+
+    public static ParticleTypes ParticleTypeToEnum(int type)
+    {
+        return (ParticleTypes)(type % Cluster.Instance.NumberOfTypes);
+    }
 
     private void OnDestroy()
     {
-        // Report minimal distance to parent cluster
-        if (ParentCluster != null)
-        {
-            ParentCluster.ReportParticleProximity(MinimalDistanceToPlayer);
-        }
+        if (Cluster == null) return;
 
-        // Remove from Swarm
-        if (ParentCluster != null && ParentCluster.Swarm != null)
-        {
-            ParentCluster.Swarm.Remove(this);
-        }
+        Cluster.Particles.Remove(this); // Remove this particle from the cluster's list
+        Cluster.ParticleTypeCounts[Type]--; // Decrement the count for this type
     }
-
-
-    private Color GetColorForType(int type, int totalTypes)
-    {
-        if (totalTypes <= 1)
-        {
-            // Default to red if there's only one type
-            return Color.HSVToRGB(0f, 1f, 1f);
-        }
-
-        float hue = (float)type / (totalTypes - 1);
-
-        Color color = Color.HSVToRGB(hue, 1f, 1f);
-
-        return color;
-    }
-
-    public void ApplyInternalForces(Cluster cluster)
-    {
-        if (this == null || _transform == null || cluster == null) return;
-
-        Vector3 totalForce = Vector3.zero;
-
-        foreach (Particle particle in cluster.Swarm)
-        {
-            if (particle == this || particle == null) continue;
-
-            Vector3 direction = particle.Position - Position;
-
-            float distance = direction.magnitude;
-            direction.Normalize();
-
-            // Repulsive forces
-            if (distance < cluster.InternalMins[Type, particle.Type])
-            {
-                Vector3 force = direction * Mathf.Abs(cluster.InternalForces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
-                force *= Map(distance, 0, Mathf.Abs(cluster.InternalMins[Type, particle.Type]), 1, 0) * ParticleManager.Instance.Dampening;
-                totalForce += force;
-            }
-
-            // Attractive forces
-            if (distance < cluster.InternalRadii[Type, particle.Type])
-            {
-                Vector3 force = direction * cluster.InternalForces[Type, particle.Type];
-                force *= Map(distance, 0, cluster.InternalRadii[Type, particle.Type], 1, 0) * ParticleManager.Instance.Dampening;
-                totalForce += force;
-            }
-        }
-
-        // Apply forces smoothly
-        Velocity += totalForce * Time.deltaTime;
-        Position += Velocity * Time.deltaTime;
-        Velocity *= ParticleManager.Instance.Friction;
-
-        ConstrainPosition();
-
-        if (_transform != null)
-            _transform.position = Position;
-    }
-
-    public void ApplyExternalForces(Cluster cluster)
-    {
-        if (this == null || _transform == null || cluster == null) return;
-
-        Vector3 totalForce = Vector3.zero;
-
-        foreach (Cluster otherCluster in ParticleManager.Instance.Clusters)
-        {
-            if (otherCluster == cluster || otherCluster == null) continue;
-            if (Vector2.Distance(cluster.Center, otherCluster.Center) > cluster.MaxExternalRadii) continue;
-
-            foreach (Particle particle in otherCluster.Swarm)
-            {
-                if (particle == null) continue;
-
-                Vector3 direction = particle.Position - Position;
-
-                float distance = direction.magnitude;
-                direction.Normalize();
-
-                // Repulsive forces
-                if (distance < cluster.ExternalMins[Type, particle.Type])
-                {
-                    Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
-                    force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[Type, particle.Type]), 1, 0) * ParticleManager.Instance.Dampening;
-                    totalForce += force;
-                }
-
-                // Attractive forces 
-                if (distance < cluster.ExternalRadii[Type, particle.Type])
-                {
-                    Vector3 force = direction * cluster.ExternalForces[Type, particle.Type];
-                    force *= Map(distance, 0, cluster.ExternalRadii[Type, particle.Type], 1, 0) * ParticleManager.Instance.Dampening;
-                    totalForce += force;
-                }
-            }
-        }
-
-        // Apply forces smoothly
-        Velocity += totalForce * Time.deltaTime;
-        Position += Velocity * Time.deltaTime;
-        Velocity *= ParticleManager.Instance.Friction;
-
-        ConstrainPosition();
-
-        if (_transform != null)
-            _transform.position = Position;
-    }
-
-    public void ApplyPlayerAttraction()
-    {
-        if (_transform == null || ParticleManager.Instance.player == null) return;
-
-        Vector3 targetPosition = Position;
-
-        // Attract to specific player points based on particle type
-        if (Type % 2 == 0)
-            targetPosition = ParticleManager.Instance.player.frontPoint.position;
-        else if (Type % 2 == 1)
-            targetPosition = ParticleManager.Instance.player.backPoint.position;
-        else
-            return;
-
-        Vector3 direction = targetPosition - Position;
-
-        float distance = direction.magnitude;
-        direction.Normalize();
-
-        float attractionStrength = ParticleManager.Instance.PlayerAttractionStrength;
-
-        // Calculate attraction force
-        Vector3 attractionForce = direction * attractionStrength * Map(distance, 0, 10f, 1f, 0f);
-
-        // Apply force
-        Velocity += attractionForce * Time.deltaTime;
-
-        ConstrainPosition();
-    }
-
-    private float Map(float value, float inMin, float inMax, float outMin, float outMax)
-    {
-        value = Mathf.Clamp(value, inMin, inMax);
-        return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            // Notify the parent cluster of the hit
-            ParentCluster.HitsToPlayer++;
-
-            // Destroy the particle
-            Destroy(gameObject);
-        }
-    }
-
-    public void UpdatePosition()
-    {
-        // Update the particle's position based on its velocity and other forces
-        Position += Velocity * Time.deltaTime;
-        transform.position = Position;
-    }
-
-    public void ApplyCohesion()
-    {
-        if (ParentCluster == null) return;
-
-        Vector3 direction = ParentCluster.Center - Position;
-
-        float distance = direction.magnitude;
-        direction.Normalize();
-
-        // Use the CohesionStrength from ParticleManager
-        float cohesionStrength = ParticleManager.Instance.CohesionStrength;
-
-        // Apply cohesion force
-        Vector3 cohesionForce = direction * cohesionStrength;
-
-        Velocity += cohesionForce * Time.deltaTime;
-    }
-
-    // This is used to keep the particles within the defined game-boundaries
-    private void ConstrainPosition()
-    {
-        float halfX = ParticleManager.Instance.HalfScreenSpace.x;
-        float halfY = ParticleManager.Instance.HalfScreenSpace.y;
-
-        // --- Optional: apply a border repulsion force if too close to the edge ---
-        float borderThreshold = 1.0f;     // distance from the border at which to start repelling
-        float repulsionStrength = 10.0f;    // adjust this to change how strongly particles are pushed inward
-        Vector3 borderForce = Vector3.zero;
-
-        // Check left border
-        if (Position.x - (-halfX) < borderThreshold)
-            borderForce.x += repulsionStrength * (1 - (Position.x - (-halfX)) / borderThreshold);
-        // Check right border
-        if (halfX - Position.x < borderThreshold)
-            borderForce.x -= repulsionStrength * (1 - (halfX - Position.x) / borderThreshold);
-        // Check bottom border
-        if (Position.y - (-halfY) < borderThreshold)
-            borderForce.y += repulsionStrength * (1 - (Position.y - (-halfY)) / borderThreshold);
-        // Check top border
-        if (halfY - Position.y < borderThreshold)
-            borderForce.y -= repulsionStrength * (1 - (halfY - Position.y) / borderThreshold);
-
-        // Apply the repulsion force (scaled by deltaTime for consistency)
-        Velocity += borderForce * Time.deltaTime;
-
-        // --- Clamp the position so particles never go out-of-bounds ---
-        float clampedX = Mathf.Clamp(Position.x, -halfX, halfX);
-        float clampedY = Mathf.Clamp(Position.y, -halfY, halfY);
-        Position = new Vector3(clampedX, clampedY, Position.z);
-
-        // Reset velocity in a direction if the particle is at the boundary and moving further out
-        if (clampedX == -halfX && Velocity.x < 0) Velocity.x = 0;
-        if (clampedX == halfX && Velocity.x > 0) Velocity.x = 0;
-        if (clampedY == -halfY && Velocity.y < 0) Velocity.y = 0;
-        if (clampedY == halfY && Velocity.y > 0) Velocity.y = 0;
-    }
-
-    public void Launch(Vector3 direction, float speed, float maxDistance)
-    {
-        _isLaunched = true;
-        IsNeutral = false;
-        _maxTravelDistance = maxDistance;
-        _launchStartPosition = Position;
-        Velocity = direction.normalized * speed;
-    }
-
 }

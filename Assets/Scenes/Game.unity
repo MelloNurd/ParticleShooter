@@ -241,6 +241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   confiner: {fileID: 119345405}
+  boxCollider: {fileID: 0}
 --- !u!1 &307559140
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,7 +617,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8371855377387520600, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -823,7 +824,7 @@ MonoBehaviour:
   InternalRadiusRange: {x: 0.5, y: 2}
   ExternalRadiusRange: {x: 2, y: 3}
   CohesionStrength: 2
-  StartPopulation: 1
+  StartPopulation: 20
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}

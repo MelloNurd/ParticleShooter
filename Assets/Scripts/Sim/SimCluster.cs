@@ -94,7 +94,7 @@ namespace NaughtyAttributes
 
         // Used to copy the values from a parent cell to a daughter cell.
         // (I don't trust deep copy when data structures get complex :)
-        public void CopyCell(Cluster colony)
+        public void CopyCell(SimCluster colony)
         {
 
             for (int i = 0; i < _numTypes; i++)

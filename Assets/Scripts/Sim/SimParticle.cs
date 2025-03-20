@@ -13,7 +13,7 @@ namespace NaughtyAttributes
         [ShowNativeProperty] public int Type { get; set; } // Determines the type of the particle, as well as the color
         [ShowNativeProperty] public int Id { get; set; } // Can be used to single out specific particles
 
-        public Cluster ParentCluster;
+        public SimCluster ParentCluster;
 
         private Transform _transform; // Caching the object's transform. Very slight performance gain.
 
@@ -105,7 +105,7 @@ namespace NaughtyAttributes
             _transform.position = Position;
         }
 
-        public void ApplyExternalForces(Cluster cluster)
+        public void ApplyExternalForces(SimCluster cluster)
         {
             Vector3 totalForce = Vector3.zero;
 

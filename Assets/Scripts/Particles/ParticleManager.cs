@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
+using System;
 
 public class ParticleManager : MonoBehaviour
 {
@@ -29,10 +30,7 @@ public class ParticleManager : MonoBehaviour
     [HideInInspector]
     public Vector2 HalfScreenSpace;
 
-    [BoxGroup("Simulation Configuration")]
-    [OnValueChanged("Restart")]
-    [Range(1, 32)]
-    public int NumberOfTypes = 5;
+    [ReadOnly] public int numberOfTypes;
 
     [BoxGroup("Simulation Configuration")]
     [Tooltip("Set to false to disable clusters evolving/dying over time.")]
@@ -99,6 +97,8 @@ public class ParticleManager : MonoBehaviour
 
     private void Awake()
     {
+        numberOfTypes = Enum.GetNames(typeof(ParticleType)).Length;
+
         // Singleton initialization
         if (Instance == null)
         {
@@ -268,7 +268,7 @@ public class ParticleManager : MonoBehaviour
         {
             for (int j = 0; j < size1; j++)
             {
-                float mutation = Random.Range(-0.1f, 0.1f);
+                float mutation = UnityEngine.Random.Range(-0.1f, 0.1f);
                 mutatedMatrix[i, j] = matrix[i, j] + mutation;
             }
         }
@@ -349,8 +349,8 @@ public class ParticleManager : MonoBehaviour
         do
         {
             newPos = new Vector3(
-                Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
-                Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
+                UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
+                UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
             0);
         }
         while (Vector2.Distance(newPos, player.transform.position) < 6 && awayFromPlayer); // Continue generating new positions if they are too close to the player

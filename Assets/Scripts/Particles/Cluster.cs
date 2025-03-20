@@ -4,6 +4,7 @@ using UnityEngine;
 public class Cluster : MonoBehaviour
 {
     public List<Particle> Swarm { get; set; } = new List<Particle>();
+    public Dictionary<ParticleType, int> ParticleTypeCounts = new Dictionary<ParticleType, int>();
     public int Id { get; set; }
 
     public Array2D<float> InternalForces;
@@ -35,12 +36,11 @@ public class Cluster : MonoBehaviour
     private float _attackTimer = 3f;    // Timer to track cooldown
     private float _attackRange = 10f;   // Range within which the cluster can attack
 
-
     private void Awake()
     {
         // Initialize particle prefab and number of types from ParticleManager
         _particlePrefab = ParticleManager.Instance.ParticlePrefab;
-        _numTypes = ParticleManager.Instance.NumberOfTypes;
+        _numTypes = ParticleManager.Instance.numberOfTypes;
         _player = FindFirstObjectByType<Player>();
     }
 
@@ -106,22 +106,22 @@ public class Cluster : MonoBehaviour
             );
             Particle newParticle = particleObj.GetComponent<Particle>();
 
-            int particleType;
-
-            // Ensure a certain percentage of particles are of the projectile type
-            if (Random.value < 0.2f) // 20% chance to be the projectile type
-            {
-                particleType = 0; // Projectile type
-            }
-            else
-            {
-                particleType = Random.Range(1, _numTypes); // Other types
-            }
-
             // Initialize the particle
-            newParticle.Initialize(particleType, this);
+            ParticleType type = newParticle.Initialize(this, i);
+            particleObj.name = "Particle " + i + " (" + type.ToString() + ")";
+
             newParticle.transform.parent = this.transform;
             Swarm.Add(newParticle);
+            if(!ParticleTypeCounts.ContainsKey(type))
+            {
+                ParticleTypeCounts[type] = 0; // Initialize count for this type if not present
+            }
+            ParticleTypeCounts[type]++;
+        }
+
+        foreach (var kvp in ParticleTypeCounts)
+        {
+            Debug.Log($"Particle Type: {kvp.Key}, Count: {kvp.Value}");
         }
 
         // Adjust the center of the cluster
@@ -157,7 +157,7 @@ public class Cluster : MonoBehaviour
         if (_attackTimer <= 0f && Vector3.Distance(Center, _player.transform.position) <= _attackRange)
         {
             // Check if there are any projectile particles available
-            if (Swarm.Exists(p => p.Type == 0))
+            if (Swarm.Exists(p => p.type == 0))
             {
                 // Launch a particle at the player
                 LaunchParticleAtPlayer(5f, 15f);
@@ -173,7 +173,6 @@ public class Cluster : MonoBehaviour
                 _attackTimer = 1f;
             }
         }
-        PickUpNeutralParticles();
     }
 
 
@@ -188,7 +187,7 @@ public class Cluster : MonoBehaviour
         foreach (Particle p in Swarm)
         {
             if (p == null) continue;
-            sum += p.Position;
+            sum += p.position;
         }
 
         Center = sum / Swarm.Count;
@@ -199,7 +198,7 @@ public class Cluster : MonoBehaviour
         {
             if (p == null) continue;
 
-            float distance = Vector3.Distance(Center, p.Position);
+            float distance = Vector3.Distance(Center, p.position);
             if (distance > ActiveRadius)
             {
                 ActiveRadius = distance;
@@ -221,7 +220,7 @@ public class Cluster : MonoBehaviour
                 {
                     if (Swarm[i] == null || Swarm[j] == null) continue;
                     Gizmos.color = Color.white;
-                    Gizmos.DrawLine(Swarm[i].Position, Swarm[j].Position);
+                    Gizmos.DrawLine(Swarm[i].position, Swarm[j].position);
                 }
             }
         }
@@ -272,7 +271,7 @@ public class Cluster : MonoBehaviour
         int projectileType = 0; // The particle type designated as the projectile
 
         // Find a particle of the projectile type in the swarm
-        Particle particleToLaunch = Swarm.Find(p => p.Type == projectileType);
+        Particle particleToLaunch = Swarm.Find(p => p.stats.TypeInt == projectileType);
 
         if (particleToLaunch == null)
         {
@@ -287,7 +286,7 @@ public class Cluster : MonoBehaviour
         particleToLaunch.transform.parent = null;
 
         // Calculate the direction towards the player
-        Vector3 direction = (_player.transform.position - particleToLaunch.Position).normalized;
+        Vector3 direction = (_player.transform.position - particleToLaunch.position).normalized;
 
         // Launch the particle
         particleToLaunch.Launch(direction, launchSpeed, maxTravelDistance);
@@ -298,27 +297,4 @@ public class Cluster : MonoBehaviour
         // Mark the particle as a projectile
         particleToLaunch.IsProjectile = true;
     }
-
-    private void PickUpNeutralParticles()
-    {
-        float pickUpRadius = 2.0f; // Adjust as needed
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(Center, pickUpRadius);
-        foreach (var collider in colliders)
-        {
-            Particle particle = collider.GetComponent<Particle>();
-            if (particle != null && particle.IsNeutral)
-            {
-                // Assign the particle to this cluster
-                particle.IsNeutral = false;
-                particle.ParentCluster = this;
-
-                // Set the particle's color based on this cluster's type
-                particle.SetColorByType();
-
-                // Add the particle to the swarm
-                Swarm.Add(particle);
-            }
-        }
-    }
-
 }

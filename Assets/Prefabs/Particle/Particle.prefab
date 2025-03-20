@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8401487593879834752}
   - component: {fileID: -6154581062664968211}
   - component: {fileID: 1788390239782810131}
-  - component: {fileID: 7793839721720781861}
   m_Layer: 3
   m_Name: Particle
   m_TagString: Particle
@@ -138,17 +137,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e34b6130f34ac54db07e220a6bc52f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  position: {x: 0, y: 0, z: 0}
+  velocity: {x: 0, y: 0, z: 0}
+  stats:
+    TypeInt: 0
+    health: 0
+    speed: 0
+  type: 0
   ParentCluster: {fileID: 0}
---- !u!114 &7793839721720781861
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5191945715267185580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 701ed2cee2818b84cbfc236a62c48db4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: 10

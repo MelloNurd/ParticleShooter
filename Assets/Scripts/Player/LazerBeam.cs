@@ -75,8 +75,8 @@ public class LazerBeam : MonoBehaviour
                 break; // Only hit the first _maxHits particles, instead of just going through all
             }
 
-            if (hits[i].transform.TryGetComponent(out ParticleHealth particle)) {
-                particle.Damage(damage);
+            if (hits[i].transform.TryGetComponent(out Particle particle)) {
+                particle.stats.Damage(damage);
             }
         }
 

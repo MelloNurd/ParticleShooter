@@ -1,17 +1,15 @@
 using UnityEngine;
 using NaughtyAttributes;
+using System;
 
 public class Particle : MonoBehaviour
 {
-    public Vector3 Position = Vector3.zero;
+    public Vector3 position = Vector3.zero;
 
-    public Vector3 Velocity;
+    public Vector3 velocity;
+    public ParticleStats stats;
 
-    [ShowNativeProperty]
-    public int Type { get; private set; }
-
-    [ShowNativeProperty]
-    public int Id { get; private set; }
+    public ParticleType type;
 
     public Cluster ParentCluster;
 
@@ -26,49 +24,35 @@ public class Particle : MonoBehaviour
     private float _maxTravelDistance;
     private Vector3 _launchPosition;
     public bool IsProjectile { get; set; } = false;
-    public bool IsNeutral { get; set; } = false;
     private Vector3 _launchStartPosition;
 
 
+    public void SetColor() => SetColor(stats.GetColorByType());
     public void SetColor(Color color)
     {
-        if (IsNeutral)
-        {
-            _spriteRenderer.color = Color.gray; // Neutral color
-        }
-        else
-        {
-            _spriteRenderer.color = color;
-        }
+        _spriteRenderer.color = color;
     }
 
-    public void SetColorByType()
+    private Color GetColorForType(int type, int totalTypes)
     {
-        Color color = GetColorForType(Type, ParentCluster._numTypes);
-        SetColor(color);
+        if (totalTypes <= 1)
+        {
+            // Default to red if there's only one type
+            return Color.HSVToRGB(0f, 1f, 1f);
+        }
+
+        float hue = (float)type / (totalTypes - 1);
+
+        Color color = Color.HSVToRGB(hue, 1f, 1f);
+
+        return color;
     }
-
-    //private void SetColorByType()
-    //{
-    //    if (IsProjectile) return; // Do not change color if it's a projectile
-
-    //    if (_spriteRenderer != null)
-    //    {
-    //        int totalTypes = ParticleManager.Instance.NumberOfTypes;
-    //        Color color = GetColorForType(Type, totalTypes);
-    //        _spriteRenderer.color = color;
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning($"SpriteRenderer not found on Particle {Id}");
-    //    }
-    //}
 
     private void Awake()
     {
         // Cache the transform and sprite renderer components
         _transform = GetComponent<Transform>();
-        Position = _transform.position;
+        position = _transform.position;
 
         _spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -76,30 +60,34 @@ public class Particle : MonoBehaviour
         MinimalDistanceToPlayer = float.MaxValue;
     }
 
-    public void Initialize(int type, Cluster parentCluster)
+    public ParticleType Initialize(Cluster parentCluster, int id)
     {
-        Type = type;
         ParentCluster = parentCluster;
-        IsNeutral = false;
-        SetColorByType();
+
         // Set initial velocity 
-        Velocity = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
+        velocity = new Vector3(
+            UnityEngine.Random.Range(-1f, 1f),
+            UnityEngine.Random.Range(-1f, 1f),
             0
         );
+
+        ParticleType type = (ParticleType)UnityEngine.Random.Range(0, Enum.GetValues(typeof(ParticleType)).Length); // Temp; Random type
+        stats = new ParticleStats(this, id, type);
+
+        SetColor();
+
+        return type;
     }
 
     private void Update()
     {
         if (_isLaunched)
         {
-            float traveledDistance = Vector3.Distance(Position, _launchStartPosition);
+            float traveledDistance = Vector3.Distance(position, _launchStartPosition);
             if (traveledDistance >= _maxTravelDistance)
             {
                 _isLaunched = false;
-                IsNeutral = true;
-                Velocity = Vector3.zero;
+                velocity = Vector3.zero;
 
                 // Remove from the previous cluster
                 if (ParentCluster != null)
@@ -112,11 +100,6 @@ public class Particle : MonoBehaviour
                 SetColor(Color.gray);
             }
         }
-        else if (IsNeutral)
-        {
-            // Optional: Add subtle movement or let them drift
-            Velocity *= 0.99f; // Slow down over time
-        }
         else
         {
             // Original behavior for active particles
@@ -127,8 +110,8 @@ public class Particle : MonoBehaviour
         }
 
         ConstrainPosition();
-        Position += Velocity * Time.deltaTime;
-        _transform.position = Position;
+        position += velocity * Time.deltaTime;
+        _transform.position = position;
     }
 
 
@@ -147,22 +130,6 @@ public class Particle : MonoBehaviour
         }
     }
 
-
-    private Color GetColorForType(int type, int totalTypes)
-    {
-        if (totalTypes <= 1)
-        {
-            // Default to red if there's only one type
-            return Color.HSVToRGB(0f, 1f, 1f);
-        }
-
-        float hue = (float)type / (totalTypes - 1);
-
-        Color color = Color.HSVToRGB(hue, 1f, 1f);
-
-        return color;
-    }
-
     public void ApplyInternalForces(Cluster cluster)
     {
         if (this == null || _transform == null || cluster == null) return;
@@ -173,37 +140,37 @@ public class Particle : MonoBehaviour
         {
             if (particle == this || particle == null) continue;
 
-            Vector3 direction = particle.Position - Position;
+            Vector3 direction = particle.position - position;
 
             float distance = direction.magnitude;
             direction.Normalize();
 
             // Repulsive forces
-            if (distance < cluster.InternalMins[Type, particle.Type])
+            if (distance < cluster.InternalMins[stats.TypeInt, particle.stats.TypeInt])
             {
-                Vector3 force = direction * Mathf.Abs(cluster.InternalForces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
-                force *= Map(distance, 0, Mathf.Abs(cluster.InternalMins[Type, particle.Type]), 1, 0) * ParticleManager.Instance.Dampening;
+                Vector3 force = direction * Mathf.Abs(cluster.InternalForces[stats.TypeInt, particle.stats.TypeInt]) * ParticleManager.Instance.RepulsionEffector;
+                force *= Map(distance, 0, Mathf.Abs(cluster.InternalMins[stats.TypeInt, particle.stats.TypeInt]), 1, 0) * ParticleManager.Instance.Dampening;
                 totalForce += force;
             }
 
             // Attractive forces
-            if (distance < cluster.InternalRadii[Type, particle.Type])
+            if (distance < cluster.InternalRadii[stats.TypeInt, particle.stats.TypeInt])
             {
-                Vector3 force = direction * cluster.InternalForces[Type, particle.Type];
-                force *= Map(distance, 0, cluster.InternalRadii[Type, particle.Type], 1, 0) * ParticleManager.Instance.Dampening;
+                Vector3 force = direction * cluster.InternalForces[stats.TypeInt, particle.stats.TypeInt];
+                force *= Map(distance, 0, cluster.InternalRadii[stats.TypeInt, particle.stats.TypeInt], 1, 0) * ParticleManager.Instance.Dampening;
                 totalForce += force;
             }
         }
 
         // Apply forces smoothly
-        Velocity += totalForce * Time.deltaTime;
-        Position += Velocity * Time.deltaTime;
-        Velocity *= ParticleManager.Instance.Friction;
+        velocity += totalForce * Time.deltaTime;
+        position += velocity * Time.deltaTime;
+        velocity *= ParticleManager.Instance.Friction;
 
         ConstrainPosition();
 
         if (_transform != null)
-            _transform.position = Position;
+            _transform.position = position;
     }
 
     public void ApplyExternalForces(Cluster cluster)
@@ -221,55 +188,55 @@ public class Particle : MonoBehaviour
             {
                 if (particle == null) continue;
 
-                Vector3 direction = particle.Position - Position;
+                Vector3 direction = particle.position - position;
 
                 float distance = direction.magnitude;
                 direction.Normalize();
 
                 // Repulsive forces
-                if (distance < cluster.ExternalMins[Type, particle.Type])
+                if (distance < cluster.ExternalMins[stats.TypeInt, particle.stats.TypeInt])
                 {
-                    Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[Type, particle.Type]) * ParticleManager.Instance.RepulsionEffector;
-                    force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[Type, particle.Type]), 1, 0) * ParticleManager.Instance.Dampening;
+                    Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[stats.TypeInt, particle.stats.TypeInt]) * ParticleManager.Instance.RepulsionEffector;
+                    force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[stats.TypeInt, particle.stats.TypeInt]), 1, 0) * ParticleManager.Instance.Dampening;
                     totalForce += force;
                 }
 
                 // Attractive forces 
-                if (distance < cluster.ExternalRadii[Type, particle.Type])
+                if (distance < cluster.ExternalRadii[stats.TypeInt, particle.stats.TypeInt])
                 {
-                    Vector3 force = direction * cluster.ExternalForces[Type, particle.Type];
-                    force *= Map(distance, 0, cluster.ExternalRadii[Type, particle.Type], 1, 0) * ParticleManager.Instance.Dampening;
+                    Vector3 force = direction * cluster.ExternalForces[stats.TypeInt, particle.stats.TypeInt];
+                    force *= Map(distance, 0, cluster.ExternalRadii[stats.TypeInt, particle.stats.TypeInt], 1, 0) * ParticleManager.Instance.Dampening;
                     totalForce += force;
                 }
             }
         }
 
         // Apply forces smoothly
-        Velocity += totalForce * Time.deltaTime;
-        Position += Velocity * Time.deltaTime;
-        Velocity *= ParticleManager.Instance.Friction;
+        velocity += totalForce * Time.deltaTime;
+        position += velocity * Time.deltaTime;
+        velocity *= ParticleManager.Instance.Friction;
 
         ConstrainPosition();
 
         if (_transform != null)
-            _transform.position = Position;
+            _transform.position = position;
     }
 
     public void ApplyPlayerAttraction()
     {
         if (_transform == null || ParticleManager.Instance.player == null) return;
 
-        Vector3 targetPosition = Position;
+        Vector3 targetPosition = position;
 
         // Attract to specific player points based on particle type
-        if (Type % 2 == 0)
+        if (stats.TypeInt % 2 == 0)
             targetPosition = ParticleManager.Instance.player.frontPoint.position;
-        else if (Type % 2 == 1)
+        else if (stats.TypeInt % 2 == 1)
             targetPosition = ParticleManager.Instance.player.backPoint.position;
         else
             return;
 
-        Vector3 direction = targetPosition - Position;
+        Vector3 direction = targetPosition - position;
 
         float distance = direction.magnitude;
         direction.Normalize();
@@ -280,7 +247,7 @@ public class Particle : MonoBehaviour
         Vector3 attractionForce = direction * attractionStrength * Map(distance, 0, 10f, 1f, 0f);
 
         // Apply force
-        Velocity += attractionForce * Time.deltaTime;
+        velocity += attractionForce * Time.deltaTime;
 
         ConstrainPosition();
     }
@@ -306,15 +273,15 @@ public class Particle : MonoBehaviour
     public void UpdatePosition()
     {
         // Update the particle's position based on its velocity and other forces
-        Position += Velocity * Time.deltaTime;
-        transform.position = Position;
+        position += velocity * Time.deltaTime;
+        transform.position = position;
     }
 
     public void ApplyCohesion()
     {
         if (ParentCluster == null) return;
 
-        Vector3 direction = ParentCluster.Center - Position;
+        Vector3 direction = ParentCluster.Center - position;
 
         float distance = direction.magnitude;
         direction.Normalize();
@@ -325,7 +292,7 @@ public class Particle : MonoBehaviour
         // Apply cohesion force
         Vector3 cohesionForce = direction * cohesionStrength;
 
-        Velocity += cohesionForce * Time.deltaTime;
+        velocity += cohesionForce * Time.deltaTime;
     }
 
     // This is used to keep the particles within the defined game-boundaries
@@ -340,40 +307,39 @@ public class Particle : MonoBehaviour
         Vector3 borderForce = Vector3.zero;
 
         // Check left border
-        if (Position.x - (-halfX) < borderThreshold)
-            borderForce.x += repulsionStrength * (1 - (Position.x - (-halfX)) / borderThreshold);
+        if (position.x - (-halfX) < borderThreshold)
+            borderForce.x += repulsionStrength * (1 - (position.x - (-halfX)) / borderThreshold);
         // Check right border
-        if (halfX - Position.x < borderThreshold)
-            borderForce.x -= repulsionStrength * (1 - (halfX - Position.x) / borderThreshold);
+        if (halfX - position.x < borderThreshold)
+            borderForce.x -= repulsionStrength * (1 - (halfX - position.x) / borderThreshold);
         // Check bottom border
-        if (Position.y - (-halfY) < borderThreshold)
-            borderForce.y += repulsionStrength * (1 - (Position.y - (-halfY)) / borderThreshold);
+        if (position.y - (-halfY) < borderThreshold)
+            borderForce.y += repulsionStrength * (1 - (position.y - (-halfY)) / borderThreshold);
         // Check top border
-        if (halfY - Position.y < borderThreshold)
-            borderForce.y -= repulsionStrength * (1 - (halfY - Position.y) / borderThreshold);
+        if (halfY - position.y < borderThreshold)
+            borderForce.y -= repulsionStrength * (1 - (halfY - position.y) / borderThreshold);
 
         // Apply the repulsion force (scaled by deltaTime for consistency)
-        Velocity += borderForce * Time.deltaTime;
+        velocity += borderForce * Time.deltaTime;
 
         // --- Clamp the position so particles never go out-of-bounds ---
-        float clampedX = Mathf.Clamp(Position.x, -halfX, halfX);
-        float clampedY = Mathf.Clamp(Position.y, -halfY, halfY);
-        Position = new Vector3(clampedX, clampedY, Position.z);
+        float clampedX = Mathf.Clamp(position.x, -halfX, halfX);
+        float clampedY = Mathf.Clamp(position.y, -halfY, halfY);
+        position = new Vector3(clampedX, clampedY, position.z);
 
         // Reset velocity in a direction if the particle is at the boundary and moving further out
-        if (clampedX == -halfX && Velocity.x < 0) Velocity.x = 0;
-        if (clampedX == halfX && Velocity.x > 0) Velocity.x = 0;
-        if (clampedY == -halfY && Velocity.y < 0) Velocity.y = 0;
-        if (clampedY == halfY && Velocity.y > 0) Velocity.y = 0;
+        if (clampedX == -halfX && velocity.x < 0) velocity.x = 0;
+        if (clampedX == halfX && velocity.x > 0) velocity.x = 0;
+        if (clampedY == -halfY && velocity.y < 0) velocity.y = 0;
+        if (clampedY == halfY && velocity.y > 0) velocity.y = 0;
     }
 
     public void Launch(Vector3 direction, float speed, float maxDistance)
     {
         _isLaunched = true;
-        IsNeutral = false;
         _maxTravelDistance = maxDistance;
-        _launchStartPosition = Position;
-        Velocity = direction.normalized * speed;
+        _launchStartPosition = position;
+        velocity = direction.normalized * speed;
     }
 
 }

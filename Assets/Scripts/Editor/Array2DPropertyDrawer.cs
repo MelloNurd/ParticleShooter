@@ -74,7 +74,7 @@ public class Array2DPropertyDrawer : PropertyDrawer
                 // X offset includes header width plus spacing for each prior column
                 float xOffset = position.x + HeaderWidth + colIndex * (columnWidth + HorizontalSpacing);
                 Rect headerRect = new Rect(xOffset, position.y, columnWidth, EditorGUIUtility.singleLineHeight);
-                Color headerColor = GetColorForType(colIndex, numTypes);
+                Color headerColor = GetColorForType(colIndex);
                 EditorGUI.DrawRect(headerRect, headerColor);
 
                 // Centered label showing the type index (or you could use "Type " + colIndex)
@@ -101,7 +101,7 @@ public class Array2DPropertyDrawer : PropertyDrawer
 
                 // Draw the row header (first cell in the row)
                 Rect rowHeaderRect = new Rect(position.x, position.y, HeaderWidth, EditorGUIUtility.singleLineHeight);
-                Color rowHeaderColor = GetColorForType(rowIndex, numTypes);
+                Color rowHeaderColor = GetColorForType(rowIndex);
                 EditorGUI.DrawRect(rowHeaderRect, rowHeaderColor);
                 GUIStyle centeredStyle = new GUIStyle(EditorStyles.label)
                 {
@@ -160,14 +160,18 @@ public class Array2DPropertyDrawer : PropertyDrawer
     }
 
     // This method calculates a color based on type index and total types.
-    private Color GetColorForType(int type, int totalTypes)
+    private Color GetColorForType(int type)
     {
-        if (totalTypes <= 1)
+        return (ParticleType)type switch
         {
-            return Color.HSVToRGB(0f, 1f, 1f);
-        }
-        float hue = (float)type / (totalTypes);
-        Color color = Color.HSVToRGB(hue, 1f, 1f);
-        return color;
+            ParticleType.Fire => new Color(1f, 0.5f, 0f),
+            ParticleType.Ice => Color.blue,
+            ParticleType.Electric => Color.yellow,
+            ParticleType.Attack => Color.red,
+            ParticleType.Defense => Color.green,
+            ParticleType.Speed => Color.magenta,
+            ParticleType.Neutral => Color.white, // Neutral
+            _ => Color.gray, // Default
+        };
     }
 }

@@ -453,6 +453,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5449931805518395528, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5968707764475774731, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -680,14 +684,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DrawParticleLines: 0
-  DrawClusterCircles: 1
+  DrawClusterCircles: 0
   player: {fileID: 1713353514}
   PlayerAttractionStrength: 3
   ParticleDamage: 10
   Clusters: []
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
-  ScreenSpace: {x: 32, y: 32}
+  ScreenSpace: {x: 24, y: 24}
   HalfScreenSpace: {x: 0, y: 0}
   numberOfTypes: 5
   RunGame: 0
@@ -702,7 +706,7 @@ MonoBehaviour:
   InternalRadiusRange: {x: 0.5, y: 2}
   ExternalRadiusRange: {x: 2, y: 3}
   CohesionStrength: 2
-  StartPopulation: 1
+  StartPopulation: 40
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}

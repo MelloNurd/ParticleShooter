@@ -85,6 +85,13 @@ public class ParticleManager : MonoBehaviour
 
     private int _runningClusterCount = 0;
 
+    private void ChangeTimescale() // This is just used in the inspector to update the time scale when changed
+    {
+        if (!Application.isPlaying) return;
+        
+        Time.timeScale = _timeScale;
+    }
+
 
     private void Awake()
     {
@@ -192,16 +199,16 @@ public class ParticleManager : MonoBehaviour
 
         Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
 
-        // Temporary, placeholder for testing
-        Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
-        {
-            { ParticleType.Neutral, 3 },
-            { ParticleType.Fire, 3 },
-            { ParticleType.Defense, 3 },
-            { ParticleType.Speed, 3 }
-        };
+        // Example for how to initialize a dictionary for spawning
+        //Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
+        //{
+        //    { ParticleType.Neutral, 3 },
+        //    { ParticleType.Fire, 3 },
+        //    { ParticleType.Defense, 3 },
+        //    { ParticleType.Speed, 3 }
+        //};
 
-        newCluster.Initialize(pos.x, pos.y, defaultParticleCounts);
+        newCluster.Initialize(pos.x, pos.y, 30);
         newCluster.Id = _runningClusterCount++;
 
         newCluster.gameObject.name = "Cluster";

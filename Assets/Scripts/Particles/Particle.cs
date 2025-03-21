@@ -53,18 +53,6 @@ public class Particle : MonoBehaviour
         SetColor();
     }
 
-    private void Update()
-    {
-        // Original behavior for active particles
-        ApplyInternalForces(ParentCluster);
-        ApplyExternalForces(ParentCluster);
-        ApplyCohesion();
-
-        position += velocity * Time.deltaTime;
-        _transform.position = position;
-    }
-
-
     private void OnDestroy()
     {
         // Remove from Swarm
@@ -150,6 +138,28 @@ public class Particle : MonoBehaviour
                     force *= Map(distance, 0, cluster.ExternalRadii[stats.TypeInt, particle.stats.TypeInt], 1, 0) * ParticleManager.Instance.Dampening;
                     totalForce += force;
                 }
+            }
+        }
+
+        // Apply forces for player (last column)
+        if (_playerTransform != null)
+        {
+            Vector3 direction = _playerTransform.position - position;
+            float distance = direction.magnitude;
+            direction.Normalize();
+            // Repulsive forces
+            if (distance < cluster.ExternalMins[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
+            {
+                Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes]) * ParticleManager.Instance.RepulsionEffector;
+                force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[stats.TypeInt, ParticleManager.Instance.numberOfTypes]), 1, 0) * ParticleManager.Instance.Dampening;
+                totalForce += force;
+            }
+            // Attractive forces 
+            if (distance < cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
+            {
+                Vector3 force = direction * cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes];
+                force *= Map(distance, 0, cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes], 1, 0) * ParticleManager.Instance.Dampening;
+                totalForce += force;
             }
         }
 

@@ -50,22 +50,26 @@ public class Cluster : MonoBehaviour
     {
         // Initialize the force matrices based on the number of types
         InternalForces = new Array2D<float>(_numTypes, _numTypes);
-        ExternalForces = new Array2D<float>(_numTypes, _numTypes);
+        ExternalForces = new Array2D<float>(_numTypes, _numTypes + 1);
         InternalMins = new Array2D<float>(_numTypes, _numTypes);
-        ExternalMins = new Array2D<float>(_numTypes, _numTypes);
+        ExternalMins = new Array2D<float>(_numTypes, _numTypes + 1);
         InternalRadii = new Array2D<float>(_numTypes, _numTypes);
-        ExternalRadii = new Array2D<float>(_numTypes, _numTypes);
+        ExternalRadii = new Array2D<float>(_numTypes, _numTypes + 1);
 
         // Initialize with default or random values
         for (int i = 0; i < _numTypes; i++)
         {
-            for (int j = 0; j < _numTypes; j++)
+            for (int j = 0; j < _numTypes + 1; j++)
             {
-                InternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalForceRange.x, ParticleManager.Instance.InternalForceRange.y);
+                if(j < _numTypes) // We only apply the last column to External Forces
+                {
+                    InternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalForceRange.x, ParticleManager.Instance.InternalForceRange.y);
+                    InternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalMinDistanceRange.x, ParticleManager.Instance.InternalMinDistanceRange.y);
+                    InternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalRadiusRange.x, ParticleManager.Instance.InternalRadiusRange.y);
+                }
+
                 ExternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalForceRange.x, ParticleManager.Instance.ExternalForceRange.y);
-                InternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalMinDistanceRange.x, ParticleManager.Instance.InternalMinDistanceRange.y);
                 ExternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalMinDistanceRange.x, ParticleManager.Instance.ExternalMinDistanceRange.y);
-                InternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalRadiusRange.x, ParticleManager.Instance.InternalRadiusRange.y);
                 ExternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalRadiusRange.x, ParticleManager.Instance.ExternalRadiusRange.y);
             }
         }
@@ -147,11 +151,6 @@ public class Cluster : MonoBehaviour
             Swarm.Add(newParticle);
         }
 
-        foreach (var kvp in ParticleTypeCounts)
-        {
-            Debug.Log($"Particle Type: {kvp.Key}, Count: {kvp.Value}");
-        }
-
         // Adjust the center of the cluster
         AdjustCenter();
     }
@@ -167,7 +166,7 @@ public class Cluster : MonoBehaviour
             if (particle == null) continue;
 
             particle.ApplyInternalForces(this);
-            // particle.ApplyExternalForces(this);
+            particle.ApplyExternalForces(this);
             particle.ApplyCohesion();
         }
     }

@@ -212,21 +212,21 @@ public class Player : MonoBehaviour
     {
         if (collision.CompareTag("Particle") && currentInvincibilityTime <= 0)
         {
-            currentInvincibilityTime = invincibilityTime;
-            overShield.SetActive(true);
-            currentHealth -= ParticleManager.Instance.ParticleDamage;
+            //currentInvincibilityTime = invincibilityTime;
+            //overShield.SetActive(true);
+            //currentHealth -= ParticleManager.Instance.ParticleDamage;
 
-            // Calculate knockback direction
-            Vector2 difference = (transform.position - collision.transform.position).normalized;
-            rb.AddForce(difference * knockbackForce, ForceMode2D.Impulse);
+            //// Calculate knockback direction
+            //Vector2 difference = (transform.position - collision.transform.position).normalized;
+            //rb.AddForce(difference * knockbackForce, ForceMode2D.Impulse);
 
-            if (currentHealth <= 0 && !hasDied)
-            {
-                healthSlider.value = 0;
-                onDeath?.Invoke();
-                hasDied = true;
-                gameObject.SetActive(false);
-            }
+            //if (currentHealth <= 0 && !hasDied)
+            //{
+            //    healthSlider.value = 0;
+            //    onDeath?.Invoke();
+            //    hasDied = true;
+            //    gameObject.SetActive(false);
+            //}
         }
         if (collision.CompareTag("HealthPack"))
         {

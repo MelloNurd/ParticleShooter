@@ -85,15 +85,6 @@ public class ParticleManager : MonoBehaviour
 
     private int _runningClusterCount = 0;
 
-    // Weights for adjusting the importance of hits and proximity
-    private const float HitsWeight = 1f;
-    private const float ProximityWeight = 0.5f; // Adjust this value based on desired influence
-
-    // Method to change the timescale of the simulation
-    private void ChangeTimescale()
-    {
-        Time.timeScale = _timeScale;
-    }
 
     private void Awake()
     {
@@ -139,92 +130,10 @@ public class ParticleManager : MonoBehaviour
             Restart();
         }
 
-        // Check for cluster extinction
-        CheckForClusterExtinction();
-
         // Update all clusters
         foreach (Cluster cluster in Clusters)
         {
             cluster.UpdateCluster();
-        }
-    }
-
-    private void CheckForClusterExtinction()
-    {
-        for (int i = Clusters.Count - 1; i >= 0; i--)
-        {
-            Cluster cluster = Clusters[i];
-            if (cluster.Swarm.Count == 0 || cluster.Swarm.Count <= cluster.numParticles * 0.1f)
-            {
-                // Find and spawn mutated versions of the most successful cluster
-                FindMostSuccessfulClusterAndSpawn();
-
-                Clusters.RemoveAt(i);
-                Destroy(cluster.gameObject);
-                RemoveLeastSuccessfulCluster();
-            }
-        }
-    }
-
-    // Method to find the most successful cluster and spawn mutated versions
-    public void FindMostSuccessfulClusterAndSpawn()
-    {
-        Cluster mostSuccessful = null;
-        float maxSuccessScore = float.MinValue;
-
-        foreach (var cluster in Clusters)
-        {
-            // Calculate success score
-            float hitsScore = cluster.HitsToPlayer;
-            float proximityScore = cluster.ProximityScore;
-            float successScore = hitsScore * HitsWeight + proximityScore * ProximityWeight;
-
-            if (successScore > maxSuccessScore)
-            {
-                maxSuccessScore = successScore;
-                mostSuccessful = cluster;
-            }
-        }
-
-        if (mostSuccessful != null)
-        {
-            // Spawn mutated versions of the most successful cluster
-            SpawnMutatedCluster(mostSuccessful);
-            SpawnMutatedCluster(mostSuccessful);
-        }
-        else
-        {
-            // If no successful cluster exists, create a new random cluster
-            CreateCluster();
-        }
-    }
-
-    public void RemoveLeastSuccessfulCluster()
-    {
-        if (Clusters.Count == 0)
-            return;
-
-        Cluster leastSuccessful = null;
-        float minSuccessScore = float.MaxValue;
-
-        foreach (var cluster in Clusters)
-        {
-            // Calculate success score
-            float hitsScore = cluster.HitsToPlayer;
-            float proximityScore = cluster.ProximityScore;
-            float successScore = hitsScore * HitsWeight + proximityScore * ProximityWeight;
-
-            if (successScore < minSuccessScore)
-            {
-                minSuccessScore = successScore;
-                leastSuccessful = cluster;
-            }
-        }
-
-        if (leastSuccessful != null)
-        {
-            Clusters.Remove(leastSuccessful);
-            Destroy(leastSuccessful.gameObject);
         }
     }
 
@@ -235,7 +144,6 @@ public class ParticleManager : MonoBehaviour
         Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
 
         // Copy the base cluster's properties
-        newCluster.numParticles = baseCluster.numParticles;
         newCluster.MaxInternalRadii = baseCluster.MaxInternalRadii;
         newCluster.MaxExternalRadii = baseCluster.MaxExternalRadii;
 
@@ -250,7 +158,7 @@ public class ParticleManager : MonoBehaviour
         newCluster.InternalRadii = MutateForceMatrix(baseCluster.InternalRadii);
         newCluster.ExternalRadii = MutateForceMatrix(baseCluster.ExternalRadii);
 
-        newCluster.Initialize(pos.x, pos.y);
+        newCluster.Initialize(pos.x, pos.y, baseCluster.ParticleTypeCounts);
         newCluster.Id = _runningClusterCount++;
         newCluster.gameObject.name = $"Cluster (Mutated from {baseCluster.Id})";
 
@@ -283,7 +191,17 @@ public class ParticleManager : MonoBehaviour
         Vector2 pos = GetRandomPointOnScreen();
 
         Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
-        newCluster.Initialize(pos.x, pos.y);
+
+        // Temporary, placeholder for testing
+        Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
+        {
+            { ParticleType.Neutral, 3 },
+            { ParticleType.Fire, 3 },
+            { ParticleType.Defense, 3 },
+            { ParticleType.Speed, 3 }
+        };
+
+        newCluster.Initialize(pos.x, pos.y, defaultParticleCounts);
         newCluster.Id = _runningClusterCount++;
 
         newCluster.gameObject.name = "Cluster";

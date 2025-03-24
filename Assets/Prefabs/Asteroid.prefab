@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1372093770364546548}
   m_Layer: 0
-  m_Name: SmallCraters
+  m_Name: SmallMines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -833,6 +833,7 @@ GameObject:
   - component: {fileID: 3485747058794867260}
   - component: {fileID: 6116757883025333676}
   - component: {fileID: 3799132128286438251}
+  - component: {fileID: 6268016715372904274}
   m_Layer: 0
   m_Name: Asteroid
   m_TagString: Untagged
@@ -1063,6 +1064,35 @@ PolygonCollider2D:
       - {x: -0.645, y: -2.3}
       - {x: -0.435, y: -2.1699998}
   m_UseDelaunayMesh: 0
+--- !u!114 &6268016715372904274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5501443064775622469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40a709484fcb5f043b58cdeca236d6b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LargeMines:
+  - {fileID: 2699993902561573676}
+  - {fileID: 5697361783850338029}
+  - {fileID: 995640380627215181}
+  - {fileID: 4545650835565202455}
+  SmallMines:
+  - {fileID: 4841433473051465212}
+  - {fileID: 613298012781399816}
+  - {fileID: 7021661146124562042}
+  - {fileID: 657320604045864283}
+  - {fileID: 4889633035590804636}
+  - {fileID: 9201103376556304361}
+  - {fileID: 4528623472819604480}
+  - {fileID: 1145727360258968492}
+  mineEnergy: 38
+  LargeMineEnergy: 10
+  SmallMineEnergy: 1
 --- !u!1 &5697361783850338029
 GameObject:
   m_ObjectHideFlags: 0
@@ -1160,7 +1190,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6864907993681280423}
   m_Layer: 0
-  m_Name: BigCraters
+  m_Name: LargeMines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

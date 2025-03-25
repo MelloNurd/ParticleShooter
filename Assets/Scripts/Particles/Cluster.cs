@@ -23,14 +23,11 @@ public class Cluster : MonoBehaviour
     private GameObject _particlePrefab;
     public int _numTypes;
 
-    private Player _player;
-
     private void Awake()
     {
         // Initialize particle prefab and number of types from ParticleManager
         _particlePrefab = ParticleManager.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
-        _player = FindFirstObjectByType<Player>();
     }
 
     public void Initialize(float x, float y, Dictionary<ParticleType, int> particleTypes)
@@ -56,27 +53,40 @@ public class Cluster : MonoBehaviour
         InternalRadii = new Array2D<float>(_numTypes, _numTypes);
         ExternalRadii = new Array2D<float>(_numTypes, _numTypes + 1);
 
+        // Temporarily cache ParticleManager ranges
+        Vector2 internalForceRange = ParticleManager.Instance.InternalForceRange;
+        Vector2 externalForceRange = ParticleManager.Instance.ExternalForceRange;
+        Vector2 internalMinDistanceRange = ParticleManager.Instance.InternalMinDistanceRange;
+        Vector2 externalMinDistanceRange = ParticleManager.Instance.ExternalMinDistanceRange;
+        Vector2 internalRadiusRange = ParticleManager.Instance.InternalRadiusRange;
+        Vector2 externalRadiusRange = ParticleManager.Instance.ExternalRadiusRange;
+
         // Initialize with default or random values
         for (int i = 0; i < _numTypes; i++)
         {
             for (int j = 0; j < _numTypes + 1; j++)
             {
-                if(j < _numTypes) // We only apply the last column to External Forces
+                if (j >= _numTypes) // For the last loop (_numTypes + 1), only adjust external
                 {
-                    InternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalForceRange.x, ParticleManager.Instance.InternalForceRange.y);
-                    InternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalMinDistanceRange.x, ParticleManager.Instance.InternalMinDistanceRange.y);
-                    InternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalRadiusRange.x, ParticleManager.Instance.InternalRadiusRange.y);
+                    ExternalForces[i, j] = externalForceRange.y;
+                    ExternalMins[i, j] = externalMinDistanceRange.y;
+                    ExternalRadii[i, j] = externalRadiusRange.y;
+
+                    break;
                 }
 
-                ExternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalForceRange.x, ParticleManager.Instance.ExternalForceRange.y);
-                ExternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalMinDistanceRange.x, ParticleManager.Instance.ExternalMinDistanceRange.y);
-                ExternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalRadiusRange.x, ParticleManager.Instance.ExternalRadiusRange.y);
+                InternalForces[i, j] = UnityEngine.Random.Range(internalForceRange.x, internalForceRange.y);
+                InternalMins[i, j] = UnityEngine.Random.Range(internalMinDistanceRange.x, internalMinDistanceRange.y);
+                InternalRadii[i, j] = UnityEngine.Random.Range(internalRadiusRange.x, internalRadiusRange.y);
+                ExternalForces[i, j] = UnityEngine.Random.Range(externalForceRange.x, externalForceRange.y);
+                ExternalMins[i, j] = UnityEngine.Random.Range(externalMinDistanceRange.x, externalMinDistanceRange.y);
+                ExternalRadii[i, j] = UnityEngine.Random.Range(externalRadiusRange.x, externalRadiusRange.y);
             }
         }
 
         // Set the maximum radii for quick reference
-        MaxInternalRadii = ParticleManager.Instance.InternalRadiusRange.y;
-        MaxExternalRadii = ParticleManager.Instance.ExternalRadiusRange.y;
+        MaxInternalRadii = internalRadiusRange.y;
+        MaxExternalRadii = externalRadiusRange.y;
     }
 
 

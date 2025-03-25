@@ -10,13 +10,13 @@ public class LazerBeam : MonoBehaviour
     public float pierce = 1; // How many particles the beam can hit, aka pierce
     public float damage = 2;
 
-    private int _particleLayer;
+    private int _raycastLayerMask;
 
     private LineRenderer _lr;
 
     private void Start()
     {
-        _particleLayer = 1 << LayerMask.NameToLayer("Particle"); // We actually get the inverted (1 << ...) layer mask, so we can use it in the Physics2D.BoxCastAll method
+        _raycastLayerMask = (1 << LayerMask.NameToLayer("Particle")) | (1 << LayerMask.NameToLayer("Asteroid")); // We actually get the inverted (1 << ...) layer mask, so we can use it in the Physics2D.BoxCastAll method
 
         SetupLineRenderer();
     }
@@ -62,7 +62,7 @@ public class LazerBeam : MonoBehaviour
     private void FireBeam()
     {
         // Cast a beam from the player. This returns all objects hit, in order from distance.
-        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, 0.5f), 0, transform.up, fireRange, _particleLayer);
+        RaycastHit2D[] hits = Physics2D.BoxCastAll(transform.position, new Vector2(0.5f, 0.5f), 0, transform.up, fireRange, _raycastLayerMask);
 
         _lr.SetPosition(0, transform.position);
 

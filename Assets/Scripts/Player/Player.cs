@@ -113,7 +113,6 @@ public class Player : MonoBehaviour
     {
         ApplyMovementAndRotation();
         ThrusterVisualization();
-        ClampPosition();
     }
 
     private void ApplyMovementAndRotation()
@@ -177,7 +176,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void disableBlasters()
+    private void DisableBlasters()
     {
         standardBlaster.SetActive(false);
         fireBlaster.SetActive(false);
@@ -185,9 +184,9 @@ public class Player : MonoBehaviour
         electricBlaster.SetActive(false);
     }
 
-    public void swapBlaster(int blasterType)
+    public void SwapBlaster(int blasterType)
     {
-        disableBlasters();
+        DisableBlasters();
         switch (blasterType)
         {
             case 0:
@@ -210,24 +209,6 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Particle") && currentInvincibilityTime <= 0)
-        {
-            //currentInvincibilityTime = invincibilityTime;
-            //overShield.SetActive(true);
-            //currentHealth -= ParticleManager.Instance.ParticleDamage;
-
-            //// Calculate knockback direction
-            //Vector2 difference = (transform.position - collision.transform.position).normalized;
-            //rb.AddForce(difference * knockbackForce, ForceMode2D.Impulse);
-
-            //if (currentHealth <= 0 && !hasDied)
-            //{
-            //    healthSlider.value = 0;
-            //    onDeath?.Invoke();
-            //    hasDied = true;
-            //    gameObject.SetActive(false);
-            //}
-        }
         if (collision.CompareTag("HealthPack"))
         {
             currentHealth += maxHealth * 0.2f;
@@ -237,25 +218,10 @@ public class Player : MonoBehaviour
             }
             Destroy(collision.gameObject);
         }
-        if(collision.CompareTag("ExpPack"))
+        else if(collision.CompareTag("ExpPack"))
         {
             PlayerExp.Instance.AddExp(PlayerExp.Instance.levelExp * .1f);
             Destroy(collision.gameObject);
         }
     }
-
-    private void ClampPosition()
-    {
-        if (ParticleManager.Instance != null)
-        {
-            Vector2 halfScreen = ParticleManager.Instance.HalfScreenSpace;
-            Vector3 position = transform.position;
-
-            position.x = Mathf.Clamp(position.x, -halfScreen.x, halfScreen.x);
-            position.y = Mathf.Clamp(position.y, -halfScreen.y, halfScreen.y);
-
-            transform.position = position;
-        }
-    }
-
 }

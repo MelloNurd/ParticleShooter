@@ -12,7 +12,7 @@ public class BulletSwitcher : MonoBehaviour
             // Basic Ship
             if(other.GetComponent<Player>())
             {
-                other.GetComponent<Player>().swapBlaster(blasterType);
+                other.GetComponent<Player>().SwapBlaster(blasterType);
             }
             // ShipM2
             else if (other.GetComponent<PlayerM2>())

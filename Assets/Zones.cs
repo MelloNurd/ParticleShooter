@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class Zones : MonoBehaviour
 {
+    public static Zones Instance;
+
     public GameObject circlePrefab;
 
     public string homebaseName = "Homebase";
@@ -22,6 +24,19 @@ public class Zones : MonoBehaviour
     private float prevScaleIncrement;
     private float prevExponentialFactor;
     private int prevSortingOrder;
+
+    private void Awake()
+    {
+        // Singleton Implementation
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {

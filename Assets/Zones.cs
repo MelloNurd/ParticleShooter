@@ -113,4 +113,20 @@ public class Zones : MonoBehaviour
             rings.Add(circle);
         }
     }
+
+    public int GetCurrentZone(Vector3 position)
+    {
+        for (int i = 0; i < rings.Count; i++)
+        {
+            if (rings[i] != null)
+            {
+                float distance = Vector3.Distance(position, rings[i].transform.position);
+                if (distance <= rings[i].transform.localScale.x / 2)
+                {
+                    return i;
+                }
+            }
+        }
+        return -1; // Not in any zone
+    }
 }

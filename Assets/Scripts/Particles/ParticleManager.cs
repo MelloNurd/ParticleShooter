@@ -83,7 +83,9 @@ public class ParticleManager : MonoBehaviour
 
     public int StartPopulation = 5;
 
-    private int _runningClusterCount = 0;
+    [ReadOnly] public int RunningClusterCount = 0;
+
+    private GameObject _clusterParent;
 
     private void ChangeTimescale() // This is just used in the inspector to update the time scale when changed
     {
@@ -126,6 +128,8 @@ public class ParticleManager : MonoBehaviour
 
     private void Start()
     {
+        _clusterParent = new GameObject("Cluster Parent");
+        
         Initialize();
     }
 
@@ -144,60 +148,13 @@ public class ParticleManager : MonoBehaviour
         }
     }
 
-    // Method to spawn a mutated cluster based on a base cluster
-    private void SpawnMutatedCluster(Cluster baseCluster)
-    {
-        Vector2 pos = GetRandomPointOnScreen();
-        Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
-
-        // Copy the base cluster's properties
-        newCluster.MaxInternalRadii = baseCluster.MaxInternalRadii;
-        newCluster.MaxExternalRadii = baseCluster.MaxExternalRadii;
-
-        // Ensure _numTypes is set
-        newCluster._numTypes = baseCluster._numTypes;
-
-        // Copy and mutate the force matrices
-        newCluster.InternalForces = MutateForceMatrix(baseCluster.InternalForces);
-        newCluster.ExternalForces = MutateForceMatrix(baseCluster.ExternalForces);
-        newCluster.InternalMins = MutateForceMatrix(baseCluster.InternalMins);
-        newCluster.ExternalMins = MutateForceMatrix(baseCluster.ExternalMins);
-        newCluster.InternalRadii = MutateForceMatrix(baseCluster.InternalRadii);
-        newCluster.ExternalRadii = MutateForceMatrix(baseCluster.ExternalRadii);
-
-        newCluster.Initialize(pos.x, pos.y, baseCluster.ParticleTypeCounts);
-        newCluster.Id = _runningClusterCount++;
-        newCluster.gameObject.name = $"Cluster (Mutated from {baseCluster.Id})";
-
-        Clusters.Add(newCluster);
-    }
-
-    // Method to mutate a force matrix
-    private Array2D<float> MutateForceMatrix(Array2D<float> matrix)
-    {
-        int size0 = matrix.GetLength(0);
-        int size1 = matrix.GetLength(1);
-        Array2D<float> mutatedMatrix = new Array2D<float>(size0, size1);
-
-        for (int i = 0; i < size0; i++)
-        {
-            for (int j = 0; j < size1; j++)
-            {
-                float mutation = UnityEngine.Random.Range(-0.1f, 0.1f);
-                mutatedMatrix[i, j] = matrix[i, j] + mutation;
-            }
-        }
-
-        return mutatedMatrix;
-    }
-
     // Method to create a new cluster
     public Cluster CreateCluster()
     {
         //Debug.Log("Creating new cluster.");
         Vector2 pos = GetRandomPointOnScreen();
 
-        Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity).GetComponent<Cluster>();
+        Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity, _clusterParent.transform).GetComponent<Cluster>();
 
         // Example for how to initialize a dictionary for spawning
         //Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
@@ -209,27 +166,13 @@ public class ParticleManager : MonoBehaviour
         //};
 
         newCluster.Initialize(pos.x, pos.y, 30);
-        newCluster.Id = _runningClusterCount++;
+        newCluster.Id = RunningClusterCount++;
 
-        newCluster.gameObject.name = "Cluster";
+        newCluster.gameObject.name = $"Cluster {newCluster.Id}";
 
         Clusters.Add(newCluster);
 
         return newCluster;
-    }
-
-    private void OnValidate()
-    {
-        UpdateClusterParameters();
-    }
-
-    // Method to update force parameters for all clusters
-    public void UpdateClusterParameters()
-    {
-        foreach (var cluster in Clusters)
-        {
-            cluster.UpdateForceParameters();
-        }
     }
 
     private void Restart()
@@ -263,7 +206,7 @@ public class ParticleManager : MonoBehaviour
             Destroy(cluster.gameObject);
         }
 
-        _runningClusterCount = 0;
+        RunningClusterCount = 0;
     }
 
     // Method to get a random point on the screen

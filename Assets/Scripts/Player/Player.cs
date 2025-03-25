@@ -13,6 +13,8 @@ public class Player : MonoBehaviour
     public float boostRechargeRate = 2; // How fast the boost recharges
     private float boostAmount; // Handles the current amount of boost the player has (how filled the bar is)
 
+    [ShowNativeProperty] public int CurrentZone => Zones.Instance.GetCurrentZone(transform.position);
+
     private float vertMovement;
     private float horzMovement;
     private bool isBoosting;

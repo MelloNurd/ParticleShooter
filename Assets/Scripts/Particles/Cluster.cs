@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class Cluster : MonoBehaviour
 {
     public List<Particle> Swarm { get; set; } = new List<Particle>();
-    public Dictionary<ParticleType, int> ParticleTypeCounts = new Dictionary<ParticleType, int>();
+    public SerializedDictionary<ParticleType, int> ParticleTypeCounts = new SerializedDictionary<ParticleType, int>();
     public int Id { get; set; }
 
     public Array2D<float> InternalForces;
@@ -30,7 +30,7 @@ public class Cluster : MonoBehaviour
         _numTypes = ParticleManager.Instance.numberOfTypes;
     }
 
-    public void Initialize(float x, float y, Dictionary<ParticleType, int> particleTypes)
+    public void Initialize(float x, float y, SerializedDictionary<ParticleType, int> particleTypes)
     {
         // Initialize the cluster with a specific position and particle types
         InitializeForceMatrices();
@@ -89,11 +89,56 @@ public class Cluster : MonoBehaviour
         MaxExternalRadii = externalRadiusRange.y;
     }
 
+    private void MutateForceMatrices(float mutationRate = 0.1f)
+    {
+        for (int i = 0; i < _numTypes; i++)
+        {
+            for (int j = 0; j < _numTypes + 1; j++)
+            {
+                if (j >= _numTypes) // For the last loop (_numTypes + 1), only adjust external
+                {
+                    ExternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
+                    ExternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
+                    ExternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
 
-    private Dictionary<ParticleType, int> GenerateRandomParticles(int numberOfParticles)
+                    break;
+                }
+
+                InternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
+                InternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
+                InternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
+                ExternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
+                ExternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
+                ExternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
+            }
+        }
+    }
+
+    public void Reproduce()
+    {
+        // Note that this automatically creates an exact copy of the cluster, including its values
+        Cluster newCluster = Instantiate(gameObject, transform.position, Quaternion.identity, transform.parent).GetComponent<Cluster>();
+        newCluster.Id = ParticleManager.Instance.RunningClusterCount++;
+        newCluster.gameObject.name = $"Cluster {newCluster.Id} (Mutated from {Id})";
+
+        newCluster.ResetSwarm();
+        newCluster.MutateForceMatrices(0.3f);
+
+        ParticleManager.Instance.Clusters.Add(newCluster);
+    }
+
+    private void Update()
+    {
+        if (Id == (ParticleManager.Instance.RunningClusterCount-1) && Input.GetKeyDown(KeyCode.L))
+        {
+            Reproduce();
+        }
+    }
+
+    private SerializedDictionary<ParticleType, int> GenerateRandomParticles(int numberOfParticles)
     {
         // Generate a random number of particles of each type
-        Dictionary<ParticleType, int> particleCounts = new Dictionary<ParticleType, int>();
+        SerializedDictionary<ParticleType, int> particleCounts = new SerializedDictionary<ParticleType, int>();
         for (int i = 0; i < numberOfParticles; i++)
         {
             ParticleType randomType = (ParticleType)UnityEngine.Random.Range(0, _numTypes);
@@ -107,13 +152,12 @@ public class Cluster : MonoBehaviour
     }
 
     public void GenerateParticles(float x, float y, int numberOfParticles) => GenerateParticles(x, y, GenerateRandomParticles(numberOfParticles));
-    public void GenerateParticles(float x, float y, Dictionary<ParticleType, int> particleCounts)
+    public void GenerateParticles(float x, float y, SerializedDictionary<ParticleType, int> particleCounts)
     {
-        ParticleTypeCounts = particleCounts;
-
         int numberOfParticles = 0;
         foreach (var kvp in particleCounts)
         {
+            ParticleTypeCounts.Add(kvp.Key, kvp.Value);
             numberOfParticles += kvp.Value;
         }
 
@@ -210,6 +254,17 @@ public class Cluster : MonoBehaviour
         }
     }
 
+    private void ResetSwarm()
+    {
+        Swarm = new List<Particle>();
+
+        foreach(var particle in GetComponentsInChildren<Particle>())
+        {
+            particle.ParentCluster = this;
+            Swarm.Add(particle);
+        }
+    }
+
     // Draw debug lines and circles
     private void OnDrawGizmos()
     {
@@ -237,26 +292,5 @@ public class Cluster : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(Center, 0.1f);
         }
-    }
-
-    public void UpdateForceParameters()
-    {
-        // Update the force matrices based on current ranges from ParticleManager
-        for (int i = 0; i < _numTypes; i++)
-        {
-            for (int j = 0; j < _numTypes; j++)
-            {
-                InternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalForceRange.x, ParticleManager.Instance.InternalForceRange.y);
-                ExternalForces[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalForceRange.x, ParticleManager.Instance.ExternalForceRange.y);
-                InternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalMinDistanceRange.x, ParticleManager.Instance.InternalMinDistanceRange.y);
-                ExternalMins[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalMinDistanceRange.x, ParticleManager.Instance.ExternalMinDistanceRange.y);
-                InternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.InternalRadiusRange.x, ParticleManager.Instance.InternalRadiusRange.y);
-                ExternalRadii[i, j] = UnityEngine.Random.Range(ParticleManager.Instance.ExternalRadiusRange.x, ParticleManager.Instance.ExternalRadiusRange.y);
-            }
-        }
-
-        // Update maximum radii in case ranges have changed
-        MaxInternalRadii = ParticleManager.Instance.InternalRadiusRange.y;
-        MaxExternalRadii = ParticleManager.Instance.ExternalRadiusRange.y;
     }
 }

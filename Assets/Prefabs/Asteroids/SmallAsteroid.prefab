@@ -27,10 +27,10 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0.2926221, w: 0.9562282}
   m_LocalPosition: {x: 1.5319996, y: -0.20199995, z: 0}
-  m_LocalScale: {x: 0.68690926, y: 0.8864522, z: 1}
+  m_LocalScale: {x: 0.6869094, y: 0.8864521, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1281082077742534013}
+  m_Father: {fileID: 9129880494259365014}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -34.03}
 --- !u!212 &8604989763681621964
 SpriteRenderer:
@@ -97,7 +97,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9129880494259365014}
   m_Layer: 6
-  m_Name: LargeMines
+  m_Name: Mines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -117,6 +117,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4636025801859078191}
+  - {fileID: 2788766401066781834}
+  - {fileID: 1812938669199499972}
   m_Father: {fileID: 8302065967935213439}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4936430310112474547
@@ -152,7 +154,6 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 9129880494259365014}
-  - {fileID: 1281082077742534013}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3576440106695737086
@@ -324,14 +325,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40a709484fcb5f043b58cdeca236d6b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LargeMines:
+  AsteroidMines:
   - {fileID: 6646165768147481008}
-  SmallMines:
   - {fileID: 8379638710497795331}
   - {fileID: 1365878939743082592}
-  asteroidEnergy: 11
-  largeMineEnergyCost: 10
-  smallMineEnergyCost: 1
+  asteroidEnergy: 15
+  mineEnergyCost: 10
   crystalPrefab: {fileID: 4684208086277503105, guid: 3ba4d7f78c94242458e155c50cd10ac6, type: 3}
   crystalLaunchForce: 2
   crystalReleaseCooldown: 1
@@ -450,10 +449,10 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.7727335, w: 0.6347306}
   m_LocalPosition: {x: -0.83799976, y: 0.8510001, z: 0}
-  m_LocalScale: {x: 0.5339346, y: 0.9947766, z: 1}
+  m_LocalScale: {x: 0.53393465, y: 0.9947767, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1281082077742534013}
+  m_Father: {fileID: 9129880494259365014}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 101.2}
 --- !u!212 &1073209974600906579
 SpriteRenderer:
@@ -510,36 +509,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &8419326249773858888
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1281082077742534013}
-  m_Layer: 6
-  m_Name: SmallMines
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1281082077742534013
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8419326249773858888}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2788766401066781834}
-  - {fileID: 1812938669199499972}
-  m_Father: {fileID: 8302065967935213439}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

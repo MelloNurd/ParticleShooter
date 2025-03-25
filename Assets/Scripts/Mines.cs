@@ -4,17 +4,14 @@ using System.Collections.Generic;
 
 public class Mines : MonoBehaviour
 {
-    public GameObject[] LargeMines;
-    public GameObject[] SmallMines;
+    public GameObject[] AsteroidMines;
     public int asteroidEnergy = 38;
 
     // Energy required to enable/deactivate each mine type
-    public int largeMineEnergyCost = 10;
-    public int smallMineEnergyCost = 1;
+    public int mineEnergyCost = 10;
 
     // Accumulators to track energy removed
-    private int smallEnergyTracker = 0;
-    private int largeEnergyTracker = 0;
+    private int removedEnergyTracker = 0;
 
     // Crystal prefab attached to the mine
     public GameObject crystalPrefab;
@@ -36,39 +33,31 @@ public class Mines : MonoBehaviour
     void InitializeMines()
     {
         // Deactivate all large mines
-        foreach (GameObject largeMine in LargeMines)
+        foreach (GameObject largeMine in AsteroidMines)
         {
             largeMine.SetActive(false);
-        }
-        // Deactivate all small mines
-        foreach (GameObject smallMine in SmallMines)
-        {
-            smallMine.SetActive(false);
         }
     }
 
     public void ActivateMines()
     {
+        int numMines = 0;
         // Calculate number of large mines to activate
-        int numLarge = Mathf.Min(asteroidEnergy / largeMineEnergyCost, LargeMines.Length);
+        if (asteroidEnergy % mineEnergyCost != 0)
+        {
+            numMines = Mathf.Min((asteroidEnergy / mineEnergyCost) + 1, AsteroidMines.Length);
+        }
+        else
+        {
+             numMines= Mathf.Min(asteroidEnergy / mineEnergyCost, AsteroidMines.Length);
+        } 
         // Create a list of large mines for random selection
-        List<GameObject> availableLargeMines = new List<GameObject>(LargeMines);
-        for (int i = 0; i < numLarge && availableLargeMines.Count > 0; i++)
+        List<GameObject> availableLargeMines = new List<GameObject>(AsteroidMines);
+        for (int i = 0; i < numMines && availableLargeMines.Count > 0; i++)
         {
             int index = Random.Range(0, availableLargeMines.Count);
             availableLargeMines[index].SetActive(true);
             availableLargeMines.RemoveAt(index);
-        }
-
-        // Remaining energy after activating large mines
-        int leftover = (asteroidEnergy - (numLarge * largeMineEnergyCost)) / smallMineEnergyCost;
-        // Create a list of small mines for random selection
-        List<GameObject> availableSmallMines = new List<GameObject>(SmallMines);
-        for (int i = 0; i < leftover && availableSmallMines.Count > 0; i++)
-        {
-            int index = Random.Range(0, availableSmallMines.Count);
-            availableSmallMines[index].SetActive(true);
-            availableSmallMines.RemoveAt(index);
         }
     }
 
@@ -105,25 +94,21 @@ public class Mines : MonoBehaviour
             _lastCrystalPopTime = Time.time;
 
             asteroidEnergy -= crystalEnergyCost;
-            smallEnergyTracker += crystalEnergyCost;
-            largeEnergyTracker += crystalEnergyCost;
+            removedEnergyTracker += crystalEnergyCost;
 
-            // Deactivate a small mine if enough energy has been removed and one is active.
-            if (smallEnergyTracker >= smallMineEnergyCost && AnyMineActive(SmallMines))
-            {
-                DeactivateRandomMine(SmallMines);
-                smallEnergyTracker -= smallMineEnergyCost;
-                largeEnergyTracker -= smallMineEnergyCost;
-            }
             // If no small mines are active, check large mines.
-            else if (largeEnergyTracker >= largeMineEnergyCost && AnyMineActive(LargeMines))
+            if (removedEnergyTracker >= mineEnergyCost && AnyMineActive(AsteroidMines))
             {
-                DeactivateRandomMine(LargeMines);
-                largeEnergyTracker -= largeMineEnergyCost;
+                DeactivateRandomMine(AsteroidMines);
+                removedEnergyTracker -= mineEnergyCost;
+            }
+            else if (AnyMineActive(AsteroidMines) && asteroidEnergy < 1)
+            {
+                DeactivateRandomMine(AsteroidMines);
             }
 
-            // Determine a spawn position slightly outside the hit point in the opposite direction of the beam.
-            float offsetDistance = 0.5f;
+                // Determine a spawn position slightly outside the hit point in the opposite direction of the beam.
+                float offsetDistance = 0.5f;
             Vector2 spawnPos = hitPoint - beamDirection.normalized * offsetDistance + Random.insideUnitCircle * 0.1f;
 
             // First try: move further away from the mines.

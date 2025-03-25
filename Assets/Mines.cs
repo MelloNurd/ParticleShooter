@@ -6,45 +6,31 @@ public class Mines : MonoBehaviour
 {
     public GameObject[] LargeMines;
     public GameObject[] SmallMines;
-    public int mineEnergy = 38;
+    public int asteroidEnergy = 38;
 
     // Energy required to enable/deactivate each mine type
-    public int LargeMineEnergy = 10;
-    public int SmallMineEnergy = 1;
+    public int largeMineEnergyCost = 10;
+    public int smallMineEnergyCost = 1;
 
     // Accumulators to track energy removed
-    private int smallEnergyAccumulator = 0;
-    private int largeEnergyAccumulator = 0;
+    private int smallEnergyTracker = 0;
+    private int largeEnergyTracker = 0;
+
+    // Crystal prefab attached to the mine
+    public GameObject crystalPrefab;
+    // Force with which crystals are launched
+    public float crystalLaunchForce = 2f;
+
+    // Time-based cooldown for crystal pop (in seconds)
+    public float crystalReleaseCooldown = 1f;
+    private float _lastCrystalPopTime = -Mathf.Infinity;
+
+    public int crystalEnergyCost = 1;
 
     void Start()
     {
         InitializeMines();
         ActivateMines();
-    }
-
-    void Update()
-    {
-        // For demonstration we use the M key to lower mineEnergy.
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            mineEnergy -= 1;
-            smallEnergyAccumulator += 1;
-            largeEnergyAccumulator += 1;
-
-            // Deactivate a small mine if enough energy has been removed and one is active.
-            if (smallEnergyAccumulator >= SmallMineEnergy && AnyMineActive(SmallMines))
-            {
-                DeactivateRandomMine(SmallMines);
-                smallEnergyAccumulator -= SmallMineEnergy;
-                largeEnergyAccumulator -= SmallMineEnergy;
-            }
-            // If no small mines are active, check large mines.
-            else if (largeEnergyAccumulator >= LargeMineEnergy && AnyMineActive(LargeMines))
-            {
-                DeactivateRandomMine(LargeMines);
-                largeEnergyAccumulator -= LargeMineEnergy;
-            }
-        }
     }
 
     void InitializeMines()
@@ -64,8 +50,8 @@ public class Mines : MonoBehaviour
     public void ActivateMines()
     {
         // Calculate number of large mines to activate
-        int numLarge = Mathf.Min(mineEnergy / LargeMineEnergy, LargeMines.Length);
-        // Creates a list of large mines to avoid duplicate selection
+        int numLarge = Mathf.Min(asteroidEnergy / largeMineEnergyCost, LargeMines.Length);
+        // Create a list of large mines for random selection
         List<GameObject> availableLargeMines = new List<GameObject>(LargeMines);
         for (int i = 0; i < numLarge && availableLargeMines.Count > 0; i++)
         {
@@ -75,7 +61,8 @@ public class Mines : MonoBehaviour
         }
 
         // Remaining energy after activating large mines
-        int leftover = (mineEnergy - (numLarge * LargeMineEnergy)) / SmallMineEnergy;
+        int leftover = (asteroidEnergy - (numLarge * largeMineEnergyCost)) / smallMineEnergyCost;
+        // Create a list of small mines for random selection
         List<GameObject> availableSmallMines = new List<GameObject>(SmallMines);
         for (int i = 0; i < leftover && availableSmallMines.Count > 0; i++)
         {
@@ -110,4 +97,58 @@ public class Mines : MonoBehaviour
         }
         return false;
     }
+
+    public void PopCrystal(Vector2 hitPoint, Vector2 beamDirection)
+    {
+        if (crystalPrefab != null && asteroidEnergy > 0 && Time.time >= _lastCrystalPopTime + crystalReleaseCooldown)
+        {
+            _lastCrystalPopTime = Time.time;
+
+            asteroidEnergy -= crystalEnergyCost;
+            smallEnergyTracker += crystalEnergyCost;
+            largeEnergyTracker += crystalEnergyCost;
+
+            // Deactivate a small mine if enough energy has been removed and one is active.
+            if (smallEnergyTracker >= smallMineEnergyCost && AnyMineActive(SmallMines))
+            {
+                DeactivateRandomMine(SmallMines);
+                smallEnergyTracker -= smallMineEnergyCost;
+                largeEnergyTracker -= smallMineEnergyCost;
+            }
+            // If no small mines are active, check large mines.
+            else if (largeEnergyTracker >= largeMineEnergyCost && AnyMineActive(LargeMines))
+            {
+                DeactivateRandomMine(LargeMines);
+                largeEnergyTracker -= largeMineEnergyCost;
+            }
+
+            // Determine a spawn position slightly outside the hit point in the opposite direction of the beam.
+            float offsetDistance = 0.5f;
+            Vector2 spawnPos = hitPoint - beamDirection.normalized * offsetDistance + Random.insideUnitCircle * 0.1f;
+
+            // Ensure the crystal isn't spawned overlapping another collider.
+            int safetyTries = 10;
+            while (Physics2D.OverlapCircle(spawnPos, 0.2f) != null && safetyTries > 0)
+            {
+                spawnPos += Random.insideUnitCircle * 0.2f;
+                safetyTries--;
+            }
+
+            GameObject crystal = Instantiate(crystalPrefab, spawnPos, Quaternion.Euler(0,0,90));
+
+            Rigidbody2D rb = crystal.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                // Calculate the base launch direction as the reverse of the beam direction,
+                // so the crystal is launched toward where the beam came from.
+                Vector2 baseDirection = (-beamDirection).normalized;
+                Vector2 randomDeviation = Random.insideUnitCircle.normalized;
+                float deviationFactor = 0.2f; // Adjust this value for more or less deviation.
+                Vector2 launchDirection = Vector2.Lerp(baseDirection, randomDeviation, deviationFactor).normalized;
+                rb.AddForce(launchDirection * crystalLaunchForce, ForceMode2D.Impulse);
+            }
+        }
+    }
+
+
 }

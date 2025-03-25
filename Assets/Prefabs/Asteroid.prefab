@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1372093770364546548}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallMines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49,7 +49,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6760243225528094936}
   - component: {fileID: 7651934138691191375}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -136,7 +136,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2660313197263987837}
   - component: {fileID: 8787801868054591853}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -223,7 +223,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6251543598468760159}
   - component: {fileID: 6341363371743299493}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BigGlow3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -310,7 +310,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4438968769508834796}
   - component: {fileID: 9186715069567193862}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow8
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -397,7 +397,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7049623699276495639}
   - component: {fileID: 892417781680895429}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BigGlow1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -484,7 +484,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8045547439643107382}
   - component: {fileID: 1360732229606857744}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -571,7 +571,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6341839318566301151}
   - component: {fileID: 7571800691617442653}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BigGlow4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -658,7 +658,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5204204998871060525}
   - component: {fileID: 6496409171092003829}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -745,7 +745,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3861686935559492352}
   - component: {fileID: 5995396012395848022}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -834,7 +834,7 @@ GameObject:
   - component: {fileID: 6116757883025333676}
   - component: {fileID: 3799132128286438251}
   - component: {fileID: 6268016715372904274}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Asteroid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1090,9 +1090,10 @@ MonoBehaviour:
   - {fileID: 9201103376556304361}
   - {fileID: 4528623472819604480}
   - {fileID: 1145727360258968492}
-  mineEnergy: 38
-  LargeMineEnergy: 10
-  SmallMineEnergy: 1
+  asteroidEnergy: 38
+  largeMineEnergyCost: 10
+  smallMineEnergyCost: 1
+  crystalPrefab: {fileID: 4684208086277503105, guid: 3ba4d7f78c94242458e155c50cd10ac6, type: 3}
 --- !u!1 &5697361783850338029
 GameObject:
   m_ObjectHideFlags: 0
@@ -1103,7 +1104,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6609618269397788836}
   - component: {fileID: 4573163748952519518}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BigGlow2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1189,7 +1190,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6864907993681280423}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: LargeMines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1225,7 +1226,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5239031997093935483}
   - component: {fileID: 8012897429614783776}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1312,7 +1313,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1060512041551819662}
   - component: {fileID: 4928653326853343516}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: SmallGlow6
   m_TagString: Untagged
   m_Icon: {fileID: 0}

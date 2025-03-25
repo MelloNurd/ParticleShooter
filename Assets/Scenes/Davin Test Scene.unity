@@ -995,10 +995,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Asteroid
       objectReference: {fileID: 0}
-    - target: {fileID: 6268016715372904274, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
-      propertyPath: mineEnergy
-      value: 28
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

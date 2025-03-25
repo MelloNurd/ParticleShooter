@@ -78,6 +78,12 @@ public class LazerBeam : MonoBehaviour
             if (hits[i].transform.TryGetComponent(out Particle particle)) {
                 particle.stats.Damage(damage);
             }
+
+            // If a mine is hit, delegate the crystal spawning to the Mines script.
+            if (hits[i].transform.TryGetComponent(out Mines mine))
+            {
+                mine.PopCrystal(hits[i].point, transform.up);
+            }
         }
 
         // If there are no hits, we use the fireRange from the player. If there are hits, we use the distance to the last hit.

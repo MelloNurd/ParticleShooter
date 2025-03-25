@@ -8,6 +8,7 @@ TagManager:
   - Particle
   - HealthPack
   - ExpPack
+  - Crystal
   layers:
   - Default
   - TransparentFX

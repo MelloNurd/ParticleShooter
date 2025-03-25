@@ -126,15 +126,50 @@ public class Mines : MonoBehaviour
             float offsetDistance = 0.5f;
             Vector2 spawnPos = hitPoint - beamDirection.normalized * offsetDistance + Random.insideUnitCircle * 0.1f;
 
-            // Ensure the crystal isn't spawned overlapping another collider.
+            // First try: move further away from the mines.
             int safetyTries = 10;
-            while (Physics2D.OverlapCircle(spawnPos, 0.2f) != null && safetyTries > 0)
+            Vector2 safeSpawnPos = spawnPos;
+            bool foundSafe = false;
+            while (safetyTries > 0)
             {
-                spawnPos += Random.insideUnitCircle * 0.2f;
+                if (Physics2D.OverlapCircle(safeSpawnPos, 0.2f) == null)
+                {
+                    foundSafe = true;
+                    break;
+                }
+                safeSpawnPos -= beamDirection.normalized * 0.2f;
                 safetyTries--;
             }
 
-            GameObject crystal = Instantiate(crystalPrefab, spawnPos, Quaternion.Euler(0,0,90));
+            // Second try: try lateral moves if moving away didn't work.
+            if (!foundSafe)
+            {
+                // Get a perpendicular direction.
+                Vector2 perp = new Vector2(-beamDirection.y, beamDirection.x);
+                safetyTries = 10;
+                for (int i = 1; i <= safetyTries; i++)
+                {
+                    // Try shifting to one side.
+                    Vector2 lateralPos = spawnPos + perp * (0.2f * i);
+                    if (Physics2D.OverlapCircle(lateralPos, 0.2f) == null)
+                    {
+                        safeSpawnPos = lateralPos;
+                        foundSafe = true;
+                        break;
+                    }
+                    // Try shifting to the other side.
+                    lateralPos = spawnPos - perp * (0.2f * i);
+                    if (Physics2D.OverlapCircle(lateralPos, 0.2f) == null)
+                    {
+                        safeSpawnPos = lateralPos;
+                        foundSafe = true;
+                        break;
+                    }
+                }
+            }
+
+            // In all cases, spawn the crystal at the best available position.
+            GameObject crystal = Instantiate(crystalPrefab, safeSpawnPos, Quaternion.Euler(0, 0, 90));
 
             Rigidbody2D rb = crystal.GetComponent<Rigidbody2D>();
             if (rb != null)
@@ -143,12 +178,14 @@ public class Mines : MonoBehaviour
                 // so the crystal is launched toward where the beam came from.
                 Vector2 baseDirection = (-beamDirection).normalized;
                 Vector2 randomDeviation = Random.insideUnitCircle.normalized;
-                float deviationFactor = 0.2f; // Adjust this value for more or less deviation.
+                float deviationFactor = 0.6f; // Adjust this value for more or less deviation.
                 Vector2 launchDirection = Vector2.Lerp(baseDirection, randomDeviation, deviationFactor).normalized;
                 rb.AddForce(launchDirection * crystalLaunchForce, ForceMode2D.Impulse);
+                rb.AddTorque(Random.Range(-1f, 1f), ForceMode2D.Impulse);
             }
         }
     }
 
 
 }
+

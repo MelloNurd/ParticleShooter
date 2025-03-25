@@ -220,7 +220,7 @@ public class Player : MonoBehaviour
             }
             Destroy(collision.gameObject);
         }
-        else if(collision.CompareTag("ExpPack"))
+        else if(collision.CompareTag("Crystal"))
         {
             PlayerExp.Instance.AddExp(PlayerExp.Instance.levelExp * .1f);
             Destroy(collision.gameObject);

@@ -36,6 +36,8 @@ public class Zones : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        Camera.main.backgroundColor = Color.black;
     }
 
     void Start()

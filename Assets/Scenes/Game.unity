@@ -536,15 +536,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1068266682060012621, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: m_BackGroundColor.b
-      value: 0.11698109
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1068266682060012621, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: m_BackGroundColor.g
-      value: 0.05540047
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1068266682060012621, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: m_BackGroundColor.r
-      value: 0.061515037
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1090517254048728135, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: sharedProfile
@@ -703,6 +703,7 @@ MonoBehaviour:
   ExternalRadiusRange: {x: 2, y: 3}
   CohesionStrength: 2
   StartPopulation: 20
+  RunningClusterCount: 0
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}

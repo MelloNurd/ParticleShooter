@@ -15,8 +15,8 @@ public class Zones : MonoBehaviour
     public int sortingOrder = -15;
 
     // Private colors remain unchanged
-    private Color startColor = new Color(0.4f, 0.4f, 0.4f, 1f);
-    private Color endColor = new Color(0.2f, 0.2f, 0.2f, 1f);
+    private Color startColor = new Color(0.05f, 0.05f, 0.15f, 1f);
+    private Color endColor = new Color(0f, 0f, 0.05f, 1f);
 
     // Cache for runtime regeneration
     private List<GameObject> rings = new List<GameObject>();

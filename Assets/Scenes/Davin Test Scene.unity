@@ -865,18 +865,17 @@ MonoBehaviour:
   DrawParticleLines: 0
   DrawClusterCircles: 1
   player: {fileID: 1713353514}
-  PlayerAttractionStrength: 3
-  ParticleDamage: 10
   Clusters: []
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
   ScreenSpace: {x: 500, y: 500}
   HalfScreenSpace: {x: 0, y: 0}
+  StartPopulation: 20
   numberOfTypes: 0
-  RunGame: 0
   RepulsionEffector: -5
   Dampening: 0.95
   Friction: 0.9
+  ParticleDamage: 10
   _timeScale: 1
   InternalForceRange: {x: 0.5, y: 1}
   ExternalForceRange: {x: 0, y: 1}
@@ -885,7 +884,6 @@ MonoBehaviour:
   InternalRadiusRange: {x: 0.5, y: 2}
   ExternalRadiusRange: {x: 2, y: 3}
   CohesionStrength: 2
-  StartPopulation: 20
   RunningClusterCount: 0
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
@@ -1056,10 +1054,6 @@ PrefabInstance:
     - target: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
       propertyPath: m_Name
       value: Asteroid
-      objectReference: {fileID: 0}
-    - target: {fileID: 6268016715372904274, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
-      propertyPath: asteroidEnergy
-      value: 12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1236,10 +1230,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1056030731772289470, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
-      propertyPath: asteroidEnergy
-      value: 15
-      objectReference: {fileID: 0}
     - target: {fileID: 4936430310112474547, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
       propertyPath: m_Name
       value: SmallAsteroid

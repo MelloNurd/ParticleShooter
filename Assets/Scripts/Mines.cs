@@ -166,7 +166,7 @@ public class Mines : MonoBehaviour
                 float deviationFactor = 0.6f; // Adjust this value for more or less deviation.
                 Vector2 launchDirection = Vector2.Lerp(baseDirection, randomDeviation, deviationFactor).normalized;
                 rb.AddForce(launchDirection * crystalLaunchForce, ForceMode2D.Impulse);
-                rb.AddTorque(Random.Range(-1f, 1f), ForceMode2D.Impulse);
+                rb.AddTorque(Random.Range(-.2f, .2f), ForceMode2D.Impulse);
             }
         }
     }

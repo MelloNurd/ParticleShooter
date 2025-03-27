@@ -332,7 +332,7 @@ MonoBehaviour:
   asteroidEnergy: 15
   mineEnergyCost: 10
   crystalPrefab: {fileID: 4684208086277503105, guid: 3ba4d7f78c94242458e155c50cd10ac6, type: 3}
-  crystalLaunchForce: 2
+  crystalLaunchForce: 0.1
   crystalReleaseCooldown: 1
   crystalEnergyCost: 1
 --- !u!1 &6646165768147481008

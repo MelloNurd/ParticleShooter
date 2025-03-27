@@ -1049,10 +1049,10 @@ MonoBehaviour:
   - {fileID: 9201103376556304361}
   - {fileID: 4528623472819604480}
   - {fileID: 1145727360258968492}
-  asteroidEnergy: 38
+  asteroidEnergy: 12
   mineEnergyCost: 10
   crystalPrefab: {fileID: 4684208086277503105, guid: 3ba4d7f78c94242458e155c50cd10ac6, type: 3}
-  crystalLaunchForce: 5
+  crystalLaunchForce: 0.1
   crystalReleaseCooldown: 1
   crystalEnergyCost: 1
 --- !u!1 &5697361783850338029

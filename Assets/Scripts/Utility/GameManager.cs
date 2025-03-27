@@ -36,7 +36,6 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (Timer.Instance.elapsedTime - lastItemSpawnTime >= 10f)
         {
             lastItemSpawnTime = Timer.Instance.elapsedTime;
@@ -50,20 +49,6 @@ public class GameManager : MonoBehaviour
             {
                 Instantiate(Expkit, ParticleManager.Instance.GetRandomPointOnScreen(), Quaternion.identity);
             }
-        }
-
-        if (!ParticleManager.Instance.RunGame) return;
-
-        if(Timer.Instance.elapsedTime - lastClusterSpawnTime >= clusterSpawnRate && ParticleManager.Instance.Clusters.Count < 40)
-        {
-            lastClusterSpawnTime= Timer.Instance.elapsedTime;
-            ParticleManager.Instance.CreateCluster();
-        }
-        if(Timer.Instance.elapsedTime - lastAggressionIncrease >= aggressionIncreaseRate && ParticleManager.Instance.PlayerAttractionStrength < 6f)
-        {
-            lastAggressionIncrease = Timer.Instance.elapsedTime;
-            ParticleManager.Instance.PlayerAttractionStrength += .5f;
-            ParticleManager.Instance.ParticleDamage += 1;
         }
     }
 

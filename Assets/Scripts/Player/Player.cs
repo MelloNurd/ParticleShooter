@@ -5,26 +5,29 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float rotationSpeed = 0.75f;
-    public float movementSpeed = 5f;
-    public float boostMultiplier = 1.75f;  // Boost increases speed
-    public float maxBoost = 100f; // Total amount of boost the player has
-    public float boostUsageRate = 20f; // How fast the boost depletes
-    public float boostRechargeRate = 2; // How fast the boost recharges
+    [BoxGroup("Game Settings")] public float interactionRadius = 20f;
+    [BoxGroup("Game Settings")] [Tooltip("This only is visible in Scene view.")] [SerializeField]
+    private bool drawPlayerInteractionRadius = false;
+
+    [BoxGroup("Movement Settings")] public float rotationSpeed = 0.75f;
+    [BoxGroup("Movement Settings")] public float movementSpeed = 5f;
+    [BoxGroup("Movement Settings")] public float boostMultiplier = 1.75f;  // Boost increases speed
+    [BoxGroup("Movement Settings")] public float maxBoost = 100f; // Total amount of boost the player has
+    [BoxGroup("Movement Settings")] public float boostUsageRate = 20f; // How fast the boost depletes
+    [BoxGroup("Movement Settings")] public float boostRechargeRate = 2; // How fast the boost recharges
     private float boostAmount; // Handles the current amount of boost the player has (how filled the bar is)
 
-    [ShowNativeProperty] public int CurrentZone => Zones.Instance.GetCurrentZone(transform.position);
+    [ShowNativeProperty] public int CurrentZone => Zones.GetCurrentZone(transform.position);
 
     private float vertMovement;
     private float horzMovement;
-    private bool isBoosting;
-    private Rigidbody2D rb;
-    public bool exhaustActive;
-    public int blasterType = 0;
 
-    public float currentHealth = 100;
-    public float maxHealth = 100;
-    public float healthRegenRate = 1f;
+    private bool isBoosting;
+    [BoxGroup("Thruster Settings")] public bool exhaustActive;
+
+    [BoxGroup("Health Settings")] public float currentHealth = 100;
+    [BoxGroup("Health Settings")] public float maxHealth = 100;
+    [BoxGroup("Health Settings")] public float healthRegenRate = 1f;
 
     private GameObject standardBlaster;
     private GameObject fireBlaster;
@@ -37,16 +40,14 @@ public class Player : MonoBehaviour
     private Slider boostSlider;
     private Slider healthSlider;
 
-    public Transform frontPoint;
-    public Transform backPoint;
-
-    public UnityEvent onDeath;
+    [HideInInspector] public UnityEvent onDeath;
     private bool hasDied;
 
-    public float invincibilityTime = .1f;
+    [BoxGroup("Overshield Settings")] public float invincibilityTime = .1f;
     private float currentInvincibilityTime = 2f;
-    GameObject overShield;
-    public float knockbackForce = 20f;
+    private GameObject overShield;
+
+    private Rigidbody2D rb;
 
     private void Start()
     {
@@ -58,9 +59,6 @@ public class Player : MonoBehaviour
 
         boostSlider = GameObject.Find("PlayerBoost").GetComponent<Slider>();
         healthSlider = GameObject.Find("PlayerHealth").GetComponent<Slider>();
-
-        frontPoint = transform.Find("FrontAttractor");
-        backPoint = transform.Find("BackAttractor");
 
         leftExhhaust = transform.Find("LeftThruster").transform.Find("LeftExhaust").gameObject;
         rightExhaust = transform.Find("RightThruster").transform.Find("RightExhaust").gameObject;
@@ -224,6 +222,15 @@ public class Player : MonoBehaviour
         {
             PlayerExp.Instance.AddExp(PlayerExp.Instance.levelExp * .1f);
             Destroy(collision.gameObject);
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if(drawPlayerInteractionRadius)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, interactionRadius);
         }
     }
 }

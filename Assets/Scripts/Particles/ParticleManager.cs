@@ -11,11 +11,7 @@ public class ParticleManager : MonoBehaviour
     public bool DrawParticleLines = false;
     [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
     public bool DrawClusterCircles = false;
-
     public Player player;
-
-    public float PlayerAttractionStrength = 5f;
-    public float ParticleDamage = 10f;
 
     public List<Cluster> Clusters = new List<Cluster>();
 
@@ -30,11 +26,10 @@ public class ParticleManager : MonoBehaviour
     [HideInInspector]
     public Vector2 HalfScreenSpace;
 
-    [ReadOnly] public int numberOfTypes;
-
     [BoxGroup("Simulation Configuration")]
-    [Tooltip("Set to false to disable clusters evolving/dying over time.")]
-    public bool RunGame = true;
+    public int StartPopulation = 5;
+    
+    [ReadOnly] public int numberOfTypes;
 
     [BoxGroup("Particle Properties")]
     [Range(-5, 5)]
@@ -47,6 +42,9 @@ public class ParticleManager : MonoBehaviour
     [BoxGroup("Particle Properties")]
     [Range(0, 2)]
     public float Friction = 0.9f;
+
+    [BoxGroup("Particle Properties")]
+    public float ParticleDamage = 10f;
 
     [BoxGroup("Unity Settings")]
     [OnValueChanged("ChangeTimescale")]
@@ -80,8 +78,6 @@ public class ParticleManager : MonoBehaviour
     [BoxGroup("Force Parameters")]
     [Range(0f, 5f)]
     public float CohesionStrength = 2f;
-
-    public int StartPopulation = 5;
 
     [ReadOnly] public int RunningClusterCount = 0;
 

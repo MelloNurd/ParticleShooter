@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Zones : MonoBehaviour
 {
-    public static Zones Instance;
+    public static Zones Instance { get; private set; }
 
     public GameObject circlePrefab;
 
@@ -116,14 +116,16 @@ public class Zones : MonoBehaviour
         }
     }
 
-    public int GetCurrentZone(Vector3 position)
+    public static int GetCurrentZone(Vector3 position)
     {
-        for (int i = 0; i < rings.Count; i++)
+        if (Instance == null) return -1;
+
+        for (int i = 0; i < Instance.rings.Count; i++)
         {
-            if (rings[i] != null)
+            if (Instance.rings[i] != null)
             {
-                float distance = Vector3.Distance(position, rings[i].transform.position);
-                if (distance <= rings[i].transform.localScale.x / 2)
+                float distance = Vector3.Distance(position, Instance.rings[i].transform.position);
+                if (distance <= Instance.rings[i].transform.localScale.x / 2)
                 {
                     return i;
                 }

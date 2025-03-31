@@ -53,6 +53,7 @@ public class Player : MonoBehaviour
     [BoxGroup("Energy Settings")] public float maxEnergy = 100f;
     [BoxGroup("Energy Settings")] public float currentEnergy = 100f;
     [BoxGroup("Energy Settings")] public float movementEnergyCost = 1f;
+    [BoxGroup("Energy Settings")] public bool consumeEnergy = true;
 
     private void Start()
     {
@@ -73,6 +74,11 @@ public class Player : MonoBehaviour
 
         overShield = transform.Find("OverShield").gameObject;
         overShield.SetActive(true);
+
+        if (!consumeEnergy)
+        {
+            movementEnergyCost = 0;
+        }
     }
 
     void Update()

@@ -39,6 +39,7 @@ public class Player : MonoBehaviour
 
     private Slider boostSlider;
     private Slider healthSlider;
+    private Slider energySlider;
 
     [HideInInspector] public UnityEvent onDeath;
     private bool hasDied;
@@ -48,6 +49,10 @@ public class Player : MonoBehaviour
     private GameObject overShield;
 
     private Rigidbody2D rb;
+
+    [BoxGroup("Energy Settings")] public float maxEnergy = 100f;
+    [BoxGroup("Energy Settings")] public float currentEnergy = 100f;
+    [BoxGroup("Energy Settings")] public float movementEnergyCost = 1f;
 
     private void Start()
     {
@@ -59,6 +64,7 @@ public class Player : MonoBehaviour
 
         boostSlider = GameObject.Find("PlayerBoost").GetComponent<Slider>();
         healthSlider = GameObject.Find("PlayerHealth").GetComponent<Slider>();
+        energySlider = GameObject.Find("PlayerEnergy").GetComponent<Slider>();
 
         leftExhhaust = transform.Find("LeftThruster").transform.Find("LeftExhaust").gameObject;
         rightExhaust = transform.Find("RightThruster").transform.Find("RightExhaust").gameObject;
@@ -133,6 +139,16 @@ public class Player : MonoBehaviour
 
         // Forward and backward movement
         rb.AddForce(transform.up * vertMovement * currentSpeed);
+
+        if(vertMovement != 0)
+        {
+            currentEnergy -= movementEnergyCost * Time.fixedDeltaTime;
+            energySlider.value = currentEnergy / maxEnergy;
+            if (currentEnergy <= 0)
+            {
+                currentEnergy = 0;
+            }
+        }
 
         // Rotation
         if (horzMovement != 0)

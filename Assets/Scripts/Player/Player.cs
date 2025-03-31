@@ -42,7 +42,6 @@ public class Player : MonoBehaviour
     private Slider energySlider;
 
     [HideInInspector] public UnityEvent onDeath;
-    private bool hasDied;
 
     [BoxGroup("Overshield Settings")] public float invincibilityTime = .1f;
     private float currentInvincibilityTime = 2f;
@@ -54,6 +53,7 @@ public class Player : MonoBehaviour
     [BoxGroup("Energy Settings")] public float currentEnergy = 100f;
     [BoxGroup("Energy Settings")] public float movementEnergyCost = 1f;
     [BoxGroup("Energy Settings")] public bool consumeEnergy = true;
+
 
     private void Start()
     {
@@ -125,6 +125,7 @@ public class Player : MonoBehaviour
     {
         ApplyMovementAndRotation();
         ThrusterVisualization();
+        CheckDeath();
     }
 
     private void ApplyMovementAndRotation()
@@ -253,6 +254,15 @@ public class Player : MonoBehaviour
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, interactionRadius);
+        }
+    }
+
+    private void CheckDeath()
+    {
+        if (currentHealth <= 0 || currentEnergy <= 0)
+        {
+            gameObject.SetActive(false);
+            onDeath?.Invoke();
         }
     }
 }

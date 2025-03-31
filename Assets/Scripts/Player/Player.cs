@@ -220,7 +220,7 @@ public class Player : MonoBehaviour
         }
         else if(collision.CompareTag("Crystal"))
         {
-            PlayerExp.Instance.AddExp(PlayerExp.Instance.levelExp * .1f);
+            Money.Instance.AddMoney(1);
             Destroy(collision.gameObject);
         }
     }

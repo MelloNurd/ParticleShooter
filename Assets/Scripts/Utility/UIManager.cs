@@ -15,9 +15,7 @@ public class UIManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        timer = GameObject.Find("Timer").GetComponent<TextMeshProUGUI>();
         endMenu = transform.Find("GameOver").gameObject;
-        finalTimer = endMenu.transform.Find("FinalTimer").GetComponent<TextMeshProUGUI>();
         player = FindFirstObjectByType<Player>();
         player.onDeath.AddListener(GameOver);
     }
@@ -31,8 +29,6 @@ public class UIManager : MonoBehaviour
     private void GameOver()
     {
         endMenu.SetActive(true);
-        finalTimer.text = timer.text;
-        timer.gameObject.SetActive(false);
     }
 
 }

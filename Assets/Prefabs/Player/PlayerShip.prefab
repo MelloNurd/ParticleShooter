@@ -946,7 +946,6 @@ GameObject:
   - component: {fileID: 8145973419358181151}
   - component: {fileID: 1199441970524072933}
   - component: {fileID: 7885298475235533802}
-  - component: {fileID: 4647687867119785136}
   m_Layer: 0
   m_Name: PlayerShip
   m_TagString: Player
@@ -988,6 +987,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fee8136fcd99f744fae2fb7df781e8b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionRadius: 20
+  drawPlayerInteractionRadius: 0
   rotationSpeed: 0.3
   movementSpeed: 3
   boostMultiplier: 1.2
@@ -995,17 +996,13 @@ MonoBehaviour:
   boostUsageRate: 20
   boostRechargeRate: 2
   exhaustActive: 1
-  blasterType: 0
   currentHealth: 100
   maxHealth: 100
   healthRegenRate: 1
-  frontPoint: {fileID: 6587186072633953767}
-  backPoint: {fileID: 2521185793229651826}
   onDeath:
     m_PersistentCalls:
       m_Calls: []
   invincibilityTime: 0.1
-  knockbackForce: 1
 --- !u!50 &1199441970524072933
 Rigidbody2D:
   serializedVersion: 5
@@ -1083,21 +1080,6 @@ PolygonCollider2D:
       - {x: -0.5, y: -0.28866667}
       - {x: 0.5, y: -0.28866667}
   m_UseDelaunayMesh: 0
---- !u!114 &4647687867119785136
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8371855377387520600}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d51ad26d8b78b74f84ec1dd5e95b69a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Level: 1
-  ExpMultiplier: 1
-  levelExp: 100
 --- !u!1 &8683226267795292098
 GameObject:
   m_ObjectHideFlags: 0

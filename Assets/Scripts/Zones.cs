@@ -137,4 +137,9 @@ public class Zones : MonoBehaviour
         }
         return -1; // Not in any zone
     }
+
+    public List<GameObject> GetZones()
+    {
+        return rings;
+    }
 }

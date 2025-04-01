@@ -176,6 +176,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Asteroid (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6268016715372904274, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
       propertyPath: mineEnergy
       value: 49
@@ -279,6 +283,10 @@ PrefabInstance:
     - target: {fileID: 4936430310112474547, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
       propertyPath: m_Name
       value: SmallAsteroid (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936430310112474547, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8302065967935213439, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -506,6 +514,10 @@ PrefabInstance:
     - target: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
       propertyPath: m_Name
       value: Asteroid (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6268016715372904274, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
       propertyPath: mineEnergy
@@ -790,21 +802,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a072be966319c6441bbf3a0bba579f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DrawParticleLines: 0
-  DrawClusterCircles: 1
   player: {fileID: 1713353514}
-  Clusters: []
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
+  RunningClusterCount: 0
+  numberOfTypes: 0
+  DrawParticleLines: 0
+  DrawClusterCircles: 1
   ScreenSpace: {x: 500, y: 500}
   HalfScreenSpace: {x: 0, y: 0}
   StartPopulation: 20
-  numberOfTypes: 0
   RepulsionEffector: -5
   Dampening: 0.95
   Friction: 0.9
   ParticleDamage: 10
-  _timeScale: 1
   InternalForceRange: {x: 0.5, y: 1}
   ExternalForceRange: {x: 0, y: 1}
   InternalMinDistanceRange: {x: 0.1, y: 1}
@@ -812,7 +823,8 @@ MonoBehaviour:
   InternalRadiusRange: {x: 0.5, y: 2}
   ExternalRadiusRange: {x: 2, y: 3}
   CohesionStrength: 2
-  RunningClusterCount: 0
+  ForceMultiplier: 1
+  _timeScale: 1
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
@@ -834,6 +846,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1998550997}
   - component: {fileID: 1998550996}
+  - component: {fileID: 1998550998}
   m_Layer: 0
   m_Name: WorldZones
   m_TagString: Untagged
@@ -859,6 +872,7 @@ MonoBehaviour:
   scaleIncrement: 10
   exponentialFactor: 0.25
   sortingOrder: -10
+  ringRadiuses: []
 --- !u!4 &1998550997
 Transform:
   m_ObjectHideFlags: 0
@@ -874,6 +888,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1998550998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1998550995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a38b501344015894baa0351e03ae065e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  asteroidPrefab: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
+  smallAsteroidPrefab: {fileID: 4936430310112474547, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
+  spawnCheckRadius: 3
+  maxSpawnAttempts: 10
 --- !u!1001 &2076855249
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -982,6 +1012,10 @@ PrefabInstance:
     - target: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
       propertyPath: m_Name
       value: Asteroid
+      objectReference: {fileID: 0}
+    - target: {fileID: 5501443064775622469, guid: fa21b3efaf003ee4ba0f66bfd91d5b66, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1100,6 +1134,10 @@ PrefabInstance:
     - target: {fileID: 4936430310112474547, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
       propertyPath: m_Name
       value: SmallAsteroid
+      objectReference: {fileID: 0}
+    - target: {fileID: 4936430310112474547, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8302065967935213439, guid: 905604198d0c82c4baa02b7a837e0a6d, type: 3}
       propertyPath: m_LocalPosition.x

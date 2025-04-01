@@ -162,7 +162,7 @@ public class ParticleManager : MonoBehaviour
 
     private void Update()
     {
-        if (!ClusterSpawning.Instance.FinishedSpawning) return;
+        if (ClusterSpawning.Instance == null || ClusterSpawning.Instance.FinishedSpawning) return;
 
         // Update all clusters
         foreach (Cluster cluster in ClusterSpawning.Instance.Clusters)

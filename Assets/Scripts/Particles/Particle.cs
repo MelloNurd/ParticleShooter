@@ -109,7 +109,7 @@ public class Particle : MonoBehaviour
 
         Vector3 totalForce = Vector3.zero;
 
-        foreach (Cluster otherCluster in ParticleManager.Instance.Clusters)
+        foreach (Cluster otherCluster in ClusterSpawning.Instance.Clusters)
         {
             if (otherCluster == cluster || otherCluster == null) continue;
             if (Vector2.Distance(cluster.Center, otherCluster.Center) > cluster.MaxExternalRadii) continue;

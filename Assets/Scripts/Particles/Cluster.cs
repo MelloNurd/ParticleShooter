@@ -146,7 +146,7 @@ public class Cluster : MonoBehaviour
         newCluster.ResetSwarm();
         newCluster.MutateForceMatrices(0.3f);
 
-        ParticleManager.Instance.Clusters.Add(newCluster);
+        ClusterSpawning.Instance.Clusters.Add(newCluster);
     }
 
     private void Update()

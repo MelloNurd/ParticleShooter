@@ -115,7 +115,7 @@ public class ParticleManager : MonoBehaviour
     [Button("Regenerate Cluster Values")]
     private void UpdateClusterValuesRuntime() // This is for an inspector value change, it is not called in code anywhere
     {
-        foreach(Cluster cluster in Clusters)
+        foreach(Cluster cluster in ClusterSpawning.Instance.Clusters)
         {
             cluster.InitializeForceMatrices();
         }
@@ -162,26 +162,13 @@ public class ParticleManager : MonoBehaviour
 
     private void Update()
     {
-        // Input handling
-        if (Input.GetKeyDown(KeyCode.R)) // Restart the simulation if the "R" key is pressed
-        {
-            Restart();
-        }
+        if (!ClusterSpawning.Instance.FinishedSpawning) return;
 
         // Update all clusters
-        foreach (Cluster cluster in Clusters)
+        foreach (Cluster cluster in ClusterSpawning.Instance.Clusters)
         {
             cluster.UpdateCluster();
         }
-    }
-
-    
-
-    private void Restart()
-    {
-        // Clear all clusters and restart
-        ClearClusters();
-        Initialize();
     }
 
     private void Initialize()
@@ -196,19 +183,6 @@ public class ParticleManager : MonoBehaviour
         //{
         //    CreateCluster();
         //}
-    }
-
-    // Method to clear all clusters
-    private void ClearClusters()
-    {
-        for (int i = Clusters.Count - 1; i >= 0; i--)
-        {
-            Cluster cluster = Clusters[i];
-            Clusters.RemoveAt(i);
-            Destroy(cluster.gameObject);
-        }
-
-        RunningClusterCount = 0;
     }
 
     // Method to get a random point on the screen

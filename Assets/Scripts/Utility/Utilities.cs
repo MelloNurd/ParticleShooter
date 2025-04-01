@@ -11,7 +11,7 @@ public static class Utilities
         Vector3 newPos;
         do
         {
-            newPos = Random.insideUnitCircle * maxRadius;
+            newPos = GetPointInCircle(position, maxRadius);
         }
         while (Vector3.Distance(newPos, position) < minRadius);
 

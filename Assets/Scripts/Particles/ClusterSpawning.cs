@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class ClusterSpawning : MonoBehaviour
 {
+    public static ClusterSpawning Instance { get; private set; }
+
     public List<Cluster> Clusters = new List<Cluster>();
+    public bool FinishedSpawning = false;
 
     private int startClusterCount = 5;
     private int maxClustersOnScreen = 20;
@@ -13,6 +16,19 @@ public class ClusterSpawning : MonoBehaviour
     private Zones zones;
 
     private List<Dictionary<ParticleType, int>> clusterDefinitions = new();
+
+    private void Awake()
+    {
+        // Singleton Implementation
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -51,41 +67,41 @@ public class ClusterSpawning : MonoBehaviour
         }
     }
 
-    private void Initialize()
-    {
-        // Initialize clusters
-        for (int i = 0; i < startClusterCount; i++)
-        {
-            cluster.Initialize(clusterDefinition);
-        }
-    }
+    //private void Initialize()
+    //{
+    //    // Initialize clusters
+    //    for (int i = 0; i < startClusterCount; i++)
+    //    {
+    //        cluster.Initialize(clusterDefinition);
+    //    }
+    //}
 
-    // Method to create a new cluster
-    public Cluster CreateCluster()
-    {
-        //Debug.Log("Creating new cluster.");
-        Vector2 pos = GetRandomPointOnScreen();
+    //// Method to create a new cluster
+    //public Cluster CreateCluster()
+    //{
+    //    //Debug.Log("Creating new cluster.");
+    //    Vector2 pos = GetRandomPointOnScreen();
 
-        Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity, _clusterParent.transform).GetComponent<Cluster>();
+    //    Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity, _clusterParent.transform).GetComponent<Cluster>();
 
-        // Example for how to initialize a dictionary for spawning
-        //Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
-        //{
-        //    { ParticleType.Neutral, 3 },
-        //    { ParticleType.Fire, 3 },
-        //    { ParticleType.Defense, 3 },
-        //    { ParticleType.Speed, 3 }
-        //};
+    //    // Example for how to initialize a dictionary for spawning
+    //    //Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
+    //    //{
+    //    //    { ParticleType.Neutral, 3 },
+    //    //    { ParticleType.Fire, 3 },
+    //    //    { ParticleType.Defense, 3 },
+    //    //    { ParticleType.Speed, 3 }
+    //    //};
 
-        newCluster.Initialize(pos.x, pos.y, 30);
-        newCluster.Id = RunningClusterCount++;
+    //    newCluster.Initialize(pos.x, pos.y, 30);
+    //    newCluster.Id = RunningClusterCount++;
 
-        newCluster.gameObject.name = $"Cluster {newCluster.Id}";
+    //    newCluster.gameObject.name = $"Cluster {newCluster.Id}";
 
-        Clusters.Add(newCluster);
+    //    Clusters.Add(newCluster);
 
-        return newCluster;
-    }
+    //    return newCluster;
+    //}
 
     private Dictionary<ParticleType, int> GenerateRandomCluster(int particleCount)
     {
@@ -106,23 +122,6 @@ public class ClusterSpawning : MonoBehaviour
         }
 
         return particleCounts;
-    }
-
-    // Method to get a random point on the screen
-    public Vector3 GetRandomPointOnScreen(bool awayFromPlayer = true)
-    {
-        Vector3 newPos;
-
-        do
-        {
-            newPos = new Vector3(
-                UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
-                UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
-            0);
-        }
-        while (Vector2.Distance(newPos, player.transform.position) < 6 && awayFromPlayer); // Continue generating new positions if they are too close to the player
-
-        return newPos;
     }
 
 }

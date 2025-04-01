@@ -10,6 +10,7 @@ public class Zones : MonoBehaviour
     public string homebaseName = "Homebase";
 
     public int circleCount = 5;
+    public int NumberOfZones => circleCount + 1; // We count outside the final circle as a zone too
     public float scaleIncrement = 0.2f;
     public float exponentialFactor = 0.25f;
     public int sortingOrder = -15;

@@ -9,8 +9,6 @@ public class ParticleManager : MonoBehaviour
 
     public Player player;
 
-    public List<Cluster> Clusters = new List<Cluster>();
-
     public GameObject ParticlePrefab;
     public GameObject ClusterPrefab;
 
@@ -177,32 +175,7 @@ public class ParticleManager : MonoBehaviour
         }
     }
 
-    // Method to create a new cluster
-    public Cluster CreateCluster()
-    {
-        //Debug.Log("Creating new cluster.");
-        Vector2 pos = GetRandomPointOnScreen();
-
-        Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity, _clusterParent.transform).GetComponent<Cluster>();
-
-        // Example for how to initialize a dictionary for spawning
-        //Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
-        //{
-        //    { ParticleType.Neutral, 3 },
-        //    { ParticleType.Fire, 3 },
-        //    { ParticleType.Defense, 3 },
-        //    { ParticleType.Speed, 3 }
-        //};
-
-        newCluster.Initialize(pos.x, pos.y, 30);
-        newCluster.Id = RunningClusterCount++;
-
-        newCluster.gameObject.name = $"Cluster {newCluster.Id}";
-
-        Clusters.Add(newCluster);
-
-        return newCluster;
-    }
+    
 
     private void Restart()
     {
@@ -219,10 +192,10 @@ public class ParticleManager : MonoBehaviour
         HalfScreenSpace = ScreenSpace * 0.5f;
 
         // Spawn initial clusters
-        for (int i = 0; i < StartPopulation; i++)
-        {
-            CreateCluster();
-        }
+        //for (int i = 0; i < StartPopulation; i++)
+        //{
+        //    CreateCluster();
+        //}
     }
 
     // Method to clear all clusters

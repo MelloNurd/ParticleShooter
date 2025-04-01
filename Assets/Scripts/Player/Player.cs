@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    public static Player Instance { get; private set; }
+
     [BoxGroup("Game Settings")] public float interactionRadius = 20f;
     [BoxGroup("Game Settings")] [Tooltip("This only is visible in Scene view.")] [SerializeField]
     private bool drawPlayerInteractionRadius = false;
@@ -54,6 +56,18 @@ public class Player : MonoBehaviour
     [BoxGroup("Energy Settings")] public float movementEnergyCost = 1f;
     [BoxGroup("Energy Settings")] public bool consumeEnergy = true;
 
+    private void Awake()
+    {
+        // Singleton Implementation
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     private void Start()
     {

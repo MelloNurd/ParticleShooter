@@ -20,6 +20,7 @@ public class Zones : MonoBehaviour
 
     // Cache for runtime regeneration
     private List<GameObject> rings = new List<GameObject>();
+    public List<float> ringRadiuses = new List<float>();
     private int prevCircleCount;
     private float prevScaleIncrement;
     private float prevExponentialFactor;
@@ -78,6 +79,7 @@ public class Zones : MonoBehaviour
             }
         }
         rings.Clear();
+        ringRadiuses.Clear();
 
         // Locate the Homebase object
         GameObject homebase = GameObject.Find(homebaseName);
@@ -113,6 +115,7 @@ public class Zones : MonoBehaviour
 
             // Keep track of the instantiated ring.
             rings.Add(circle);
+            ringRadiuses.Add(circle.transform.localScale.x / 2);
         }
     }
 

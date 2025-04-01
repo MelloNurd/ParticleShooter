@@ -190,9 +190,11 @@ public class Particle : MonoBehaviour
         // Use the CohesionStrength from ParticleManager
         float cohesionStrength = ParticleManager.Instance.CohesionStrength;
 
-        // Apply cohesion force
-        Vector3 cohesionForce = direction * cohesionStrength;
-
-        velocity += cohesionForce * Time.deltaTime;
+        // Apply cohesion force only if distance is less than the external radius
+        //if (distance < ParentCluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
+        //{
+            Vector3 cohesionForce = direction * cohesionStrength;
+            velocity += cohesionForce * Time.deltaTime;
+        //}
     }
 }

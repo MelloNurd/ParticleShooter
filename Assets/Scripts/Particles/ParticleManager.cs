@@ -7,16 +7,24 @@ public class ParticleManager : MonoBehaviour
 {
     public static ParticleManager Instance { get; private set; }
 
-    [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
-    public bool DrawParticleLines = false;
-    [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
-    public bool DrawClusterCircles = false;
     public Player player;
 
     public List<Cluster> Clusters = new List<Cluster>();
 
     public GameObject ParticlePrefab;
     public GameObject ClusterPrefab;
+
+    [ReadOnly] public int RunningClusterCount = 0;
+    [ReadOnly] public int numberOfTypes;
+
+    //////////////////////////
+
+    [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
+    public bool DrawParticleLines = false;
+    [BoxGroup("Cluster/Particle Debugging (Scene view only)")]
+    public bool DrawClusterCircles = false;
+
+    //////////////////////////
 
     [BoxGroup("Simulation Configuration")]
     [OnValueChanged("Restart")]
@@ -29,7 +37,7 @@ public class ParticleManager : MonoBehaviour
     [BoxGroup("Simulation Configuration")]
     public int StartPopulation = 5;
     
-    [ReadOnly] public int numberOfTypes;
+    //////////////////////////
 
     [BoxGroup("Particle Properties")]
     [Range(-5, 5)]
@@ -46,40 +54,56 @@ public class ParticleManager : MonoBehaviour
     [BoxGroup("Particle Properties")]
     public float ParticleDamage = 10f;
 
+    //////////////////////////
+    
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [MinMaxSlider(0.1f, 5f)]
+    public Vector2 InternalForceRange = new Vector2(2f, 5f);
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [MinMaxSlider(-5f, 5f)]
+    public Vector2 ExternalForceRange = new Vector2(-5f, 5f);
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [MinMaxSlider(0.1f, 2f)]
+    public Vector2 InternalMinDistanceRange = new Vector2(0.1f, 0.5f);
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [MinMaxSlider(0.1f, 5f)]
+    public Vector2 ExternalMinDistanceRange = new Vector2(1f, 2f);
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [MinMaxSlider(0.1f, 5f)]
+    public Vector2 InternalRadiusRange = new Vector2(0.5f, 2f);
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [MinMaxSlider(2f, 7f)]
+    public Vector2 ExternalRadiusRange = new Vector2(2f, 7f);
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [Range(0f, 5f)]
+    public float CohesionStrength = 2f;
+
+    [BoxGroup("Force Parameters")]
+    [OnValueChanged("UpdateClusterValuesRuntime")]
+    [Range(0.1f, 10f)]
+    public float ForceMultiplier = 1f;
+
+    //////////////////////////
+    
     [BoxGroup("Unity Settings")]
     [OnValueChanged("ChangeTimescale")]
     [Range(0, 5)]
     public float _timeScale = 1f;
 
-    [BoxGroup("Force Parameters")]
-    [MinMaxSlider(-5f, 5f)]
-    public Vector2 InternalForceRange = new Vector2(2f, 5f);
-
-    [BoxGroup("Force Parameters")]
-    [MinMaxSlider(-5f, 5f)]
-    public Vector2 ExternalForceRange = new Vector2(-5f, 5f);
-
-    [BoxGroup("Force Parameters")]
-    [MinMaxSlider(0.1f, 2f)]
-    public Vector2 InternalMinDistanceRange = new Vector2(0.1f, 0.5f);
-
-    [BoxGroup("Force Parameters")]
-    [MinMaxSlider(1f, 5f)]
-    public Vector2 ExternalMinDistanceRange = new Vector2(1f, 2f);
-
-    [BoxGroup("Force Parameters")]
-    [MinMaxSlider(0.5f, 5f)]
-    public Vector2 InternalRadiusRange = new Vector2(0.5f, 2f);
-
-    [BoxGroup("Force Parameters")]
-    [MinMaxSlider(2f, 7f)]
-    public Vector2 ExternalRadiusRange = new Vector2(2f, 7f);
-
-    [BoxGroup("Force Parameters")]
-    [Range(0f, 5f)]
-    public float CohesionStrength = 2f;
-
-    [ReadOnly] public int RunningClusterCount = 0;
+    //////////////////////////
 
     private GameObject _clusterParent;
 
@@ -88,6 +112,15 @@ public class ParticleManager : MonoBehaviour
         if (!Application.isPlaying) return;
         
         Time.timeScale = _timeScale;
+    }
+
+    [Button("Regenerate Cluster Values")]
+    private void UpdateClusterValuesRuntime() // This is for an inspector value change, it is not called in code anywhere
+    {
+        foreach(Cluster cluster in Clusters)
+        {
+            cluster.InitializeForceMatrices();
+        }
     }
 
 

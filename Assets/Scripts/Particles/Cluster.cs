@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class Cluster : MonoBehaviour
 {
@@ -43,7 +44,7 @@ public class Cluster : MonoBehaviour
         GenerateParticles(x, y, numberOfParticles);
     }
 
-    private void InitializeForceMatrices()
+    public void InitializeForceMatrices()
     {
         // Initialize the force matrices based on the number of types
         InternalForces = new Array2D<float>(_numTypes, _numTypes);
@@ -68,25 +69,46 @@ public class Cluster : MonoBehaviour
             {
                 if (j >= _numTypes) // For the last loop (_numTypes + 1), only adjust external
                 {
-                    ExternalForces[i, j] = externalForceRange.y;
+                    ExternalForces[i, j] = externalForceRange.y * ParticleManager.Instance.ForceMultiplier;
                     ExternalMins[i, j] = externalMinDistanceRange.y;
                     ExternalRadii[i, j] = externalRadiusRange.y;
 
                     break;
                 }
 
-                InternalForces[i, j] = UnityEngine.Random.Range(internalForceRange.x, internalForceRange.y);
+                InternalForces[i, j] = UnityEngine.Random.Range(internalForceRange.x, internalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
                 InternalMins[i, j] = UnityEngine.Random.Range(internalMinDistanceRange.x, internalMinDistanceRange.y);
                 InternalRadii[i, j] = UnityEngine.Random.Range(internalRadiusRange.x, internalRadiusRange.y);
-                ExternalForces[i, j] = UnityEngine.Random.Range(externalForceRange.x, externalForceRange.y);
+                ExternalForces[i, j] = UnityEngine.Random.Range(externalForceRange.x, externalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
                 ExternalMins[i, j] = UnityEngine.Random.Range(externalMinDistanceRange.x, externalMinDistanceRange.y);
                 ExternalRadii[i, j] = UnityEngine.Random.Range(externalRadiusRange.x, externalRadiusRange.y);
             }
         }
 
+        // Since internal forces should all be positive, we want to make one type negative to add movement
+        CreateInternalMovement();
+
         // Set the maximum radii for quick reference
         MaxInternalRadii = internalRadiusRange.y;
         MaxExternalRadii = externalRadiusRange.y;
+    }
+
+    private void CreateInternalMovement()
+    {
+        // This function manually assigns two types to have following behavior.
+        // In other words, one type will attract towards another type, but the other type will repel from it.
+
+        // Select two random types from the number of types, and make sure they are not the same type
+        int type1, type2;
+        do {
+            type1 = UnityEngine.Random.Range(0, _numTypes); 
+            type2 = UnityEngine.Random.Range(0, _numTypes);
+        }
+        while (type1 == type2);
+
+        InternalForces[type1, type2] = -InternalForces[type2, type1] * 0.75f;
+        InternalMins[type1, type2] = 1 / InternalRadii[type1, type2];
+        InternalMins[type2, type1] = 1 / InternalRadii[type2, type1];
     }
 
     private void MutateForceMatrices(float mutationRate = 0.1f)

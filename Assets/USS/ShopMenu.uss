@@ -8,9 +8,10 @@
     -unity-paragraph-spacing: 0;
     transition-duration: 2s;
     transition-property: all;
+    translate: 0 -105px;
 }
 
-.header:enabled {
+.header-started {
     -unity-font-definition: url("project://database/Assets/Font/AstroSpace-0Wl3o.otf?fileID=12800000&guid=771f31b210173a84d99e438826cfaefb&type=3#AstroSpace-0Wl3o");
     font-size: 111px;
     -unity-text-align: upper-left;
@@ -21,5 +22,6 @@
     transition-property: all;
     transition-duration: 2s;
     transition-timing-function: ease;
-    transition-delay: 0s;
+    transition-delay: 1s;
+    translate: 0 0;
 }

@@ -788,6 +788,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1959806306}
   - component: {fileID: 1959806305}
+  - component: {fileID: 1959806307}
   m_Layer: 5
   m_Name: HomebaseMenu
   m_TagString: Untagged
@@ -829,6 +830,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1959806307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1959806304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a844af0754dfc3e43b9c8cbb5068df23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2030043860
 GameObject:
   m_ObjectHideFlags: 0

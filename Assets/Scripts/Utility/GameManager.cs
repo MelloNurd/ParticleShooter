@@ -43,11 +43,11 @@ public class GameManager : MonoBehaviour
             int random = Random.Range(1, 11);
             if (random < 6)
             {
-                Instantiate(Medkit, ParticleManager.Instance.GetRandomPointOnScreen(), Quaternion.identity);
+                Instantiate(Medkit, Utilities.GetRandomPointOnScreen(), Quaternion.identity);
             }
             if (random < 3)
             {
-                Instantiate(Expkit, ParticleManager.Instance.GetRandomPointOnScreen(), Quaternion.identity);
+                Instantiate(Expkit, Utilities.GetRandomPointOnScreen(), Quaternion.identity);
             }
         }
     }

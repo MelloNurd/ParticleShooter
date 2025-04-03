@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -7,7 +8,7 @@ public class Cluster : MonoBehaviour
 {
     public List<Particle> Swarm { get; set; } = new List<Particle>();
     public SerializedDictionary<ParticleType, int> ParticleTypeCounts = new SerializedDictionary<ParticleType, int>();
-    public int Id { get; set; }
+    [ShowNativeProperty] public int Id { get; set; }
 
     public Array2D<float> InternalForces;
     public Array2D<float> ExternalForces;
@@ -24,21 +25,20 @@ public class Cluster : MonoBehaviour
     private GameObject _particlePrefab;
     public int _numTypes;
 
-    private void Awake()
-    {
-        // Initialize particle prefab and number of types from ParticleManager
-        _particlePrefab = ParticleManager.Instance.ParticlePrefab;
-        _numTypes = ParticleManager.Instance.numberOfTypes;
-    }
-
     public void Initialize(float x, float y, SerializedDictionary<ParticleType, int> particleTypes)
     {
+        _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
+        _numTypes = ParticleManager.Instance.numberOfTypes;
+
         // Initialize the cluster with a specific position and particle types
         InitializeForceMatrices();
         GenerateParticles(x, y, particleTypes);
     }
     public void Initialize(float x, float y, int numberOfParticles)
     {
+        _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
+        _numTypes = ParticleManager.Instance.numberOfTypes;
+
         // Initialize force matrices and generate new particles
         InitializeForceMatrices();
         GenerateParticles(x, y, numberOfParticles);
@@ -95,6 +95,12 @@ public class Cluster : MonoBehaviour
 
     private void CreateInternalMovement()
     {
+        if(_numTypes < 2)
+        {
+            Debug.LogWarning("Less than two types detected. Cannot create internal movement.");
+            return;
+        }
+
         // This function manually assigns two types to have following behavior.
         // In other words, one type will attract towards another type, but the other type will repel from it.
 
@@ -146,7 +152,7 @@ public class Cluster : MonoBehaviour
         newCluster.ResetSwarm();
         newCluster.MutateForceMatrices(0.3f);
 
-        ClusterSpawning.Instance.Clusters.Add(newCluster);
+        ParticleManager.Instance.Clusters.Add(newCluster);
     }
 
     private void Update()
@@ -176,8 +182,10 @@ public class Cluster : MonoBehaviour
     public void GenerateParticles(float x, float y, int numberOfParticles) => GenerateParticles(x, y, GenerateRandomParticles(numberOfParticles));
     public void GenerateParticles(float x, float y, SerializedDictionary<ParticleType, int> particleCounts)
     {
+        var copy = particleCounts.Clone(); // SerializeDictionary pass by reference so we need to make a copy
+
         int numberOfParticles = 0;
-        foreach (var kvp in particleCounts)
+        foreach (var kvp in copy)
         {
             ParticleTypeCounts.Add(kvp.Key, kvp.Value);
             numberOfParticles += kvp.Value;
@@ -209,12 +217,12 @@ public class Cluster : MonoBehaviour
 
             // Assign type properly
             ParticleType type = ParticleType.Neutral; // Default type
-            foreach (var kvp in particleCounts)
+            foreach (var kvp in copy)
             {
                 if (kvp.Value > 0)
                 {
                     type = kvp.Key; // Get the first available type
-                    particleCounts[kvp.Key]--; // Decrease the count for this type
+                    copy[kvp.Key]--; // Decrease the count for this type
                     break;
                 }
             }
@@ -240,6 +248,8 @@ public class Cluster : MonoBehaviour
         foreach (Particle particle in Swarm)
         {
             if (particle == null) continue;
+
+            Debug.Log($"Cluster {Id} running update.");
 
             particle.ApplyInternalForces(this);
             particle.ApplyExternalForces(this);

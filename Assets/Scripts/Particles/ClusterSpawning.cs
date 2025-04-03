@@ -1,21 +1,27 @@
+using Mono.Cecil;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class ClusterSpawning : MonoBehaviour
 {
     public static ClusterSpawning Instance { get; private set; }
 
-    public List<Cluster> Clusters = new List<Cluster>();
-    public bool FinishedSpawning = false;
+    public bool FinishedSpawning { get; private set; } = false;
 
-    private int startClusterCount = 5;
-    private int maxClustersOnScreen = 20;
+    public GameObject ClusterPrefab;
+    public GameObject ParticlePrefab;
 
-    private GameObject player;
-    private Zones zones;
+    private int _maxClustersOnScreen = 20;
 
-    private List<Dictionary<ParticleType, int>> clusterDefinitions = new();
+    private GameObject _player;
+    private Rigidbody2D _playerRb;
+    private Zones _zones;
+
+    private List<SerializedDictionary<ParticleType, int>> _clusterDefinitions = new();
+
+    private GameObject _clusterParent;
 
     private void Awake()
     {
@@ -28,31 +34,66 @@ public class ClusterSpawning : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        // Ensure the particle and cluster prefabs are assigned
+        if (ParticlePrefab == null || ClusterPrefab == null)
+        {
+            Debug.LogError("ParticlePrefab or ClusterPrefab is not assigned in the inspector!");
+            return;
+        }
     }
 
     void Start()
     {
-        player = Player.Instance.gameObject;
-        zones = Zones.Instance;
+        _player = Player.Instance.gameObject;
+        _playerRb = _player.GetComponent<Rigidbody2D>();
+        _zones = Zones.Instance;
 
-        if(player == null || zones == null)
+        if(_player == null || _zones == null)
         {
             Debug.LogError("Player or Zones instance is null. Make sure they are initialized before this script runs.");
             return;
         }
 
-        InitializeClusterList();
+        _clusterParent = new GameObject("Cluster Parent");
+
+        InitializeClusterTypes();
+        Initialize();
+
+        FinishedSpawning = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        // Check if the player is moving, and if the number of clusters is less than the max allowed
+        // If so, small change to spawn a new cluster
+        if (_playerRb.linearVelocity.magnitude > 0.1f && ParticleManager.Instance.Clusters.Count < _maxClustersOnScreen)
+        {
+            if (Random.Range(0, 100) > 1) return;
+
+            Vector3 randomPos;
+            int threshold = 0;
+            do
+            {
+                randomPos = Utilities.GetRandomPointOffScreen(1, 0.5f);
+                threshold++;
+            } // The Dot basically checks if the random position is in front of the player
+            while (Vector3.Dot(_player.transform.up, (randomPos - _player.transform.position).normalized) < 0.5f && threshold < 500);
+
+            if(threshold >= 500)
+            {
+                Debug.LogWarning("Threshold reached while trying to find a point in circle.");
+                return;
+            }
+
+            CreateCluster(randomPos);
+        }
     }
 
-    private void InitializeClusterList()
+    private void InitializeClusterTypes()
     {
-        clusterDefinitions.Clear();
+        _clusterDefinitions.Clear();
 
         int? zoneCount = Zones.Instance.NumberOfZones;
         if(zoneCount == null || zoneCount == -1)
@@ -63,49 +104,71 @@ public class ClusterSpawning : MonoBehaviour
 
         for(int i = 0; i < zoneCount; i++)
         {
-            clusterDefinitions.Add(GenerateRandomCluster((i+1)*5));
+            _clusterDefinitions.Add(GenerateRandomCluster((i+1)*5));
         }
     }
 
-    //private void Initialize()
-    //{
-    //    // Initialize clusters
-    //    for (int i = 0; i < startClusterCount; i++)
-    //    {
-    //        cluster.Initialize(clusterDefinition);
-    //    }
-    //}
-
-    //// Method to create a new cluster
-    //public Cluster CreateCluster()
-    //{
-    //    //Debug.Log("Creating new cluster.");
-    //    Vector2 pos = GetRandomPointOnScreen();
-
-    //    Cluster newCluster = Instantiate(ClusterPrefab, pos, Quaternion.identity, _clusterParent.transform).GetComponent<Cluster>();
-
-    //    // Example for how to initialize a dictionary for spawning
-    //    //Dictionary<ParticleType, int> defaultParticleCounts = new Dictionary<ParticleType, int>
-    //    //{
-    //    //    { ParticleType.Neutral, 3 },
-    //    //    { ParticleType.Fire, 3 },
-    //    //    { ParticleType.Defense, 3 },
-    //    //    { ParticleType.Speed, 3 }
-    //    //};
-
-    //    newCluster.Initialize(pos.x, pos.y, 30);
-    //    newCluster.Id = RunningClusterCount++;
-
-    //    newCluster.gameObject.name = $"Cluster {newCluster.Id}";
-
-    //    Clusters.Add(newCluster);
-
-    //    return newCluster;
-    //}
-
-    private Dictionary<ParticleType, int> GenerateRandomCluster(int particleCount)
+    private void Initialize()
     {
-        Dictionary<ParticleType, int> particleCounts = new Dictionary<ParticleType, int>();
+        //for (int i = 0; i < startClusterCount; i++)
+        //{
+        //    Vector3 randomPos = Utilities.GetPointInCircle(
+        //        Player.Instance.transform.position,
+        //        Player.Instance.minInteractionRadius,
+        //        Player.Instance.minInteractionRadius * 1.5f
+        //    );
+
+        //    Cluster cluster = CreateCluster(randomPos);
+        //}
+    }
+
+    private SerializedDictionary<ParticleType, int> ClusterTypeByZone(Vector3 pos)
+    {
+        int zoneIndex = Zones.GetCurrentZone(pos);
+        if (zoneIndex == -1)
+        {
+            Debug.LogError("Zone index is invalid. Make sure the Zones instance is initialized before this script runs.");
+            return null;
+        }
+
+        return _clusterDefinitions[zoneIndex];
+    }
+
+    // Method to create a new cluster
+    public Cluster CreateCluster(Vector3 position)
+    {
+        int count = ParticleManager.Instance.Clusters.Count;
+
+        Cluster newCluster = Instantiate(ClusterPrefab, position, Quaternion.identity, _clusterParent.transform).GetComponent<Cluster>();
+        newCluster.gameObject.name = $"Cluster {++count}";
+
+        // Example for how to initialize a dictionary for spawning
+        //SerializedDictionary<ParticleType, int> defaultParticleCounts = new SerializedDictionary<ParticleType, int>
+        //{
+        //    { ParticleType.Neutral, 3 },
+        //    { ParticleType.Fire, 1 },
+        //    { ParticleType.Defense, 5 },
+        //    { ParticleType.Speed, 3 }
+        //};
+
+        var clusterType = ClusterTypeByZone(position);
+        if(clusterType == null)
+        {
+            Debug.LogError("Cluster type is null. Make sure the ClusterTypeByZone method is returning a valid dictionary.");
+            return null;
+        }
+
+        newCluster.Id = count;
+        newCluster.Initialize(position.x, position.y, clusterType);
+
+        ParticleManager.Instance.Clusters.Add(newCluster);
+
+        return newCluster;
+    }
+
+    private SerializedDictionary<ParticleType, int> GenerateRandomCluster(int particleCount)
+    {
+        SerializedDictionary<ParticleType, int> particleCounts = new SerializedDictionary<ParticleType, int>();
         
         for(int i = 0; i < particleCount; i++)
         {

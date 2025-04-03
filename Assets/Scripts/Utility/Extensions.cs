@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public static class Extensions
 {
@@ -160,6 +161,25 @@ public static class Extensions
     public static TKey ReverseLookup<TKey, TValue>(this IDictionary<TKey, TValue> source, TValue lookup) where TValue : class
     {
         return source.FirstOrDefault(x => x.Value == lookup).Key;
+    }
+
+    ////////// SERIALIZED DICTIONARIES ////////////
+
+    /// <summary>
+    /// Clones a dictionary by creating a new dictionary and copying the keys and values.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    /// <param name="original"></param>
+    /// <returns>An exact copy of the original Dictionary.</returns>
+    public static SerializedDictionary<TKey, TValue> Clone<TKey, TValue>(this SerializedDictionary<TKey, TValue> original)
+    {
+        var copy = new SerializedDictionary<TKey, TValue>();
+        foreach (var kvp in original)
+        {
+            copy.Add(kvp.Key, kvp.Value); // Consider deep-copying TValue if it's a reference type
+        }
+        return copy;
     }
     #endregion
 

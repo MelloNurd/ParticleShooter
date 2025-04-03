@@ -6,11 +6,10 @@ using System;
 public class ParticleManager : MonoBehaviour
 {
     public static ParticleManager Instance { get; private set; }
+    
+    public List<Cluster> Clusters = new List<Cluster>();
 
     public Player player;
-
-    public GameObject ParticlePrefab;
-    public GameObject ClusterPrefab;
 
     [ReadOnly] public int RunningClusterCount = 0;
     [ReadOnly] public int numberOfTypes;
@@ -103,8 +102,6 @@ public class ParticleManager : MonoBehaviour
 
     //////////////////////////
 
-    private GameObject _clusterParent;
-
     private void ChangeTimescale() // This is just used in the inspector to update the time scale when changed
     {
         if (!Application.isPlaying) return;
@@ -115,7 +112,7 @@ public class ParticleManager : MonoBehaviour
     [Button("Regenerate Cluster Values")]
     private void UpdateClusterValuesRuntime() // This is for an inspector value change, it is not called in code anywhere
     {
-        foreach(Cluster cluster in ClusterSpawning.Instance.Clusters)
+        foreach(Cluster cluster in Clusters)
         {
             cluster.InitializeForceMatrices();
         }
@@ -142,30 +139,21 @@ public class ParticleManager : MonoBehaviour
             player = FindFirstObjectByType<Player>();
         }
 
-        // Ensure the particle and cluster prefabs are assigned
-        if (ParticlePrefab == null || ClusterPrefab == null)
-        {
-            Debug.LogError("ParticlePrefab or ClusterPrefab is not assigned in the inspector!");
-            return;
-        }
-
         // Enable running in background
         Application.runInBackground = true;
     }
 
     private void Start()
     {
-        _clusterParent = new GameObject("Cluster Parent");
-        
         Initialize();
     }
 
     private void Update()
     {
-        if (ClusterSpawning.Instance == null || ClusterSpawning.Instance.FinishedSpawning) return;
+        if (ClusterSpawning.Instance == null || !ClusterSpawning.Instance.FinishedSpawning) return;
 
         // Update all clusters
-        foreach (Cluster cluster in ClusterSpawning.Instance.Clusters)
+        foreach (Cluster cluster in Clusters)
         {
             cluster.UpdateCluster();
         }
@@ -177,28 +165,5 @@ public class ParticleManager : MonoBehaviour
 
         // Calculate half screen space
         HalfScreenSpace = ScreenSpace * 0.5f;
-
-        // Spawn initial clusters
-        //for (int i = 0; i < StartPopulation; i++)
-        //{
-        //    CreateCluster();
-        //}
-    }
-
-    // Method to get a random point on the screen
-    public Vector3 GetRandomPointOnScreen(bool awayFromPlayer = true)
-    {
-        Vector3 newPos;
-
-        do
-        {
-            newPos = new Vector3(
-                UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
-                UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
-            0);
-        }
-        while (Vector2.Distance(newPos, player.transform.position) < 6 && awayFromPlayer); // Continue generating new positions if they are too close to the player
-
-        return newPos;
     }
 }

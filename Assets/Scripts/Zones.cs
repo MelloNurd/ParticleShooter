@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using NaughtyAttributes;
 
 public class Zones : MonoBehaviour
 {
@@ -9,23 +10,26 @@ public class Zones : MonoBehaviour
 
     public string homebaseName = "Homebase";
 
-    public int circleCount = 5;
+    [OnValueChanged("UpdateFromInspector")] public int circleCount = 5;
     public int NumberOfZones => circleCount + 1; // We count outside the final circle as a zone too
-    public float scaleIncrement = 0.2f;
-    public float exponentialFactor = 0.25f;
-    public int sortingOrder = -15;
+    [OnValueChanged("UpdateFromInspector")] public float scaleIncrement = 0.2f;
+    [OnValueChanged("UpdateFromInspector")] public float exponentialFactor = 0.25f;
+    [OnValueChanged("UpdateFromInspector")] public int sortingOrder = -15;
 
     // Private colors remain unchanged
     private Color startColor = new Color(0.05f, 0.05f, 0.15f, 1f);
     private Color endColor = new Color(0f, 0f, 0.05f, 1f);
 
-    // Cache for runtime regeneration
+    private GameObject _zoneParent;
     private List<GameObject> rings = new List<GameObject>();
     public List<float> ringRadiuses = new List<float>();
-    private int prevCircleCount;
-    private float prevScaleIncrement;
-    private float prevExponentialFactor;
-    private int prevSortingOrder;
+
+    private void UpdateFromInspector()
+    { // This is using the OnValueChanged attribute and is not called anywhere in code
+        if (!Application.isPlaying) return;
+
+        GenerateRings();
+    }
 
     private void Awake()
     {
@@ -40,36 +44,11 @@ public class Zones : MonoBehaviour
         }
 
         Camera.main.backgroundColor = Color.black;
+
+        GenerateRings();
     }
 
-    void Start()
-    {
-        CacheParameters();
-        RegenerateRings();
-    }
-
-    void Update()
-    {
-        // Check if any of the inspector parameters have changed.
-        if (circleCount != prevCircleCount ||
-            scaleIncrement != prevScaleIncrement ||
-            exponentialFactor != prevExponentialFactor ||
-            sortingOrder != prevSortingOrder)
-        {
-            RegenerateRings();
-            CacheParameters();
-        }
-    }
-
-    void CacheParameters()
-    {
-        prevCircleCount = circleCount;
-        prevScaleIncrement = scaleIncrement;
-        prevExponentialFactor = exponentialFactor;
-        prevSortingOrder = sortingOrder;
-    }
-
-    void RegenerateRings()
+    void GenerateRings()
     {
         // Destroy previous rings
         foreach (var ring in rings)
@@ -81,6 +60,8 @@ public class Zones : MonoBehaviour
         }
         rings.Clear();
         ringRadiuses.Clear();
+
+        GameObject zoneParent = new GameObject("Zones");
 
         // Locate the Homebase object
         GameObject homebase = GameObject.Find(homebaseName);
@@ -97,7 +78,8 @@ public class Zones : MonoBehaviour
         for (int i = 0; i < circleCount; i++)
         {
             // Instantiate a new circle at the homebase's position
-            GameObject circle = Instantiate(circlePrefab, origin, Quaternion.identity);
+            GameObject circle = Instantiate(circlePrefab, origin, Quaternion.identity, zoneParent.transform);
+            circle.name = "Zone " + i;
 
             // Calculate the scale multiplier so that each ring is larger than the last.
             float scaleMultiplier = 1 + ((i + 1) * scaleIncrement);
@@ -135,7 +117,7 @@ public class Zones : MonoBehaviour
                 }
             }
         }
-        return -1; // Not in any zone
+        return Instance.rings.Count; // Outside zones (so we consider it the last zone, with no defined boundary)
     }
 
     public List<GameObject> GetZones()

@@ -8,30 +8,78 @@ public static class Utilities
     }
     public static Vector3 GetPointInCircle(Vector3 position, float minRadius, float maxRadius)
     {
+        if(minRadius > maxRadius)
+        {
+            Debug.LogError("Min radius cannot be greater than max radius.");
+            return position;
+        }
+
+        int threshold = 0;
+
         Vector3 newPos;
         do
         {
             newPos = GetPointInCircle(position, maxRadius);
+            threshold++;
         }
-        while (Vector3.Distance(newPos, position) < minRadius);
+        while (Vector3.Distance(newPos, position) <= minRadius && threshold < 100);
 
-        return newPos;
+        // Threshold is in place to prevent any potential infinite loops
+        if(threshold >= 100)
+        {
+            Debug.LogWarning("Threshold reached while trying to find a point in circle.");
+            return position;
+        }
+
+        return position + newPos;
     }
 
-    // Method to get a random point on the screen
-    //public Vector3 GetRandomPointOnScreen(bool awayFromPlayer = true)
-    //{
-    //    Vector3 newPos;
+    public static bool IsOnScreen(Vector3 pos, float margin = 0) => IsOnScreen(Camera.main, pos, margin);
+    public static bool IsOnScreen(Camera cam, Vector3 pos, float margin = 0)
+    {
+        Vector3 viewportPos = cam.WorldToViewportPoint(pos);
 
-    //    do
-    //    {
-    //        newPos = new Vector3(
-    //            UnityEngine.Random.Range(-HalfScreenSpace.x, HalfScreenSpace.x),
-    //            UnityEngine.Random.Range(-HalfScreenSpace.y, HalfScreenSpace.y),
-    //        0);
-    //    }
-    //    while (Vector2.Distance(newPos, player.transform.position) < 6 && awayFromPlayer); // Continue generating new positions if they are too close to the player
+        // Check if in front of the camera
+        bool isInFront = viewportPos.z > 0;
 
-    //    return newPos;
-    //}
+        // Check if inside screen bounds
+        bool isOnScreen = viewportPos.x >= -margin && viewportPos.x <= 1 + margin &&
+                          viewportPos.y >= -margin && viewportPos.y <= 1 + margin;
+
+        return isInFront && isOnScreen;
+    }
+
+    public static Vector3 GetRandomPointOnScreen() => GetRandomPointOnScreen(Camera.main);
+    public static Vector3 GetRandomPointOnScreen(Camera cam)
+    {
+        Vector3 randomPoint = new(Random.Range(0f, 1f), Random.Range(0f, 1f), cam.nearClipPlane + 1f);
+
+        return cam.ViewportToWorldPoint(randomPoint);
+    }
+
+    public static Vector3 GetRandomPointOffScreen(float radius = 1f, float margin = 0) => GetRandomPointOffScreen(Camera.main, radius, margin);
+    public static Vector3 GetRandomPointOffScreen(Camera cam, float radius = 1f, float margin = 0)
+    {
+        // Some manual tweaks to try and prevent infinite loops. Multiply by 0.1f to get it closer to size of a Unity unit.
+        radius = Mathf.Max(0.05f, Mathf.Abs(radius * 0.1f)); // Ensure radius is positive and above 0.05f.
+        margin = Mathf.Min(radius * 0.5f, Mathf.Abs(margin * 0.1f)); // Ensure margin is posiitve and no more than half of the radius.
+        
+        Vector3 randomPos;
+        int threshold = 0;
+        do
+        {
+            Vector3 temp = new(Random.Range(-radius, 1 + radius), Random.Range(-radius, 1 + radius), cam.nearClipPlane + 1f);
+            randomPos = cam.ViewportToWorldPoint(temp);
+            threshold++;
+        }
+        while (IsOnScreen(randomPos, margin) && threshold < 100);
+
+        if (threshold >= 100)
+        {
+            Debug.LogWarning("Threshold reached while trying to find a point off screen. Check your values and try again.");
+            return Vector3.zero;
+        }
+
+        return randomPos;
+    }
 }

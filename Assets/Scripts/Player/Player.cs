@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
 {
     public static Player Instance { get; private set; }
 
-    [BoxGroup("Game Settings")] public float interactionRadius = 20f;
+    [BoxGroup("Game Settings")] public float minInteractionRadius = 20f;
     [BoxGroup("Game Settings")] [Tooltip("This only is visible in Scene view.")] [SerializeField]
     private bool drawPlayerInteractionRadius = false;
 
@@ -267,7 +267,7 @@ public class Player : MonoBehaviour
         if(drawPlayerInteractionRadius)
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, interactionRadius);
+            Gizmos.DrawWireSphere(transform.position, minInteractionRadius);
         }
     }
 

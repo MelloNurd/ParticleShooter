@@ -1,11 +1,11 @@
 using NaughtyAttributes;
 using UnityEngine;
 
-public class RestartButton : MonoBehaviour
+public class ButtonFunctions : MonoBehaviour
 {
     [Scene] public string sceneName;
 
-    public void OnClick()
+    public void LoadScene()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
     }

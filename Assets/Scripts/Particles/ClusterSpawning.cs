@@ -10,6 +10,8 @@ public class ClusterSpawning : MonoBehaviour
 
     public bool FinishedSpawning { get; private set; } = false;
 
+    public float DespawnTimeOffscreen = 10f;
+
     public GameObject ClusterPrefab;
     public GameObject ParticlePrefab;
 

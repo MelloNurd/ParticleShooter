@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,7 +26,10 @@ public class Cluster : MonoBehaviour
     private GameObject _particlePrefab;
     public int _numTypes;
 
-    public void Initialize(float x, float y, SerializedDictionary<ParticleType, int> particleTypes)
+    private bool _isWarmedUp = false;
+    private float _timeOffscreen = 0f;
+
+    public async void Initialize(float x, float y, SerializedDictionary<ParticleType, int> particleTypes)
     {
         _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
@@ -33,8 +37,12 @@ public class Cluster : MonoBehaviour
         // Initialize the cluster with a specific position and particle types
         InitializeForceMatrices();
         GenerateParticles(x, y, particleTypes);
+
+        await UniTask.Delay(5000);
+
+        _isWarmedUp = true;
     }
-    public void Initialize(float x, float y, int numberOfParticles)
+    public async void Initialize(float x, float y, int numberOfParticles)
     {
         _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
@@ -42,6 +50,10 @@ public class Cluster : MonoBehaviour
         // Initialize force matrices and generate new particles
         InitializeForceMatrices();
         GenerateParticles(x, y, numberOfParticles);
+
+        await UniTask.Delay(5000);
+
+        _isWarmedUp = true;
     }
 
     public void InitializeForceMatrices()
@@ -161,6 +173,23 @@ public class Cluster : MonoBehaviour
         {
             Reproduce();
         }
+
+        if(_isWarmedUp)
+        {
+            if(Utilities.IsOnScreen(Center))
+            {
+                _timeOffscreen = 0f;
+            }
+            else
+            {
+                _timeOffscreen += Time.deltaTime;
+            }
+
+            if(_timeOffscreen > ClusterSpawning.Instance.DespawnTimeOffscreen)
+            {
+                KillCluster();
+            }
+        }
     }
 
     private SerializedDictionary<ParticleType, int> GenerateRandomParticles(int numberOfParticles)
@@ -249,8 +278,6 @@ public class Cluster : MonoBehaviour
         {
             if (particle == null) continue;
 
-            Debug.Log($"Cluster {Id} running update.");
-
             particle.ApplyInternalForces(this);
             particle.ApplyExternalForces(this);
             particle.ApplyCohesion();
@@ -284,6 +311,23 @@ public class Cluster : MonoBehaviour
                 ActiveRadius = distance;
             }
         }
+    }
+
+    private void KillCluster()
+    {
+        // Destroy all particles in the swarm
+        foreach (Particle particle in Swarm)
+        {
+            if (particle != null)
+            {
+                Destroy(particle.gameObject);
+            }
+        }
+
+        ParticleManager.Instance.Clusters.Remove(this);
+
+        // Destroy the cluster itself
+        Destroy(gameObject);
     }
 
     private void ResetSwarm()

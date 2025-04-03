@@ -18,6 +18,8 @@ public class Cluster : MonoBehaviour
     public Array2D<float> InternalRadii;
     public Array2D<float> ExternalRadii;
 
+    private GameObject player;
+
     public float MaxInternalRadii { get; set; }
     public float MaxExternalRadii { get; set; }
     public Vector3 Center;
@@ -40,6 +42,7 @@ public class Cluster : MonoBehaviour
 
         await UniTask.Delay(5000);
 
+        player = Player.Instance.gameObject;
         _isWarmedUp = true;
     }
     public async void Initialize(float x, float y, int numberOfParticles)
@@ -53,6 +56,7 @@ public class Cluster : MonoBehaviour
 
         await UniTask.Delay(5000);
 
+        player = Player.Instance.gameObject;
         _isWarmedUp = true;
     }
 
@@ -185,7 +189,7 @@ public class Cluster : MonoBehaviour
                 _timeOffscreen += Time.deltaTime;
             }
 
-            if(_timeOffscreen > ClusterSpawning.Instance.DespawnTimeOffscreen)
+            if(Vector2.Distance(player.transform.position, transform.position) > 40 || _timeOffscreen > ClusterSpawning.Instance.DespawnTimeOffscreen)
             {
                 KillCluster();
             }

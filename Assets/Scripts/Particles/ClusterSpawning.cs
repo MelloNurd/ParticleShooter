@@ -15,7 +15,7 @@ public class ClusterSpawning : MonoBehaviour
     public GameObject ClusterPrefab;
     public GameObject ParticlePrefab;
 
-    private int _maxClustersOnScreen = 20;
+    private int _maxClustersOnScreen = 30;
 
     private GameObject _player;
     private Rigidbody2D _playerRb;
@@ -66,13 +66,13 @@ public class ClusterSpawning : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // Check if the player is moving, and if the number of clusters is less than the max allowed
         // If so, small change to spawn a new cluster
         if (_playerRb.linearVelocity.magnitude > 0.1f && ParticleManager.Instance.Clusters.Count < _maxClustersOnScreen)
         {
-            if (Random.Range(0, 100) > 1) return;
+            if (Random.Range(0, 150) > 1) return;
 
             Vector3 randomPos;
             int threshold = 0;

@@ -573,6 +573,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1475739696}
   - component: {fileID: 1475739697}
+  - component: {fileID: 1475739698}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -607,9 +608,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a072be966319c6441bbf3a0bba579f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Clusters: []
   player: {fileID: 1713353514}
-  ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
-  ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
   RunningClusterCount: 0
   numberOfTypes: 0
   DrawParticleLines: 0
@@ -630,6 +630,21 @@ MonoBehaviour:
   CohesionStrength: 2
   ForceMultiplier: 1
   _timeScale: 1
+--- !u!114 &1475739698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1475739694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 948485aa0fe453d4ca2a84441c1f3f76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DespawnTimeOffscreen: 8
+  ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
+  ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}

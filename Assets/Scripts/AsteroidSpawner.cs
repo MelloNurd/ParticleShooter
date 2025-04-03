@@ -25,6 +25,9 @@ public class AsteroidSpawner : MonoBehaviour
     public GameObject asteroidPrefab;
     public GameObject smallAsteroidPrefab;
 
+    private GameObject astZonePar;
+    List<GameObject> asteroids = new List<GameObject>();
+
     // Radius for collision checking when spawning to prevent overlapping objects
     [SerializeField] private float spawnCheckRadius = 5f;
     // Maximum attempts to find a non-colliding position per spawn
@@ -32,6 +35,7 @@ public class AsteroidSpawner : MonoBehaviour
 
     void Start()
     {
+        astZonePar = new GameObject("Asteroid Zone Parent");
         // Start spawning asteroids after one frame delay
         StartCoroutine(SpawnAsteroids());
     }
@@ -64,23 +68,19 @@ public class AsteroidSpawner : MonoBehaviour
             yield break;
         }
 
-        // Sort zones by their calculated radius (ascending)
-        List<GameObject> sortedZones = zones.OrderBy(zone => zone.transform.localScale.x * 0.5f).ToList();
-
         // Loop through each sorted zone
-        for (int i = 0; i < sortedZones.Count; i++)
+        for (int i = 0; i < zones.Count; i++)
         {
-            GameObject zone = sortedZones[i];
-            float outerRadius = zone.transform.localScale.x * 0.5f;
+            GameObject zone = zones[i];
+            float outerRadius = Zones.Instance.ringRadiuses[i];
+            float innerRadius = 0;
+            if (i - 1 >= 0)
+            {
+                innerRadius = Zones.Instance.ringRadiuses[i - 1];
+            }
             GameObject prefabToSpawn;
             int spawnCount;
 
-            // Define spawn counts and prefab types per zone:
-            // Zone 1 (i==0): 1 small asteroid 
-            // Zone 2 (i==1): 7 small asteroids 
-            // Zone 3 (i==2): 15 small asteroids 
-            // Zone 4 (i==3): 7 normal asteroids 
-            // Zone 5 (i==4): 12 normal asteroids
             if (i < 3)
             {
                 prefabToSpawn = smallAsteroidPrefab;
@@ -117,17 +117,10 @@ public class AsteroidSpawner : MonoBehaviour
                 }
             }
 
-            // Determine the inner bound so that spawns don't appear inside an inner zone.
-            // For Zone 1, inner radius is 0; otherwise it's the previous zone's outer radius.
-            float innerRadius = (i == 0) ? 0f : sortedZones[i - 1].transform.localScale.x * 0.5f;
-
             // Create or find a container for asteroids for this zone.
-            string zoneContainerName = "Zone " + (i + 1);
-            GameObject zoneContainer = GameObject.Find(zoneContainerName);
-            if (zoneContainer == null)
-            {
-                zoneContainer = new GameObject(zoneContainerName);
-            }
+            string zoneContainerName = "Zone " + (i);
+            GameObject zoneContainer = new GameObject(zoneContainerName);
+            zoneContainer.transform.parent = astZonePar.transform;
 
             // Spawn asteroids randomly within the annular area.
             for (int j = 0; j < spawnCount; j++)
@@ -148,7 +141,8 @@ public class AsteroidSpawner : MonoBehaviour
 
                     if (!collisionFound)
                     {
-                        Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity, zoneContainer.transform);
+                        GameObject thisAsteroid = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity, zoneContainer.transform);
+                        asteroids.Add(thisAsteroid);
                         spawned = true;
                     }
                 }
@@ -163,36 +157,11 @@ public class AsteroidSpawner : MonoBehaviour
 
     private void ClearOldAsteroids()
     {
-        // Attempt to get the Zones manager from the scene.
-        Zones zonesManager = FindFirstObjectByType<Zones>();
-        if (zonesManager == null)
+        while(asteroids.Count > 0)
         {
-            Debug.LogError("Zones manager not found in the scene. Cannot clear old asteroids.");
-            return;
-        }
-
-        // Retrieve zones from the Zones manager.
-        List<GameObject> zones = zonesManager.GetZones();
-        if (zones == null)
-            return;
-
-        // For each zone, look for a container named "Zone i" and remove its children.
-        for (int i = 0; i < zones.Count; i++)
-        {
-            string zoneContainerName = "Zone " + (i + 1);
-            GameObject zoneContainer = GameObject.Find(zoneContainerName);
-            if (zoneContainer != null)
-            {
-                // Destroy all children in the container.
-                for (int j = zoneContainer.transform.childCount - 1; j >= 0; j--)
-                {
-                    GameObject child = zoneContainer.transform.GetChild(j).gameObject;
-                    if (Application.isPlaying)
-                        Destroy(child);
-                    else
-                        DestroyImmediate(child);
-                }
-            }
+            GameObject asteroid = asteroids[0];
+            asteroids.RemoveAt(0);
+            Destroy(asteroid);
         }
     }
 }

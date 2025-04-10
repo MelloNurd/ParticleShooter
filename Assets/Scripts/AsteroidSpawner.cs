@@ -141,7 +141,7 @@ public class AsteroidSpawner : MonoBehaviour
 
                     if (!collisionFound)
                     {
-                        GameObject thisAsteroid = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity, zoneContainer.transform);
+                        GameObject thisAsteroid = Instantiate(prefabToSpawn, spawnPosition, Quaternion.Euler(0, 0, Random.Range(0f, 360f)), zoneContainer.transform);
                         asteroids.Add(thisAsteroid);
                         spawned = true;
                     }

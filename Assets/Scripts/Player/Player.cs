@@ -188,8 +188,10 @@ public class Player : MonoBehaviour
             return;
         }
 
-        leftThruster.SetThrust(rb.linearVelocity.magnitude * 0.75f - (rb.angularVelocity * 0.005f));
-        rightThruster.SetThrust(rb.linearVelocity.magnitude * 0.75f + (rb.angularVelocity * 0.005f));
+        float boostMultiplier = isBoosting && boostAmount > 0 ? 1.8f : 1f;
+
+        leftThruster.SetThrust(rb.linearVelocity.magnitude * 0.75f * boostMultiplier - (rb.angularVelocity * 0.005f));
+        rightThruster.SetThrust(rb.linearVelocity.magnitude * 0.75f * boostMultiplier + (rb.angularVelocity * 0.005f));
 
         //if (vertInput > 0)
         //{

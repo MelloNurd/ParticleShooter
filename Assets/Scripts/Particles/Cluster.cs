@@ -18,6 +18,8 @@ public class Cluster : MonoBehaviour
     public Array2D<float> InternalRadii;
     public Array2D<float> ExternalRadii;
 
+    public List<GameObject> NearbyCrystals = new();
+
     private GameObject player;
 
     public float MaxInternalRadii { get; set; }
@@ -64,11 +66,11 @@ public class Cluster : MonoBehaviour
     {
         // Initialize the force matrices based on the number of types
         InternalForces = new Array2D<float>(_numTypes, _numTypes);
-        ExternalForces = new Array2D<float>(_numTypes, _numTypes + 1);
+        ExternalForces = new Array2D<float>(_numTypes, _numTypes + 2);
         InternalMins = new Array2D<float>(_numTypes, _numTypes);
-        ExternalMins = new Array2D<float>(_numTypes, _numTypes + 1);
+        ExternalMins = new Array2D<float>(_numTypes, _numTypes + 2);
         InternalRadii = new Array2D<float>(_numTypes, _numTypes);
-        ExternalRadii = new Array2D<float>(_numTypes, _numTypes + 1);
+        ExternalRadii = new Array2D<float>(_numTypes, _numTypes + 2);
 
         // Temporarily cache ParticleManager ranges
         Vector2 internalForceRange = ParticleManager.Instance.InternalForceRange;
@@ -81,15 +83,15 @@ public class Cluster : MonoBehaviour
         // Initialize with default or random values
         for (int i = 0; i < _numTypes; i++)
         {
-            for (int j = 0; j < _numTypes + 1; j++)
+            for (int j = 0; j < _numTypes + 2; j++)
             {
                 if (j >= _numTypes) // For the last loop (_numTypes + 1), only adjust external
-                {
+                { // +1 is player, +2 is crystals
                     ExternalForces[i, j] = externalForceRange.y * ParticleManager.Instance.ForceMultiplier;
                     ExternalMins[i, j] = externalMinDistanceRange.y;
                     ExternalRadii[i, j] = externalRadiusRange.y;
 
-                    break;
+                    continue;
                 }
 
                 InternalForces[i, j] = UnityEngine.Random.Range(internalForceRange.x, internalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
@@ -112,7 +114,7 @@ public class Cluster : MonoBehaviour
     {
         for (int i = 0; i < _numTypes; i++)
         {
-            for (int j = 0; j < _numTypes + 1; j++)
+            for (int j = 0; j < _numTypes + 2; j++)
             {
                 if (j >= _numTypes) // For the last loop (_numTypes + 1), only adjust external
                 {
@@ -120,7 +122,7 @@ public class Cluster : MonoBehaviour
                     ExternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
                     ExternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
 
-                    break;
+                    continue;
                 }
 
                 InternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
@@ -167,6 +169,17 @@ public class Cluster : MonoBehaviour
             if(Vector2.Distance(player.transform.position, transform.position) > 40 || _timeOffscreen > ClusterSpawning.Instance.DespawnTimeOffscreen)
             {
                 KillCluster();
+            }
+        }
+
+        // Check for nearby crystals
+        NearbyCrystals.Clear();
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(Center, 20f);
+        foreach (Collider2D collider in colliders)
+        {
+            if (collider.CompareTag("Crystal"))
+            {
+                NearbyCrystals.Add(collider.gameObject);
             }
         }
     }

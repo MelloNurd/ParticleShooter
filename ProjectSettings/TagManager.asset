@@ -9,6 +9,7 @@ TagManager:
   - HealthPack
   - ExpPack
   - Crystal
+  - EnergyRecharger
   layers:
   - Default
   - TransparentFX

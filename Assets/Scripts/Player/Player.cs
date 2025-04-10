@@ -56,6 +56,8 @@ public class Player : MonoBehaviour
     [BoxGroup("Energy Settings")] public float movementEnergyCost = 1f;
     [BoxGroup("Energy Settings")] public bool consumeEnergy = true;
 
+    bool isRecharging = false;
+
     private void Awake()
     {
         // Singleton Implementation
@@ -105,6 +107,22 @@ public class Player : MonoBehaviour
 
         RegenHealth();
         OvershieldCooldown();
+
+        if(isRecharging)
+        {
+            currentEnergy += maxEnergy * 0.2f * Time.deltaTime;
+            energySlider.value = currentEnergy / maxEnergy;
+            if (currentEnergy > maxEnergy)
+            {
+                currentEnergy = maxEnergy;
+            }
+            boostAmount += maxBoost * 0.2f * Time.deltaTime;
+            boostSlider.value = boostAmount / maxBoost;
+            if (boostAmount > maxBoost)
+            {
+                boostAmount = maxBoost;
+            }
+        }
     }
 
     private void RegenHealth()
@@ -148,8 +166,10 @@ public class Player : MonoBehaviour
         if (isBoosting)
         {
             currentSpeed *= boostMultiplier;
-            boostAmount -= boostUsageRate * Time.fixedDeltaTime;
-
+            if(!isRecharging)
+            {
+                boostAmount -= boostUsageRate * Time.fixedDeltaTime;
+            }
         }
         else if (boostAmount < maxBoost) // Recharge boost
         {
@@ -161,7 +181,10 @@ public class Player : MonoBehaviour
 
         if(vertInput != 0)
         {
-            currentEnergy -= movementEnergyCost * Time.fixedDeltaTime;
+            if(!isRecharging)
+            {
+                currentEnergy -= movementEnergyCost * Time.fixedDeltaTime;
+            }
             energySlider.value = currentEnergy / maxEnergy;
             if (currentEnergy <= 0)
             {
@@ -259,12 +282,25 @@ public class Player : MonoBehaviour
             }
             Destroy(collision.gameObject);
         }
-        else if(collision.CompareTag("Crystal"))
+        if(collision.CompareTag("Crystal"))
         {
             Money.Instance.AddMoney(1);
             Destroy(collision.gameObject);
         }
+        if(collision.CompareTag("EnergyRecharger"))
+        {
+           isRecharging = true;
+        }
     }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("EnergyRecharger"))
+        {
+            isRecharging = false;
+        }
+    }
+
 
     private void OnDrawGizmos()
     {

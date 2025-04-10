@@ -3,6 +3,7 @@ using System.Globalization;
 using TMPro;
 using UnityEditor.SearchService;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class Homebase : MonoBehaviour
@@ -19,6 +20,7 @@ public class Homebase : MonoBehaviour
     private GameObject _test1;
     private GameObject _test2;
 
+    public static UnityEvent EnterHomebase = new();
     private void Awake()
     {
         // Singleton Implementation
@@ -92,6 +94,7 @@ public class Homebase : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             SceneManager.LoadScene("Homebase");
+            EnterHomebase?.Invoke();
         }
     }
 }

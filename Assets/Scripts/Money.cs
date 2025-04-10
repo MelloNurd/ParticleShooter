@@ -6,6 +6,7 @@ public class Money : MonoBehaviour
 {
     public static Money Instance;
     public TextMeshProUGUI moneyText;
+    public int storedMoney = 0;
     public int currentMoney = 0;
 
     void Awake()
@@ -18,6 +19,8 @@ public class Money : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        Homebase.EnterHomebase.AddListener(storeMoney);
+        storedMoney = PlayerPrefs.GetInt("StoredMoney", 0);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -35,5 +38,13 @@ public class Money : MonoBehaviour
     {
         currentMoney += amount;
         UpdateMoneyUI();
+    }
+    
+    private void storeMoney()
+    {
+        storedMoney += currentMoney;
+        currentMoney = 0;
+        UpdateMoneyUI();
+        PlayerPrefs.SetInt("StoredMoney", storedMoney);
     }
 }

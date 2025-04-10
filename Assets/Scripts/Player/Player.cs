@@ -21,11 +21,14 @@ public class Player : MonoBehaviour
 
     [ShowNativeProperty] public int CurrentZone => Zones.GetCurrentZone(transform.position);
 
-    private float vertMovement;
-    private float horzMovement;
+    private float vertInput;
+    private float horzInput;
+    private bool hasInput => horzInput != 0 || vertInput != 0;
 
     private bool isBoosting;
     [BoxGroup("Thruster Settings")] public bool exhaustActive;
+    private ThrusterVisualizer leftThruster;
+    private ThrusterVisualizer rightThruster;
 
     [BoxGroup("Health Settings")] public float currentHealth = 100;
     [BoxGroup("Health Settings")] public float maxHealth = 100;
@@ -35,9 +38,6 @@ public class Player : MonoBehaviour
     private GameObject fireBlaster;
     private GameObject iceBlaster;
     private GameObject electricBlaster;
-
-    private GameObject leftExhhaust;
-    private GameObject rightExhaust;
 
     private Slider boostSlider;
     private Slider healthSlider;
@@ -81,10 +81,8 @@ public class Player : MonoBehaviour
         healthSlider = GameObject.Find("PlayerHealth").GetComponent<Slider>();
         energySlider = GameObject.Find("PlayerEnergy").GetComponent<Slider>();
 
-        leftExhhaust = transform.Find("LeftThruster").transform.Find("LeftExhaust").gameObject;
-        rightExhaust = transform.Find("RightThruster").transform.Find("RightExhaust").gameObject;
-        leftExhhaust.SetActive(false);
-        rightExhaust.SetActive(false);
+        leftThruster = transform.Find("LeftThruster").GetComponentInChildren<ThrusterVisualizer>();
+        rightThruster = transform.Find("RightThruster").GetComponentInChildren<ThrusterVisualizer>();
 
         overShield = transform.Find("OverShield").gameObject;
         overShield.SetActive(true);
@@ -98,11 +96,11 @@ public class Player : MonoBehaviour
     void Update()
     {
         // Movement input
-        horzMovement = Input.GetAxisRaw("Horizontal");
-        vertMovement = Input.GetAxisRaw("Vertical");
+        horzInput = Input.GetAxisRaw("Horizontal");
+        vertInput = Input.GetAxisRaw("Vertical");
 
         // Boosting input
-        isBoosting = Input.GetKey(KeyCode.LeftShift) && boostAmount > 0 && vertMovement != 0;
+        isBoosting = Input.GetKey(KeyCode.LeftShift) && boostAmount > 0 && vertInput != 0;
         boostSlider.value = boostAmount / maxBoost;
 
         RegenHealth();
@@ -159,9 +157,9 @@ public class Player : MonoBehaviour
         }
 
         // Forward and backward movement
-        rb.AddForce(transform.up * vertMovement * currentSpeed);
+        rb.AddForce(transform.up * vertInput * currentSpeed);
 
-        if(vertMovement != 0)
+        if(vertInput != 0)
         {
             currentEnergy -= movementEnergyCost * Time.fixedDeltaTime;
             energySlider.value = currentEnergy / maxEnergy;
@@ -172,9 +170,9 @@ public class Player : MonoBehaviour
         }
 
         // Rotation
-        if (horzMovement != 0)
+        if (horzInput != 0)
         {
-            rb.AddTorque(-horzMovement * rotationSpeed);
+            rb.AddTorque(-horzInput * rotationSpeed);
         }
 
         // Clamp boost amount within bounds
@@ -183,34 +181,38 @@ public class Player : MonoBehaviour
 
     private void ThrusterVisualization()
     {
-        // Activate exhaust when moving forward
-        if (exhaustActive && vertMovement > 0)
+        if(!hasInput || !exhaustActive)
         {
-            leftExhhaust.SetActive(true);
-            rightExhaust.SetActive(true);
-        }
-        else
-        {
-            leftExhhaust.SetActive(false);
-            rightExhaust.SetActive(false);
+            leftThruster.SetThrust(0);
+            rightThruster.SetThrust(0);
+            return;
         }
 
-        // Thruster activation based on rotation
-        if (horzMovement > 0 && exhaustActive && vertMovement == 0) // Turning Right
-        {
-            leftExhhaust.SetActive(true);
-            rightExhaust.SetActive(false);
-        }
-        else if (horzMovement < 0 && exhaustActive && vertMovement == 0) // Turning Left
-        {
-            rightExhaust.SetActive(true);
-            leftExhhaust.SetActive(false);
-        }
-        else if (horzMovement == 0 && vertMovement == 0) // If stationary, no thrusters
-        {
-            leftExhhaust.SetActive(false);
-            rightExhaust.SetActive(false);
-        }
+        leftThruster.SetThrust(rb.linearVelocity.magnitude * 0.75f - (rb.angularVelocity * 0.005f));
+        rightThruster.SetThrust(rb.linearVelocity.magnitude * 0.75f + (rb.angularVelocity * 0.005f));
+
+        //if (vertInput > 0)
+        //{
+        //    leftExhhaust.SetActive(true);
+        //    rightExhaust.SetActive(true);
+        //}
+        //else
+        //{
+        //    leftExhhaust.SetActive(false);
+        //    rightExhaust.SetActive(false);
+        //}
+
+        //// Thruster activation based on rotation
+        //if (horzInput > 0 && vertInput == 0) // Turning Right
+        //{
+        //    leftExhhaust.SetActive(true);
+        //    rightExhaust.SetActive(false);
+        //}
+        //else if (horzInput < 0 && vertInput == 0) // Turning Left
+        //{
+        //    rightExhaust.SetActive(true);
+        //    leftExhhaust.SetActive(false);
+        //}
     }
 
     private void DisableBlasters()

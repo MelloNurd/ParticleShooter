@@ -82,4 +82,18 @@ public static class Utilities
 
         return randomPos;
     }
+
+    public static Vector3 GetScreenEdgePosition(Vector3 pos, Vector3 direction)
+    {
+        Vector3 checkedPos = pos;
+        Vector3 travelDir = direction.normalized * 0.01f;
+
+        do
+        {
+            checkedPos += travelDir;
+        }
+        while (IsOnScreen(checkedPos));
+
+        return checkedPos;
+    }
 }

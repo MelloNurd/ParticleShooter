@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2661818603259030342}
   - component: {fileID: 7901169878184649843}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Isometric Diamond (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 1445411030163164764}
   - component: {fileID: -224683852677582398}
   - component: {fileID: -3264200233547716385}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Crystal
   m_TagString: Crystal
   m_Icon: {fileID: 0}
@@ -308,7 +308,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3691691666395523562}
   - component: {fileID: 6997625757342041172}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Isometric Diamond (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

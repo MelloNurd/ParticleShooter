@@ -8,6 +8,8 @@ public class Homebase : MonoBehaviour
 
     public Vector3 HomePos => transform.position;
 
+    private LineRenderer _playerBaseLine;
+
     private void Awake()
     {
         // Singleton Implementation
@@ -18,6 +20,17 @@ public class Homebase : MonoBehaviour
         else if (Instance != this)
         {
             Destroy(gameObject);
+        }
+
+        _playerBaseLine = transform.Find("Trail").GetComponent<LineRenderer>();
+        _playerBaseLine.SetPosition(0, transform.position);
+    }
+
+    private void Update()
+    {
+        if (_playerBaseLine != null && Player.Instance != null)
+        {
+            _playerBaseLine.SetPosition(1, Player.Instance.transform.position);
         }
     }
 

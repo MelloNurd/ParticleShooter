@@ -104,12 +104,12 @@ public class ClusterSpawning : MonoBehaviour
             return;
         }
 
-        int baseCount = 15;
+        int baseCount = 10;
         int zoneMultiplier = 8;
 
         for (int i = 0; i < zoneCount; i++)
         {
-            _clusterDefinitions.Add(GenerateRandomCluster(baseCount + (i+1)*zoneMultiplier));
+            _clusterDefinitions.Add(GenerateRandomCluster(baseCount + i*zoneMultiplier));
         }
     }
 

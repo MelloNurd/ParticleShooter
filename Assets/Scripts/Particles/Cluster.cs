@@ -102,35 +102,10 @@ public class Cluster : MonoBehaviour
         }
 
         // Since internal forces should all be positive, we want to make one type negative to add movement
-        CreateInternalMovement();
 
         // Set the maximum radii for quick reference
         MaxInternalRadii = internalRadiusRange.y;
         MaxExternalRadii = externalRadiusRange.y;
-    }
-
-    private void CreateInternalMovement()
-    {
-        if(_numTypes < 2)
-        {
-            Debug.LogWarning("Less than two types detected. Cannot create internal movement.");
-            return;
-        }
-
-        // This function manually assigns two types to have following behavior.
-        // In other words, one type will attract towards another type, but the other type will repel from it.
-
-        // Select two random types from the number of types, and make sure they are not the same type
-        int type1, type2;
-        do {
-            type1 = UnityEngine.Random.Range(0, _numTypes); 
-            type2 = UnityEngine.Random.Range(0, _numTypes);
-        }
-        while (type1 == type2);
-
-        InternalForces[type1, type2] = -InternalForces[type2, type1] * 0.75f;
-        InternalMins[type1, type2] = 1 / InternalRadii[type1, type2];
-        InternalMins[type2, type1] = 1 / InternalRadii[type2, type1];
     }
 
     private void MutateForceMatrices(float mutationRate = 0.1f)

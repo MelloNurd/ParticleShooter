@@ -24,10 +24,22 @@ public class Mines : MonoBehaviour
 
     public int crystalEnergyCost = 1;
 
+    private float passiveReleaseTimer = 3f;
+
     void Start()
     {
         InitializeMines();
         ActivateMines();
+    }
+
+    private void Update()
+    {
+        passiveReleaseTimer -= Time.deltaTime;
+        if (passiveReleaseTimer <= 0)
+        {
+            randomCrystalRelease();
+            passiveReleaseTimer = 3f;
+        }
     }
 
     void InitializeMines()
@@ -49,8 +61,8 @@ public class Mines : MonoBehaviour
         }
         else
         {
-             numMines= Mathf.Min(asteroidEnergy / mineEnergyCost, AsteroidMines.Length);
-        } 
+            numMines = Mathf.Min(asteroidEnergy / mineEnergyCost, AsteroidMines.Length);
+        }
         // Create a list of large mines for random selection
         List<GameObject> availableLargeMines = new List<GameObject>(AsteroidMines);
         for (int i = 0; i < numMines && availableLargeMines.Count > 0; i++)
@@ -107,8 +119,8 @@ public class Mines : MonoBehaviour
                 DeactivateRandomMine(AsteroidMines);
             }
 
-                // Determine a spawn position slightly outside the hit point in the opposite direction of the beam.
-                float offsetDistance = 0.5f;
+            // Determine a spawn position slightly outside the hit point in the opposite direction of the beam.
+            float offsetDistance = 0.5f;
             Vector2 spawnPos = hitPoint - beamDirection.normalized * offsetDistance + Random.insideUnitCircle * 0.1f;
 
             // First try: move further away from the mines.
@@ -171,6 +183,49 @@ public class Mines : MonoBehaviour
         }
     }
 
+    public void randomCrystalRelease()
+    {
+        if (crystalPrefab != null && asteroidEnergy > 0 && Time.time >= _lastCrystalPopTime + crystalReleaseCooldown)
+        {
+            _lastCrystalPopTime = Time.time;
 
+            asteroidEnergy -= crystalEnergyCost;
+            removedEnergyTracker += crystalEnergyCost;
+
+            if (removedEnergyTracker >= mineEnergyCost && AnyMineActive(AsteroidMines))
+            {
+                DeactivateRandomMine(AsteroidMines);
+                removedEnergyTracker -= mineEnergyCost;
+            }
+            else if (AnyMineActive(AsteroidMines) && asteroidEnergy < 1)
+            {
+                DeactivateRandomMine(AsteroidMines);
+            }
+
+            // Generate a random direction.
+            Vector2 randomDirection = Random.insideUnitCircle.normalized;
+
+            // Use the attached Collider2D to compute the offset outside the asteroid.
+            float outsideOffset = 0.5f; // default offset
+            Collider2D collider = GetComponent<Collider2D>();
+            if (collider != null)
+            {
+                // Use the collider's largest extent to safely spawn outside.
+                outsideOffset = collider.bounds.extents.magnitude + 0.1f;
+            }
+
+            Vector2 spawnPos = (Vector2)transform.position + randomDirection * outsideOffset;
+
+            GameObject crystal = Instantiate(crystalPrefab, spawnPos, Quaternion.Euler(0, 0, 90));
+
+            Rigidbody2D rb = crystal.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                // Launch in a completely random direction.
+                Vector2 launchDirection = Random.insideUnitCircle.normalized;
+                rb.AddForce(launchDirection * crystalLaunchForce, ForceMode2D.Impulse);
+                rb.AddTorque(Random.Range(-.2f, .2f), ForceMode2D.Impulse);
+            }
+        }
+    }
 }
-

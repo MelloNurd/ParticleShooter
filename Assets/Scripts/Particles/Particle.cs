@@ -142,26 +142,42 @@ public class Particle : MonoBehaviour
         }
 
         // Apply forces for player (last column)
-        //if (_playerTransform != null)
-        //{
-        //    Vector3 direction = _playerTransform.position - position;
-        //    float distance = direction.magnitude;
-        //    direction.Normalize();
-        //    // Repulsive forces
-        //    if (distance < cluster.ExternalMins[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
-        //    {
-        //        Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes]) * ParticleManager.Instance.RepulsionEffector;
-        //        force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[stats.TypeInt, ParticleManager.Instance.numberOfTypes]), 1, 0) * ParticleManager.Instance.Dampening;
-        //        totalForce += force;
-        //    }
-        //    // Attractive forces 
-        //    if (distance < cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
-        //    {
-        //        Vector3 force = direction * cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes];
-        //        force *= Map(distance, 0, cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes], 1, 0) * ParticleManager.Instance.Dampening;
-        //        totalForce += force;
-        //    }
-        //}
+        if (_playerTransform != null)
+        {
+            Vector3 direction = _playerTransform.position - position;
+            float distance = direction.magnitude;
+            direction.Normalize();
+            // Repulsive forces
+            if (distance < cluster.ExternalMins[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
+            {
+                Vector3 force = direction * Mathf.Abs(cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes]) * ParticleManager.Instance.RepulsionEffector;
+                force *= Map(distance, 0, Mathf.Abs(cluster.ExternalMins[stats.TypeInt, ParticleManager.Instance.numberOfTypes]), 1, 0) * ParticleManager.Instance.Dampening;
+                totalForce += force;
+            }
+            // Attractive forces 
+            if (distance < cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes])
+            {
+                Vector3 force = direction * cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes];
+                force *= Map(distance, 0, cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes], 1, 0) * ParticleManager.Instance.Dampening;
+                totalForce += force;
+            }
+        }
+
+        // Crystal attraction
+        foreach(var crystal in cluster.NearbyCrystals)
+        {
+            if (crystal == null) continue;
+            Vector3 direction = crystal.transform.position - position;
+            float distance = direction.magnitude;
+            direction.Normalize();
+            // Attractive forces 
+            if (distance < cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes+1])
+            {
+                Vector3 force = direction * cluster.ExternalForces[stats.TypeInt, ParticleManager.Instance.numberOfTypes+1];
+                force *= Map(distance, 0, cluster.ExternalRadii[stats.TypeInt, ParticleManager.Instance.numberOfTypes+1], 1, 0) * ParticleManager.Instance.Dampening;
+                totalForce += force;
+            }
+        }
 
         // Apply forces smoothly
         velocity += totalForce * Time.deltaTime;

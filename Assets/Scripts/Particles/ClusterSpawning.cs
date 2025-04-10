@@ -15,6 +15,7 @@ public class ClusterSpawning : MonoBehaviour
     public GameObject ClusterPrefab;
     public GameObject ParticlePrefab;
 
+    public Cluster lastDespawned;
     private int _maxClustersOnScreen = 30;
 
     private GameObject _player;
@@ -89,7 +90,14 @@ public class ClusterSpawning : MonoBehaviour
                 return;
             }
 
-            CreateCluster(randomPos);
+            if(lastDespawned == null)
+            {
+                CreateCluster(randomPos);
+            }
+            else
+            {
+                lastDespawned.Reproduce(randomPos);
+            }
         }
     }
 

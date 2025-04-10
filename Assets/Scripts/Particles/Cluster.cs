@@ -135,10 +135,12 @@ public class Cluster : MonoBehaviour
         }
     }
 
-    public void Reproduce()
+
+    public Cluster Reproduce() => Reproduce(transform.position);
+    public Cluster Reproduce(Vector3 position)
     {
         // Note that this automatically creates an exact copy of the cluster, including its values
-        Cluster newCluster = Instantiate(gameObject, transform.position, Quaternion.identity, transform.parent).GetComponent<Cluster>();
+        Cluster newCluster = Instantiate(gameObject, position, Quaternion.identity, transform.parent).GetComponent<Cluster>();
         newCluster.Id = ParticleManager.Instance.RunningClusterCount++;
         newCluster.gameObject.name = $"Cluster {newCluster.Id} (Mutated from {Id})";
 
@@ -146,6 +148,8 @@ public class Cluster : MonoBehaviour
         newCluster.MutateForceMatrices(0.3f);
 
         ParticleManager.Instance.Clusters.Add(newCluster);
+
+        return newCluster;
     }
 
     private void Update()
@@ -168,6 +172,7 @@ public class Cluster : MonoBehaviour
 
             if(Vector2.Distance(player.transform.position, transform.position) > 40 || _timeOffscreen > ClusterSpawning.Instance.DespawnTimeOffscreen)
             {
+                ClusterSpawning.Instance.lastDespawned = this; // This is getting set to null immediately, needs to be fixed
                 KillCluster();
             }
         }

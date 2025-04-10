@@ -35,6 +35,8 @@ public class Homebase : MonoBehaviour
         _distanceText = transform.Find("UI").GetComponentInChildren<TMP_Text>();
         _lineMaterial = _playerBaseLine.material;
         _playerBaseLine.SetPosition(0, transform.position);
+
+        GetComponentInChildren<Canvas>().worldCamera = Camera.main;
     }
 
     private void Update()

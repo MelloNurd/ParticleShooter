@@ -17,8 +17,6 @@ public class Homebase : MonoBehaviour
     private TMP_Text _distanceText;
 
     [SerializeField] private GameObject _test;
-    private GameObject _test1;
-    private GameObject _test2;
 
     public static UnityEvent EnterHomebase = new();
     private void Awake()
@@ -37,10 +35,6 @@ public class Homebase : MonoBehaviour
         _distanceText = transform.Find("UI").GetComponentInChildren<TMP_Text>();
         _lineMaterial = _playerBaseLine.material;
         _playerBaseLine.SetPosition(0, transform.position);
-
-        _test1 = Instantiate(_test, transform.position, Quaternion.identity);
-        _test2 = Instantiate(_test, transform.position, Quaternion.identity);
-        _test2.GetComponent<SpriteRenderer>().color = Color.red;
     }
 
     private void Update()

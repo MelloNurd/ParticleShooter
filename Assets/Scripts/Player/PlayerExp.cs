@@ -40,10 +40,6 @@ public class PlayerExp : MonoBehaviour
 
             // Increment level
             Level++;
-
-            // Offer upgrades based on level (2 upgrades offered before level 5, 3 after)
-            if (Level < 5) UpgradeWindow.Instance.OfferUpgrades(2);
-            else UpgradeWindow.Instance.OfferUpgrades(3);
         }
         UpdateSlider();
     }

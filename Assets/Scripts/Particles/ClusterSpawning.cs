@@ -75,6 +75,14 @@ public class ClusterSpawning : MonoBehaviour
         {
             if (Random.Range(0, 150) > 1) return;
 
+            Vector3 moveDir;
+            if (Player.Instance.movingForwards) 
+                moveDir = _player.transform.up;
+            else if (Player.Instance.movingBackwards) 
+                moveDir = -_player.transform.up;
+            else 
+                return;
+
             Vector3 randomPos;
             int threshold = 0;
             do
@@ -82,7 +90,7 @@ public class ClusterSpawning : MonoBehaviour
                 randomPos = Utilities.GetRandomPointOffScreen(1, 0.5f);
                 threshold++;
             } // The Dot basically checks if the random position is in front of the player
-            while (Vector3.Dot(_player.transform.up, (randomPos - _player.transform.position).normalized) < 0.5f && threshold < 500);
+            while (Vector3.Dot(moveDir, (randomPos - _player.transform.position).normalized) < 0.5f && threshold < 500);
 
             if(threshold >= 500)
             {

@@ -29,6 +29,8 @@ public class Player : MonoBehaviour
     [BoxGroup("Thruster Settings")] public bool exhaustActive;
     private ThrusterVisualizer leftThruster;
     private ThrusterVisualizer rightThruster;
+    public bool movingForwards => vertInput > 0;
+    public bool movingBackwards => vertInput < 0;
 
     [BoxGroup("Health Settings")] public float currentHealth = 100;
     [BoxGroup("Health Settings")] public float maxHealth = 100;

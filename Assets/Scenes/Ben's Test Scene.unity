@@ -355,6 +355,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1033787963}
   - component: {fileID: 1033787964}
+  - component: {fileID: 1033787965}
   m_Layer: 0
   m_Name: StatsManagers
   m_TagString: Untagged
@@ -362,21 +363,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1033787963
-Transform:
+--- !u!224 &1033787963
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1033787962}
-  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.8096, z: 90}
+  m_LocalPosition: {x: 0, y: 0, z: 90}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 4.8096}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1033787964
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -389,6 +394,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cf87a0c0631d084980504d0a99c12ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!223 &1033787965
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1033787962}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1001 &1046205866
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -657,7 +685,6 @@ MonoBehaviour:
   DespawnTimeOffscreen: 10
   ClusterPrefab: {fileID: 877583948938342854, guid: 027327da74b860a408b439c10aa03325, type: 3}
   ParticlePrefab: {fileID: 5191945715267185580, guid: 818b2494db3d2df4f83db667cbc2a958, type: 3}
-  lastDespawned: {fileID: 0}
 --- !u!114 &1713353514 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8145973419358181151, guid: 641a138140284eb4fb4e9d73ad0473e4, type: 3}
@@ -972,7 +999,7 @@ SceneRoots:
   - {fileID: 787182878}
   - {fileID: 2702097385143544422}
   - {fileID: 307559143}
-  - {fileID: 1033787963}
   - {fileID: 1046205866}
   - {fileID: 1998550997}
   - {fileID: 9113190541318065899}
+  - {fileID: 1033787963}

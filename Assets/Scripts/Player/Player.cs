@@ -58,7 +58,12 @@ public class Player : MonoBehaviour
     [BoxGroup("Energy Settings")] public float movementEnergyCost = 1f;
     [BoxGroup("Energy Settings")] public bool consumeEnergy = true;
 
-    bool isRecharging = false;
+    private bool isRecharging = false;
+
+    [BoxGroup("Autonomous Mode")] public bool enableAutoMode = false;
+    [BoxGroup("Autonomous Mode")] [SerializeField] private Vector3 destinationPoint;
+    private float timeStuck = 0f;
+
 
     private void Awake()
     {
@@ -95,13 +100,41 @@ public class Player : MonoBehaviour
         {
             movementEnergyCost = 0;
         }
+
+        destinationPoint = new Vector3(0, -50);
     }
 
     void Update()
     {
         // Movement input
-        horzInput = Input.GetAxisRaw("Horizontal");
-        vertInput = Input.GetAxisRaw("Vertical");
+        if (enableAutoMode)
+        {
+            // Move towards the destination point
+            vertInput = (Vector3.Dot(transform.right, (destinationPoint - transform.position).normalized) < 0.5f) ? 1f : 0f;
+
+            horzInput = Vector3.Dot(transform.right, (destinationPoint - transform.position).normalized) > 0 ? 1f : -1f;
+        
+            if(Input.GetKeyDown(KeyCode.B))
+            {
+                destinationPoint = Utilities.GetEmptyPointInCircle(transform.position, 25f);
+            }
+
+            if(rb.linearVelocity.magnitude < 1f)
+            {
+                timeStuck += Time.deltaTime;
+            }
+
+            if(timeStuck > 5f || Vector2.Distance(transform.position, destinationPoint) < 1)
+            {
+                destinationPoint = Utilities.GetEmptyPointInCircle(transform.position, 25f);
+                timeStuck = 0;
+            }
+        }
+        else
+        {
+            horzInput = Input.GetAxisRaw("Horizontal");
+            vertInput = Input.GetAxisRaw("Vertical");
+        }
 
         // Boosting input
         isBoosting = Input.GetKey(KeyCode.LeftShift) && boostAmount > 0 && vertInput != 0;
@@ -110,7 +143,20 @@ public class Player : MonoBehaviour
         RegenHealth();
         OvershieldCooldown();
 
-        if(isRecharging)
+        // Energy Handling
+        if (vertInput != 0 && !enableAutoMode) // Decreasing
+        {
+            if (!isRecharging)
+            {
+                currentEnergy -= movementEnergyCost * Time.fixedDeltaTime;
+            }
+            energySlider.value = currentEnergy / maxEnergy;
+            if (currentEnergy <= 0)
+            {
+                currentEnergy = 0;
+            }
+        }
+        if (isRecharging) // Recharging
         {
             currentEnergy += maxEnergy * 0.2f * Time.deltaTime;
             energySlider.value = currentEnergy / maxEnergy;
@@ -180,19 +226,6 @@ public class Player : MonoBehaviour
 
         // Forward and backward movement
         rb.AddForce(transform.up * vertInput * currentSpeed);
-
-        if(vertInput != 0)
-        {
-            if(!isRecharging)
-            {
-                currentEnergy -= movementEnergyCost * Time.fixedDeltaTime;
-            }
-            energySlider.value = currentEnergy / maxEnergy;
-            if (currentEnergy <= 0)
-            {
-                currentEnergy = 0;
-            }
-        }
 
         // Rotation
         if (horzInput != 0)

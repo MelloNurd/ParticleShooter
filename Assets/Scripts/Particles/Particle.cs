@@ -213,4 +213,13 @@ public class Particle : MonoBehaviour
             velocity += cohesionForce * Time.deltaTime;
         //}
     }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (type == ParticleType.Neutral && collision.CompareTag("Crystal"))
+        {
+            Destroy(collision.gameObject);
+            ParentCluster.energy += ParentCluster.eatEnergy;
+        }
+    }
 }

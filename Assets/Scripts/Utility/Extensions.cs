@@ -5,6 +5,15 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+public enum Rarity
+{
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary
+}
+
 public static class Extensions
 {
     // Created by: Ben Bonus
@@ -12,14 +21,6 @@ public static class Extensions
     // These are here simply to make code a little easier to read and write. You can use them as you would with any other function on the specified type.
 
     #region Project Specific Extensions
-    public enum Rarity
-    {
-        Common,
-        Uncommon,
-        Rare,
-        Epic,
-        Legendary
-    }
     public static Color GetColor(this Rarity rarity)
     {
         switch (rarity)

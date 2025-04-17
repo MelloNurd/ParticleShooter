@@ -61,7 +61,7 @@ public class Zones : MonoBehaviour
         rings.Clear();
         ringRadiuses.Clear();
 
-        GameObject zoneParent = new GameObject("Zones");
+        GameObject zoneParent = gameObject;
 
         // Locate the Homebase object
         GameObject homebase = GameObject.Find(homebaseName);

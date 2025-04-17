@@ -31,7 +31,38 @@ public static class Utilities
             return position;
         }
 
-        return position + newPos;
+        return newPos;
+    }
+
+    public static Vector3 GetEmptyPointInCircle(Vector3 position, float radius) => GetEmptyPointInCircle(position, 0f, radius);
+    public static Vector3 GetEmptyPointInCircle(Vector3 position, float minRadius, float maxRadius)
+    {
+        if (minRadius > maxRadius)
+        {
+            Debug.LogError("Min radius cannot be greater than max radius.");
+            return position;
+        }
+        int threshold = 0;
+        Vector3 newPos;
+        do
+        {
+            newPos = GetPointInCircle(position, minRadius, maxRadius);
+        }
+        while (!IsEmptyPosition(newPos) && threshold++ < 100);
+        
+        if (threshold >= 100)
+        {
+            Debug.LogWarning("Threshold reached while trying to find an empty point in circle.");
+            return position;
+        }
+
+        return newPos;
+    }
+
+    public static bool IsEmptyPosition(Vector3 pos)
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(pos, 0f);
+        return colliders.Length == 0;
     }
 
     public static bool IsOnScreen(Vector3 pos, float margin = 0) => IsOnScreen(Camera.main, pos, margin);
@@ -55,6 +86,26 @@ public static class Utilities
         Vector3 randomPoint = new(Random.Range(0f, 1f), Random.Range(0f, 1f), cam.nearClipPlane + 1f);
 
         return cam.ViewportToWorldPoint(randomPoint);
+    }
+
+    public static Vector3 GetRandomEmptyPointOnScreen() => GetRandomEmptyPointOnScreen(Camera.main);
+    public static Vector3 GetRandomEmptyPointOnScreen(Camera cam)
+    {
+        Vector3 pos = Vector3.zero;
+        int threshhold = 0;
+        do
+        {
+            pos = GetRandomPointOnScreen(cam);
+        } 
+        while(!IsEmptyPosition(pos) && ++threshhold < 100);
+
+        if (threshhold >= 100)
+        {
+            Debug.LogWarning("Threshold reached while trying to find an empty point on screen.");
+            return pos;
+        }
+
+        return pos;
     }
 
     public static Vector3 GetRandomPointOffScreen(float radius = 1f, float margin = 0) => GetRandomPointOffScreen(Camera.main, radius, margin);

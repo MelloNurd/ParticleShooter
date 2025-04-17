@@ -10,13 +10,12 @@ public class ClusterSpawning : MonoBehaviour
 
     public bool FinishedSpawning { get; private set; } = false;
 
-    public float DespawnTimeOffscreen = 10f;
-
     public GameObject ClusterPrefab;
     public GameObject ParticlePrefab;
 
-    public Cluster lastDespawned;
-    private int _maxClustersOnScreen = 30;
+    private int _totalSpawned = 0;
+
+    private int _maxClustersSpawned = 15;
 
     private GameObject _player;
     private Rigidbody2D _playerRb;
@@ -71,7 +70,7 @@ public class ClusterSpawning : MonoBehaviour
     {
         // Check if the player is moving, and if the number of clusters is less than the max allowed
         // If so, small change to spawn a new cluster
-        if (_playerRb.linearVelocity.magnitude > 0.1f && ParticleManager.Instance.Clusters.Count < _maxClustersOnScreen)
+        if (_playerRb.linearVelocity.magnitude > 0.1f && ParticleManager.Instance.Clusters.Count < _maxClustersSpawned)
         {
             if (Random.Range(0, 150) > 1) return;
 
@@ -98,14 +97,16 @@ public class ClusterSpawning : MonoBehaviour
                 return;
             }
 
-            if(lastDespawned == null)
+            if(_totalSpawned < _maxClustersSpawned || ParticleManager.Instance.Clusters.Count <= 0)
             {
                 CreateCluster(randomPos);
             }
             else
             {
-                lastDespawned.Reproduce(randomPos);
+                ParticleManager.Instance.Clusters.GetRandom().Reproduce(randomPos);
             }
+
+            _totalSpawned++;
         }
     }
 

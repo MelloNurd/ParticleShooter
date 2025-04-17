@@ -20,6 +20,12 @@ public class Cluster : MonoBehaviour
 
     public List<GameObject> NearbyCrystals = new();
 
+    public float lifetime = 0;
+    public float energy = 100;
+    public int eatEnergy;
+    private float energyTimer;
+    private int energyDecayRate = 2;
+
     private GameObject player;
 
     public float MaxInternalRadii { get; set; }
@@ -30,36 +36,25 @@ public class Cluster : MonoBehaviour
     private GameObject _particlePrefab;
     public int _numTypes;
 
-    private bool _isWarmedUp = false;
-    private float _timeOffscreen = 0f;
-
-    public async void Initialize(float x, float y, SerializedDictionary<ParticleType, int> particleTypes)
+    public void Initialize(float x, float y, SerializedDictionary<ParticleType, int> particleTypes)
     {
         _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
+        player = Player.Instance.gameObject;
 
         // Initialize the cluster with a specific position and particle types
         InitializeForceMatrices();
         GenerateParticles(x, y, particleTypes);
-
-        await UniTask.Delay(5000);
-
-        player = Player.Instance.gameObject;
-        _isWarmedUp = true;
     }
-    public async void Initialize(float x, float y, int numberOfParticles)
+    public void Initialize(float x, float y, int numberOfParticles)
     {
         _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
+        player = Player.Instance.gameObject;
 
         // Initialize force matrices and generate new particles
         InitializeForceMatrices();
         GenerateParticles(x, y, numberOfParticles);
-
-        await UniTask.Delay(5000);
-
-        player = Player.Instance.gameObject;
-        _isWarmedUp = true;
     }
 
     public void InitializeForceMatrices()
@@ -94,20 +89,20 @@ public class Cluster : MonoBehaviour
                     continue;
                 }
 
-                InternalForces[i, j] = UnityEngine.Random.Range(internalForceRange.x, internalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
-                InternalMins[i, j] = UnityEngine.Random.Range(internalMinDistanceRange.x, internalMinDistanceRange.y);
-                InternalRadii[i, j] = UnityEngine.Random.Range(internalRadiusRange.x, internalRadiusRange.y);
-                ExternalForces[i, j] = UnityEngine.Random.Range(externalForceRange.x, externalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
-                ExternalMins[i, j] = UnityEngine.Random.Range(externalMinDistanceRange.x, externalMinDistanceRange.y);
-                ExternalRadii[i, j] = UnityEngine.Random.Range(externalRadiusRange.x, externalRadiusRange.y);
+                InternalForces[i, j] = Random.Range(internalForceRange.x, internalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
+                InternalMins[i, j] = Random.Range(internalMinDistanceRange.x, internalMinDistanceRange.y);
+                InternalRadii[i, j] = Random.Range(internalRadiusRange.x, internalRadiusRange.y);
+                ExternalForces[i, j] = Random.Range(externalForceRange.x, externalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
+                ExternalMins[i, j] = Random.Range(externalMinDistanceRange.x, externalMinDistanceRange.y);
+                ExternalRadii[i, j] = Random.Range(externalRadiusRange.x, externalRadiusRange.y);
             }
         }
-
-        // Since internal forces should all be positive, we want to make one type negative to add movement
 
         // Set the maximum radii for quick reference
         MaxInternalRadii = internalRadiusRange.y;
         MaxExternalRadii = externalRadiusRange.y;
+
+        eatEnergy = Random.Range(50, 100);
     }
 
     private void MutateForceMatrices(float mutationRate = 0.1f)
@@ -133,16 +128,24 @@ public class Cluster : MonoBehaviour
                 ExternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
             }
         }
+
+        eatEnergy += Random.Range(-2, 3);
     }
 
 
-    public Cluster Reproduce() => Reproduce(transform.position);
+    public Cluster Reproduce() => Reproduce(Center);
     public Cluster Reproduce(Vector3 position)
     {
         // Note that this automatically creates an exact copy of the cluster, including its values
         Cluster newCluster = Instantiate(gameObject, position, Quaternion.identity, transform.parent).GetComponent<Cluster>();
         newCluster.Id = ParticleManager.Instance.RunningClusterCount++;
         newCluster.gameObject.name = $"Cluster {newCluster.Id} (Mutated from {Id})";
+
+        for(int i = 0; i < newCluster.transform.childCount; i++)
+        {
+            var temp = newCluster.transform.GetChild(i).GetComponent<Particle>();
+            Debug.Log($"Mutated cluster particle {i}: {temp.type}");
+        }
 
         newCluster.ResetSwarm();
         newCluster.MutateForceMatrices(0.3f);
@@ -159,26 +162,21 @@ public class Cluster : MonoBehaviour
             Reproduce();
         }
 
-        if(_isWarmedUp)
-        {
-            if(Utilities.IsOnScreen(Center))
-            {
-                _timeOffscreen = 0f;
-            }
-            else
-            {
-                _timeOffscreen += Time.deltaTime;
-            }
+        // Lifetime increment
+        lifetime += Time.deltaTime;
 
-            if(Vector2.Distance(player.transform.position, transform.position) > 40 || _timeOffscreen > ClusterSpawning.Instance.DespawnTimeOffscreen)
-            {
-                ClusterSpawning.Instance.lastDespawned = this; // This is getting set to null immediately, needs to be fixed
-                KillCluster();
-            }
+        // Energy decay
+        if (energy > 0)
+        {
+            energy -= energyDecayRate * Time.deltaTime;
+        }
+        else if(!Utilities.IsOnScreen(Center, 5f)) // Try to avoid killing one on screen for immersion
+        {
+            KillCluster();
         }
 
-        // Check for nearby crystals
-        NearbyCrystals.Clear();
+            // Check for nearby crystals
+            NearbyCrystals.Clear();
         Collider2D[] colliders = Physics2D.OverlapCircleAll(Center, 20f);
         foreach (Collider2D collider in colliders)
         {
@@ -331,9 +329,10 @@ public class Cluster : MonoBehaviour
     {
         Swarm = new List<Particle>();
 
+        int tempId = 0;
         foreach(var particle in GetComponentsInChildren<Particle>())
         {
-            particle.ParentCluster = this;
+            particle.Initialize(this, tempId++, particle.type);
             Swarm.Add(particle);
         }
     }

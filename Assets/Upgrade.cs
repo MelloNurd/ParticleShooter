@@ -24,6 +24,7 @@ public class Upgrade : MonoBehaviour
 
     private int numPurchased;
 
+    ScreenShake screenShaker;
     void Start()
     {
         // Initialize the variables
@@ -49,6 +50,8 @@ public class Upgrade : MonoBehaviour
         {
             OutsideBars[i].enabled = false;
         }
+
+        screenShaker = GameObject.Find("Shaker").GetComponent<ScreenShake>();
 
         // Function that updates the UI to reflect the current state of the upgrade
         UpdateUI();
@@ -98,6 +101,10 @@ public class Upgrade : MonoBehaviour
             numPurchased++;
             UpdateUI();
             PlayerPrefs.SetInt(upgradeType.ToString() + "_Upgrade", numPurchased);
+        }
+        else
+        {
+            screenShaker.shake = true;
         }
     }
 }

@@ -31,6 +31,7 @@ public class Player : MonoBehaviour
     private ThrusterVisualizer rightThruster;
     public bool movingForwards => vertInput > 0;
     public bool movingBackwards => vertInput < 0;
+    private bool CanMoveBackwards = false;
 
     [BoxGroup("Health Settings")] public float currentHealth = 100;
     [BoxGroup("Health Settings")] public float maxHealth = 100;
@@ -64,6 +65,10 @@ public class Player : MonoBehaviour
     [BoxGroup("Autonomous Mode")][SerializeField] private Vector3 destinationPoint;
     private float timeStuck = 0f;
 
+    private bool canDash = false;
+    private float dashCooldown = 10;
+    private float currentDashCooldown = 0;
+    private float dashCost = 50f;
 
     private void Awake()
     {
@@ -80,6 +85,8 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
+        InitializeFromUpgrades();
+
         rb = GetComponent<Rigidbody2D>();
         boostAmount = maxBoost;
 
@@ -137,6 +144,10 @@ public class Player : MonoBehaviour
         {
             horzInput = Input.GetAxisRaw("Horizontal");
             vertInput = Input.GetAxisRaw("Vertical");
+            if(!CanMoveBackwards && vertInput < 0)
+            {
+                vertInput = 0;
+            }
         }
 
         // Boosting input
@@ -173,6 +184,14 @@ public class Player : MonoBehaviour
             {
                 boostAmount = maxBoost;
             }
+        }
+
+        currentDashCooldown -= Time.deltaTime;
+        if (canDash && Input.GetKeyDown(KeyCode.Space) && currentDashCooldown <= 0 && boostAmount >= dashCost)
+        {
+            rb.AddForce(transform.up * 10f, ForceMode2D.Impulse);
+            boostAmount -= dashCost;
+            currentDashCooldown = dashCooldown;
         }
     }
 
@@ -355,6 +374,23 @@ public class Player : MonoBehaviour
         {
             gameObject.SetActive(false);
             onDeath?.Invoke();
+        }
+    }
+
+    private void InitializeFromUpgrades()
+    {
+        maxHealth = UpgradeList.HealthValues[PlayerPrefs.GetInt("Health_Upgrade", 0)];
+        maxEnergy = UpgradeList.EnergyValues[PlayerPrefs.GetInt("Energy_Upgrade", 0)];
+        maxBoost = UpgradeList.BoostValues[PlayerPrefs.GetInt("Boost_Upgrade", 0)];
+        movementSpeed = UpgradeList.SpeedValues[PlayerPrefs.GetInt("Speed_Upgrade", 0)];
+
+        CanMoveBackwards = PlayerPrefs.GetInt("MoveBackwards_Upgrade", 0) != 0;
+        if (PlayerPrefs.GetInt("Dash_Upgrade", 0) > 0)
+        {
+            Debug.Log("Dash Upgrade Initialized");
+            canDash = true;
+            dashCooldown = UpgradeList.DashValues[PlayerPrefs.GetInt("Dash_Upgrade", 10)];
+            Debug.Log("Dash Cooldown: " + dashCooldown);
         }
     }
 }

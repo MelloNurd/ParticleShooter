@@ -1,12 +1,19 @@
 using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Mathematics;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.Rendering;
 using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class Cluster : MonoBehaviour
 {
+    public Entity ParticleEntityPrefab;
+
     public List<Particle> Swarm { get; set; } = new List<Particle>();
     public SerializedDictionary<ParticleType, int> ParticleTypeCounts = new SerializedDictionary<ParticleType, int>();
     [ShowNativeProperty] public int Id { get; set; }
@@ -41,20 +48,26 @@ public class Cluster : MonoBehaviour
         _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
         player = Player.Instance.gameObject;
+        ParticleEntityPrefab = ParticleManager.Instance.ParticleEntityPrefab;
 
         // Initialize the cluster with a specific position and particle types
         InitializeForceMatrices();
         GenerateParticles(x, y, particleTypes);
+
+        ConvertToForceMatrixEntity(World.DefaultGameObjectInjectionWorld.EntityManager, Id);
     }
     public void Initialize(float x, float y, int numberOfParticles)
     {
         _particlePrefab = ClusterSpawning.Instance.ParticlePrefab;
         _numTypes = ParticleManager.Instance.numberOfTypes;
         player = Player.Instance.gameObject;
+        ParticleEntityPrefab = ParticleManager.Instance.ParticleEntityPrefab;
 
         // Initialize force matrices and generate new particles
         InitializeForceMatrices();
         GenerateParticles(x, y, numberOfParticles);
+
+        ConvertToForceMatrixEntity(World.DefaultGameObjectInjectionWorld.EntityManager, Id);
     }
 
     public void InitializeForceMatrices()
@@ -89,12 +102,12 @@ public class Cluster : MonoBehaviour
                     continue;
                 }
 
-                InternalForces[i, j] = Random.Range(internalForceRange.x, internalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
-                InternalMins[i, j] = Random.Range(internalMinDistanceRange.x, internalMinDistanceRange.y);
-                InternalRadii[i, j] = Random.Range(internalRadiusRange.x, internalRadiusRange.y);
-                ExternalForces[i, j] = Random.Range(externalForceRange.x, externalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
-                ExternalMins[i, j] = Random.Range(externalMinDistanceRange.x, externalMinDistanceRange.y);
-                ExternalRadii[i, j] = Random.Range(externalRadiusRange.x, externalRadiusRange.y);
+                InternalForces[i, j] = UnityEngine.Random.Range(internalForceRange.x, internalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
+                InternalMins[i, j] = UnityEngine.Random.Range(internalMinDistanceRange.x, internalMinDistanceRange.y);
+                InternalRadii[i, j] = UnityEngine.Random.Range(internalRadiusRange.x, internalRadiusRange.y);
+                ExternalForces[i, j] = UnityEngine.Random.Range(externalForceRange.x, externalForceRange.y) * ParticleManager.Instance.ForceMultiplier;
+                ExternalMins[i, j] = UnityEngine.Random.Range(externalMinDistanceRange.x, externalMinDistanceRange.y);
+                ExternalRadii[i, j] = UnityEngine.Random.Range(externalRadiusRange.x, externalRadiusRange.y);
             }
         }
 
@@ -102,7 +115,7 @@ public class Cluster : MonoBehaviour
         MaxInternalRadii = internalRadiusRange.y;
         MaxExternalRadii = externalRadiusRange.y;
 
-        eatEnergy = Random.Range(50, 100);
+        eatEnergy = UnityEngine.Random.Range(50, 100);
     }
 
     private void MutateForceMatrices(float mutationRate = 0.1f)
@@ -113,23 +126,23 @@ public class Cluster : MonoBehaviour
             {
                 if (j >= _numTypes) // For the last loop (_numTypes + 1), only adjust external
                 {
-                    ExternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
-                    ExternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
-                    ExternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
+                    ExternalForces[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                    ExternalMins[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                    ExternalRadii[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
 
                     continue;
                 }
 
-                InternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
-                InternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
-                InternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
-                ExternalForces[i, j] += Random.Range(-mutationRate, mutationRate);
-                ExternalMins[i, j] += Random.Range(-mutationRate, mutationRate);
-                ExternalRadii[i, j] += Random.Range(-mutationRate, mutationRate);
+                InternalForces[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                InternalMins[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                InternalRadii[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                ExternalForces[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                ExternalMins[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
+                ExternalRadii[i, j] += UnityEngine.Random.Range(-mutationRate, mutationRate);
             }
         }
 
-        eatEnergy += Random.Range(-2, 3);
+        eatEnergy += UnityEngine.Random.Range(-2, 3);
     }
 
 
@@ -223,51 +236,53 @@ public class Cluster : MonoBehaviour
             numberOfParticles += kvp.Value;
         }
 
-        // Clear the current swarm and generate new particles
-        Swarm = new List<Particle>();
+        EntityManager em = World.DefaultGameObjectInjectionWorld.EntityManager;
+
+        // Clear Swarm
+        Swarm = new List<Particle>(); // Not really used anymore in ECS-only world
 
         for (int i = 0; i < numberOfParticles; i++)
         {
-            Vector3 spawnPos;
-
-            // Generate a small random offset
-            Vector3 randomOffset = new Vector3(
-                UnityEngine.Random.Range(-0.5f, 0.5f),
-                UnityEngine.Random.Range(-0.5f, 0.5f),
-                0
+            Vector3 spawnPos = new Vector3(
+                x + UnityEngine.Random.Range(-0.5f, 0.5f),
+                y + UnityEngine.Random.Range(-0.5f, 0.5f),
+                0f
             );
 
-            spawnPos = new Vector3(x, y, 0) + randomOffset;
+            // Create entity
+            Entity particle = em.Instantiate(ParticleEntityPrefab);
 
-            // Instantiate the particle at the cluster position plus the random offset
-            GameObject particleObj = Instantiate(
-                _particlePrefab,
-                spawnPos,
-                Quaternion.identity
-            );
-            Particle newParticle = particleObj.GetComponent<Particle>();
-
-            // Assign type properly
-            ParticleType type = ParticleType.Neutral; // Default type
+            // Pick type
+            ParticleType type = ParticleType.Neutral;
             foreach (var kvp in copy)
             {
                 if (kvp.Value > 0)
                 {
-                    type = kvp.Key; // Get the first available type
-                    copy[kvp.Key]--; // Decrease the count for this type
+                    type = kvp.Key;
+                    copy[kvp.Key]--;
                     break;
                 }
             }
 
-            // Initialize the particle
-            newParticle.Initialize(this, i, type);
-            particleObj.name = "Particle " + i + " (" + type.ToString() + ")";
+            // Set initial component data
+            em.SetComponentData(particle, new ParticleData
+            {
+                Position = spawnPos,
+                Type = (int)type
+            });
 
-            newParticle.transform.parent = this.transform;
-            Swarm.Add(newParticle);
+            em.SetComponentData(particle, new VelocityData
+            {
+                Velocity = float3.zero
+            });
+
+            em.SetComponentData(particle, new ClusterOwner
+            {
+                ClusterId = Id
+            });
         }
 
-        // Adjust the center of the cluster
+        // Center adjustment could still work if you query all entities owned by this cluster
         AdjustCenter();
     }
 
@@ -376,4 +391,59 @@ public class Cluster : MonoBehaviour
             Gizmos.DrawWireSphere(Center, 0.1f);
         }
     }
+    public Entity ConvertToForceMatrixEntity(EntityManager entityManager, int clusterId)
+    {
+        int types = _numTypes;
+        int externalCols = types + 2;
+
+        var builder = new BlobBuilder(Allocator.Temp);
+        ref ForceMatricesBlob root = ref builder.ConstructRoot<ForceMatricesBlob>();
+
+        root.TypeCount = types;
+
+        var totalInternal = types * types;
+        var totalExternal = types * externalCols;
+
+        var internalForces = builder.Allocate(ref root.InternalForces, totalInternal);
+        var externalForces = builder.Allocate(ref root.ExternalForces, totalExternal);
+        var internalRadii = builder.Allocate(ref root.InternalRadii, totalInternal);
+        var externalRadii = builder.Allocate(ref root.ExternalRadii, totalExternal);
+        var internalMins = builder.Allocate(ref root.InternalMins, totalInternal);
+        var externalMins = builder.Allocate(ref root.ExternalMins, totalExternal);
+
+        for (int i = 0; i < types; i++)
+        {
+            for (int j = 0; j < types; j++)
+            {
+                int idx = i * types + j;
+                internalForces[idx] = InternalForces[i, j];
+                internalRadii[idx] = InternalRadii[i, j];
+                internalMins[idx] = InternalMins[i, j];
+            }
+
+            for (int j = 0; j < externalCols; j++)
+            {
+                int idx = i * externalCols + j;
+                externalForces[idx] = ExternalForces[i, j];
+                externalRadii[idx] = ExternalRadii[i, j];
+                externalMins[idx] = ExternalMins[i, j];
+            }
+        }
+
+        var blobRef = builder.CreateBlobAssetReference<ForceMatricesBlob>(Allocator.Persistent);
+        builder.Dispose();
+
+        var entity = entityManager.CreateEntity();
+        entityManager.AddComponentData(entity, new ClusterForceMatricesComponent
+        {
+            ClusterOwner = Entity.Null, // Optional unless you want a link back
+            ClusterId = clusterId,
+            ForceData = blobRef,
+            Center = Center,
+            MaxExternalRadii = MaxExternalRadii
+        });
+
+        return entity;
+    }
+
 }

@@ -2,11 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
 using System;
+using Unity.Entities;
 
 public class ParticleManager : MonoBehaviour
 {
     public static ParticleManager Instance { get; private set; }
-    
+
+    public Entity ParticleEntityPrefab;
+
     public List<Cluster> Clusters = new List<Cluster>();
 
     public Player player;
@@ -165,5 +168,18 @@ public class ParticleManager : MonoBehaviour
 
         // Calculate half screen space
         HalfScreenSpace = ScreenSpace * 0.5f;
+
+        var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+        EntityQuery query = em.CreateEntityQuery(typeof(ParticleEntityPrefabReference));
+
+        if (!query.IsEmptyIgnoreFilter)
+        {
+            var prefabData = query.GetSingleton<ParticleEntityPrefabReference>();
+            ParticleEntityPrefab = prefabData.Prefab;
+        }
+        else
+        {
+            Debug.LogWarning("No ParticleEntityPrefabReference singleton found.");
+        }
     }
 }

@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
     public static Player Instance { get; private set; }
 
     [BoxGroup("Game Settings")] public float minInteractionRadius = 20f;
-    [BoxGroup("Game Settings")] [Tooltip("This only is visible in Scene view.")] [SerializeField]
+    [BoxGroup("Game Settings")][Tooltip("This only is visible in Scene view.")][SerializeField]
     private bool drawPlayerInteractionRadius = false;
 
     [BoxGroup("Movement Settings")] public float rotationSpeed = 0.75f;
@@ -61,7 +61,7 @@ public class Player : MonoBehaviour
     private bool isRecharging = false;
 
     [BoxGroup("Autonomous Mode")] public bool enableAutoMode = false;
-    [BoxGroup("Autonomous Mode")] [SerializeField] private Vector3 destinationPoint;
+    [BoxGroup("Autonomous Mode")][SerializeField] private Vector3 destinationPoint;
     private float timeStuck = 0f;
 
 
@@ -104,6 +104,14 @@ public class Player : MonoBehaviour
         destinationPoint = new Vector3(0, -50);
     }
 
+    [Button]
+    private void SetRandomAutonomousDestination()
+    {
+        if (!Application.isPlaying) return; // Since we have an inspector button
+
+        destinationPoint = Utilities.GetEmptyPointInCircle(transform.position, 25f);
+    }
+
     void Update()
     {
         // Movement input
@@ -113,11 +121,6 @@ public class Player : MonoBehaviour
             vertInput = (Vector3.Dot(transform.right, (destinationPoint - transform.position).normalized) < 0.5f) ? 1f : 0f;
 
             horzInput = Vector3.Dot(transform.right, (destinationPoint - transform.position).normalized) > 0 ? 1f : -1f;
-        
-            if(Input.GetKeyDown(KeyCode.B))
-            {
-                destinationPoint = Utilities.GetEmptyPointInCircle(transform.position, 25f);
-            }
 
             if(rb.linearVelocity.magnitude < 1f)
             {
@@ -126,7 +129,7 @@ public class Player : MonoBehaviour
 
             if(timeStuck > 5f || Vector2.Distance(transform.position, destinationPoint) < 1)
             {
-                destinationPoint = Utilities.GetEmptyPointInCircle(transform.position, 25f);
+                SetRandomAutonomousDestination();
                 timeStuck = 0;
             }
         }

@@ -140,6 +140,7 @@ public class Cluster : MonoBehaviour
         Cluster newCluster = Instantiate(gameObject, position, Quaternion.identity, transform.parent).GetComponent<Cluster>();
         newCluster.Id = ParticleManager.Instance.RunningClusterCount++;
         newCluster.gameObject.name = $"Cluster {newCluster.Id} (Mutated from {Id})";
+        newCluster.Center = position;
 
         for(int i = 0; i < newCluster.transform.childCount; i++)
         {
@@ -147,7 +148,14 @@ public class Cluster : MonoBehaviour
             Debug.Log($"Mutated cluster particle {i}: {temp.type}");
         }
 
-        newCluster.ResetSwarm();
+        List<Vector3> particlePositions = new();
+        particlePositions.Add(Center);
+        foreach (var particle in Swarm)
+        {
+            particlePositions.Add(particle.position);
+        }
+
+        newCluster.ResetSwarm(particlePositions);
         newCluster.MutateForceMatrices(0.3f);
 
         ParticleManager.Instance.Clusters.Add(newCluster);
@@ -325,14 +333,17 @@ public class Cluster : MonoBehaviour
         Destroy(gameObject);
     }
 
-    private void ResetSwarm()
+    private void ResetSwarm(List<Vector3> positions)
     {
         Swarm = new List<Particle>();
+
+        Center = positions[0];
 
         int tempId = 0;
         foreach(var particle in GetComponentsInChildren<Particle>())
         {
-            particle.Initialize(this, tempId++, particle.type);
+            particle.stats = new ParticleStats(particle, tempId++, particle.type);
+            particle.position = positions[tempId];
             Swarm.Add(particle);
         }
     }

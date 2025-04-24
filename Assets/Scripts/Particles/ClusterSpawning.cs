@@ -65,7 +65,17 @@ public class ClusterSpawning : MonoBehaviour
         FinishedSpawning = true;
     }
 
-    // Update is called once per frame
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            var temp = ParticleManager.Instance.Clusters.GetRandom();
+            if(temp == null) return;
+            Debug.Log(temp.name);
+            temp.Reproduce(_player.transform.position + _player.transform.up * 2);
+        }
+    }
+
     void FixedUpdate()
     {
         // Check if the player is moving, and if the number of clusters is less than the max allowed

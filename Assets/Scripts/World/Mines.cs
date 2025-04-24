@@ -166,7 +166,7 @@ public class Mines : MonoBehaviour
             }
 
             // In all cases, spawn the crystal at the best available position.
-            GameObject crystal = Instantiate(crystalPrefab, safeSpawnPos, Quaternion.Euler(0, 0, 90));
+            GameObject crystal = Instantiate(crystalPrefab, safeSpawnPos, Quaternion.Euler(0, 0, 90), transform.parent);
 
             Rigidbody2D rb = crystal.GetComponent<Rigidbody2D>();
             if (rb != null)
@@ -216,7 +216,7 @@ public class Mines : MonoBehaviour
 
             Vector2 spawnPos = (Vector2)transform.position + randomDirection * outsideOffset;
 
-            GameObject crystal = Instantiate(crystalPrefab, spawnPos, Quaternion.Euler(0, 0, 90));
+            GameObject crystal = Instantiate(crystalPrefab, spawnPos, Quaternion.Euler(0, 0, 90), transform.parent);
 
             Rigidbody2D rb = crystal.GetComponent<Rigidbody2D>();
             if (rb != null)

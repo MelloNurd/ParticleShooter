@@ -1,6 +1,7 @@
 using UnityEngine;
 using NaughtyAttributes;
 using System;
+using Unity.Entities;
 
 public class Particle : MonoBehaviour
 {

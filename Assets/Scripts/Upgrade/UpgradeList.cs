@@ -11,7 +11,7 @@ public enum UpgradeType
     Speed,
 
     //Abilties
-    MoveBackwards,
+    Move_Backwards,
     Dash,
 
     //Weapon Stuff

@@ -32,7 +32,8 @@ public class Upgrade : MonoBehaviour
 
         GameObject upgradeTextObject = transform.Find("UpgradeName").gameObject;
         TMP_Text upgradeName = upgradeTextObject.GetComponent<TMP_Text>();
-        upgradeName.text = upgradeType.ToString();
+        upgradeName.text = upgradeType.ToString().Replace("_", " ");
+        
 
         purchaseButton = transform.Find("BuyButton").gameObject;
         GameObject priceTextObject = transform.Find("Price").gameObject;

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using NaughtyAttributes;
 using System;
@@ -170,16 +170,15 @@ public class ParticleManager : MonoBehaviour
         HalfScreenSpace = ScreenSpace * 0.5f;
 
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-        EntityQuery query = em.CreateEntityQuery(typeof(ParticleEntityPrefabReference));
 
-        if (!query.IsEmptyIgnoreFilter)
+        if (em.CreateEntityQuery(typeof(ParticleEntityPrefabReference)).TryGetSingleton(out ParticleEntityPrefabReference prefabRef))
         {
-            var prefabData = query.GetSingleton<ParticleEntityPrefabReference>();
-            ParticleEntityPrefab = prefabData.Prefab;
+            ParticleEntityPrefab = prefabRef.Prefab;
+            Debug.Log("ECS ParticleEntityPrefab successfully loaded from SubScene.");
         }
         else
         {
-            Debug.LogWarning("No ParticleEntityPrefabReference singleton found.");
+            Debug.LogWarning("Could not find ECS prefab singleton! Is the SubScene open?");
         }
     }
 }

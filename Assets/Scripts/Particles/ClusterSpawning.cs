@@ -74,6 +74,10 @@ public class ClusterSpawning : MonoBehaviour
             Debug.Log(temp.name);
             temp.Reproduce(_player.transform.position + _player.transform.up * 2);
         }
+        else if (Input.GetKeyDown(KeyCode.G))
+        {
+            CreateCluster(_player.transform.position + _player.transform.up * 2);
+        }
     }
 
     void FixedUpdate()

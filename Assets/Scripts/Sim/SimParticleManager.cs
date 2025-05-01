@@ -44,6 +44,8 @@ namespace NaughtyAttributes
         [OnValueChanged("ChangeTimescale")][UnityEngine.Range(0, 5)][SerializeField] public float _timeScale = 1f;
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        float startScreenSpaceY;
+        float startScreenSpaceX;
         private void ChangeTimescale()
         {
             Time.timeScale = _timeScale;
@@ -77,6 +79,8 @@ namespace NaughtyAttributes
 
         private void Start()
         {
+            startScreenSpaceY = ScreenSpace.y;
+            startScreenSpaceX = ScreenSpace.x;
             Initialize();
             SpawnParticles();
         }
@@ -95,7 +99,7 @@ namespace NaughtyAttributes
         }
 
         [Button("Restart Simulation", EButtonEnableMode.Playmode)]
-        private void Restart()
+        public void Restart()
         {
             // Restarts the simulation by first clearing all particles and then restarting the process
             ClearParticles();
@@ -104,7 +108,7 @@ namespace NaughtyAttributes
         }
 
         [Button("Reset Values", EButtonEnableMode.Playmode)]
-        private void Initialize()
+        public void Initialize()
         {
             // This is a safety precaution as we are using the OnValueChanged, and that calls even when not in play mode.
             if (!Application.isPlaying) return;
@@ -199,6 +203,62 @@ namespace NaughtyAttributes
                 }
             }
             Debug.Log("Forces swapped between particle types.");
+        }
+
+        public void ForcesRangeChanged(float lowerRange, float upperRange)
+        {
+            _forcesRange = new Vector2(lowerRange, upperRange);
+            Initialize();
+        }
+
+        public void MinDistancesRangeChanged(float lowerRange, float upperRange)
+        {
+            _minDistancesRange = new Vector2(lowerRange, upperRange);
+            Initialize();
+        }
+        public void RadiiRangeChanged(float lowerRange, float upperRange)
+        {
+            _radiiRange = new Vector2(lowerRange, upperRange);
+            Initialize();
+        }
+
+        public void NumbParticlesChanged(float number)
+        {
+            NumberOfParticles = (int)number;
+            Restart();
+        }
+
+        public void NumbTypesChanged(float number)
+        {
+            NumberOfTypes = (int)number;
+            Restart();
+        }
+
+        public void RepulsionEffectorChanged(float number)
+        {
+            RepulsionEffector = number;
+        }
+
+        public void DampeningChanged(float number)
+        {
+            Dampening = number;
+        }
+
+        public void FrictionChanged(float number)
+        {
+            Friction = number;
+        }
+
+        public void TimeScaleChanged(float number)
+        {
+            _timeScale = number;
+            Debug.Log("Time scale changed to: " + _timeScale);
+            ChangeTimescale();
+        }
+        public void ScreenSpaceChanged(float scale)
+        {
+            ScreenSpace = new Vector2(startScreenSpaceX * scale, startScreenSpaceY * scale);
+            Initialize();
         }
     }
 }

@@ -4,7 +4,22 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class DOTSBootstrap : MonoBehaviour
+public struct SimSettings : IComponentData
+{
+    public int NumberOfParticles;
+    public int NumberOfTypes;
+    public float Friction;
+    public float Dampening;
+    public float RepulsionEffector;
+    public float2 ScreenSpace;
+    public float2 HalfScreenSpace;
+
+    public Entity ForcesBuffer;
+    public Entity MinDistancesBuffer;
+    public Entity RadiiBuffer;
+}
+
+public class SettingsLoader : MonoBehaviour
 {
     [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
     public Vector2 screenSpace = new Vector2(32, 18);

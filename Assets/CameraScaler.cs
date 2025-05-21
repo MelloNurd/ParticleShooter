@@ -20,7 +20,7 @@ public class CameraScaler : MonoBehaviour
 
     public void ScaleCamera()
     {
-        myCamera.Lens.OrthographicSize = SimParticleManager.Instance.ScreenSpace.y / 2;
+        //myCamera.Lens.OrthographicSize = SimParticleManager.Instance.ScreenSpace.y / 2;
     }
 
 }

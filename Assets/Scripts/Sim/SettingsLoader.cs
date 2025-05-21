@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using static Unity.Entities.SystemBaseDelegates;
 
 public struct SimSettings : IComponentData
 {
@@ -24,6 +25,7 @@ public struct RespawnParticles : IComponentData { }
 
 public class SettingsLoader : MonoBehaviour
 {
+    public static SettingsLoader Instance { get; private set; }
     [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
     public Vector2 screenSpace = new Vector2(32, 18);
     [UnityEngine.Range(1, 9999)] public int numberOfParticles = 1000;
@@ -57,6 +59,22 @@ public class SettingsLoader : MonoBehaviour
     private bool _settingsDirty = false;
     private bool _needsRespawn = false;
 
+    float startScreenSpaceX;
+    float startScreenSpaceY;
+
+    private void Awake()
+    {
+        // Singleton pattern to ensure only one instance of SettingsLoader exists
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     void Start()
     {
         Application.targetFrameRate = 60;
@@ -64,6 +82,9 @@ public class SettingsLoader : MonoBehaviour
         InitializeSettings();
         _prevParticleCount = numberOfParticles;
         _prevTypeCount = numberOfTypes;
+
+        startScreenSpaceX = screenSpace.x;
+        startScreenSpaceY = screenSpace.y;
     }
 
     void Update()
@@ -233,5 +254,62 @@ public class SettingsLoader : MonoBehaviour
     {
         _needsRespawn = true;
         _settingsDirty = true;
+    }
+
+    public void ForcesRangeChanged(float lowerRange, float upperRange)
+    {
+        _forcesRange = new Vector2(lowerRange, upperRange);
+        _settingsDirty=true;
+    }
+
+    public void MinDistancesRangeChanged(float lowerRange, float upperRange)
+    {
+        _minDistancesRange = new Vector2(lowerRange, upperRange);
+        _settingsDirty=true;
+    }
+    public void RadiiRangeChanged(float lowerRange, float upperRange)
+    {
+        _radiiRange = new Vector2(lowerRange, upperRange);
+        _settingsDirty=true;
+    }
+
+    public void NumbParticlesChanged(float number)
+    {
+        numberOfParticles = (int)number;
+        ForceRestart();
+    }
+
+    public void NumbTypesChanged(float number)
+    {
+        numberOfTypes = (int)number;
+        ForceRestart();
+    }
+
+    public void RepulsionEffectorChanged(float number)
+    {
+        repulsion = number;
+        _settingsDirty = true;
+    }
+
+    public void DampeningChanged(float number)
+    {
+        dampening = number;
+        _settingsDirty = true;
+    }
+
+    public void FrictionChanged(float number)
+    {
+        friction = number;
+        _settingsDirty = true;
+    }
+
+    public void TimeScaleChanged(float number)
+    {
+        _timeScale = number;
+    }
+    public void ScreenSpaceChanged(float scale)
+    {
+        screenSpace = new Vector2(startScreenSpaceX * scale, startScreenSpaceY * scale);
+        _settingsDirty=true;
     }
 }

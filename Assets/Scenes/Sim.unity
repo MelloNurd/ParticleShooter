@@ -298,7 +298,7 @@ PrefabInstance:
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1202883118}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -321,7 +321,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      value: SettingsLoader, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -930,8 +930,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: TimeScaleChanged
         m_Mode: 0
         m_Arguments:
@@ -1037,9 +1037,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
-        m_MethodName: Restart
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
+        m_MethodName: ForceRestart
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1788,7 +1788,7 @@ PrefabInstance:
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1202883118}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -1811,7 +1811,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      value: SettingsLoader, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -2734,8 +2734,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: NumbTypesChanged
         m_Mode: 0
         m_Arguments:
@@ -4318,8 +4318,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: RepulsionEffectorChanged
         m_Mode: 0
         m_Arguments:
@@ -4505,7 +4505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   screenSpace: {x: 100, y: 50}
-  numberOfParticles: 8000
+  numberOfParticles: 2000
   numberOfTypes: 5
   _forcesRange: {x: 1, y: 4}
   _minDistancesRange: {x: 6, y: 12}
@@ -6052,8 +6052,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: FrictionChanged
         m_Mode: 0
         m_Arguments:
@@ -6137,8 +6137,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: DampeningChanged
         m_Mode: 0
         m_Arguments:
@@ -7976,8 +7976,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: NumbParticlesChanged
         m_Mode: 0
         m_Arguments:
@@ -8083,9 +8083,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
-        m_MethodName: Initialize
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
+        m_MethodName: RefreshSettings
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8717,8 +8717,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      - m_Target: {fileID: 1202883118}
+        m_TargetAssemblyTypeName: SettingsLoader, Assembly-CSharp
         m_MethodName: ScreenSpaceChanged
         m_Mode: 0
         m_Arguments:
@@ -9081,7 +9081,7 @@ PrefabInstance:
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1202883118}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -9104,7 +9104,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: NaughtyAttributes.SimParticleManager, Assembly-CSharp
+      value: SettingsLoader, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5661967143972018084, guid: f4eb5dadfdd467f409d7271c4452081f, type: 3}
       propertyPath: m_OnValuesChanged.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName

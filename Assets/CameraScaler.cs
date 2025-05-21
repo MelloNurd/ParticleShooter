@@ -10,6 +10,7 @@ public class CameraScaler : MonoBehaviour
     void Start()
     {
         myCamera = GetComponent<CinemachineCamera>();
+        ScaleCamera();
     }
 
     // Update is called once per frame
@@ -20,7 +21,7 @@ public class CameraScaler : MonoBehaviour
 
     public void ScaleCamera()
     {
-        //myCamera.Lens.OrthographicSize = SimParticleManager.Instance.ScreenSpace.y / 2;
+        myCamera.Lens.OrthographicSize = SettingsLoader.Instance.screenSpace.y / 2;
     }
 
 }

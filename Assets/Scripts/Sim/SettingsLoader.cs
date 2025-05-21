@@ -41,6 +41,7 @@ public class SettingsLoader : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 60;
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         Entity forcesEntity = em.CreateEntity(typeof(FloatBuffer));

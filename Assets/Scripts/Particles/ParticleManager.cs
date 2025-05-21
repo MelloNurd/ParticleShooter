@@ -168,17 +168,5 @@ public class ParticleManager : MonoBehaviour
 
         // Calculate half screen space
         HalfScreenSpace = ScreenSpace * 0.5f;
-
-        var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-        if (em.CreateEntityQuery(typeof(ParticleEntityPrefabReference)).TryGetSingleton(out ParticleEntityPrefabReference prefabRef))
-        {
-            ParticleEntityPrefab = prefabRef.Prefab;
-            Debug.Log("ECS ParticleEntityPrefab successfully loaded from SubScene.");
-        }
-        else
-        {
-            Debug.LogWarning("Could not find ECS prefab singleton! Is the SubScene open?");
-        }
     }
 }

@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &576729653
+--- !u!1 &1807157815
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,38 +127,44 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 576729655}
-  - component: {fileID: 576729654}
+  - component: {fileID: 1807157817}
+  - component: {fileID: 1807157816}
   m_Layer: 0
-  m_Name: ParticlePrefabHolder
+  m_Name: ParticleSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &576729654
+--- !u!114 &1807157816
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 576729653}
+  m_GameObject: {fileID: 1807157815}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7aa9206037117784b88afb2eca599345, type: 3}
+  m_Script: {fileID: 11500000, guid: 8f43e708fe2edc74c9dedc35a6408b24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particlePrefabGO: {fileID: 874169667465089539, guid: 627dd416cfe92644c9242b8c09dc359f, type: 3}
---- !u!4 &576729655
+  ScreenSize: {x: 128, y: 74}
+  ParticlePrefab: {fileID: 8417370538834686084, guid: 1bd2cc566a03b3f479b225295243930d, type: 3}
+  NumberOfParticles: 10000
+  NumberOfTypes: 5
+  Repulsion: -5
+  Dampening: 0.8
+  Friction: 0.8
+--- !u!4 &1807157817
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 576729653}
+  m_GameObject: {fileID: 1807157815}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.258802, y: -39.437256, z: -0.6809998}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -168,4 +174,4 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 576729655}
+  - {fileID: 1807157817}

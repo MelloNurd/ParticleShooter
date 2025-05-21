@@ -54,7 +54,6 @@ public class Cluster : MonoBehaviour
         InitializeForceMatrices();
         GenerateParticles(x, y, particleTypes);
 
-        ConvertToForceMatrixEntity(World.DefaultGameObjectInjectionWorld.EntityManager, Id);
     }
     public void Initialize(float x, float y, int numberOfParticles)
     {
@@ -67,7 +66,6 @@ public class Cluster : MonoBehaviour
         InitializeForceMatrices();
         GenerateParticles(x, y, numberOfParticles);
 
-        ConvertToForceMatrixEntity(World.DefaultGameObjectInjectionWorld.EntityManager, Id);
     }
 
     public void InitializeForceMatrices()
@@ -263,23 +261,6 @@ public class Cluster : MonoBehaviour
                     break;
                 }
             }
-
-            // Set initial component data
-            em.SetComponentData(particle, new ParticleData
-            {
-                Position = spawnPos,
-                Type = (int)type
-            });
-
-            em.SetComponentData(particle, new VelocityData
-            {
-                Velocity = float3.zero
-            });
-
-            em.SetComponentData(particle, new ClusterOwner
-            {
-                ClusterId = Id
-            });
         }
 
         // Center adjustment could still work if you query all entities owned by this cluster
@@ -391,59 +372,4 @@ public class Cluster : MonoBehaviour
             Gizmos.DrawWireSphere(Center, 0.1f);
         }
     }
-    public Entity ConvertToForceMatrixEntity(EntityManager entityManager, int clusterId)
-    {
-        int types = _numTypes;
-        int externalCols = types + 2;
-
-        var builder = new BlobBuilder(Allocator.Temp);
-        ref ForceMatricesBlob root = ref builder.ConstructRoot<ForceMatricesBlob>();
-
-        root.TypeCount = types;
-
-        var totalInternal = types * types;
-        var totalExternal = types * externalCols;
-
-        var internalForces = builder.Allocate(ref root.InternalForces, totalInternal);
-        var externalForces = builder.Allocate(ref root.ExternalForces, totalExternal);
-        var internalRadii = builder.Allocate(ref root.InternalRadii, totalInternal);
-        var externalRadii = builder.Allocate(ref root.ExternalRadii, totalExternal);
-        var internalMins = builder.Allocate(ref root.InternalMins, totalInternal);
-        var externalMins = builder.Allocate(ref root.ExternalMins, totalExternal);
-
-        for (int i = 0; i < types; i++)
-        {
-            for (int j = 0; j < types; j++)
-            {
-                int idx = i * types + j;
-                internalForces[idx] = InternalForces[i, j];
-                internalRadii[idx] = InternalRadii[i, j];
-                internalMins[idx] = InternalMins[i, j];
-            }
-
-            for (int j = 0; j < externalCols; j++)
-            {
-                int idx = i * externalCols + j;
-                externalForces[idx] = ExternalForces[i, j];
-                externalRadii[idx] = ExternalRadii[i, j];
-                externalMins[idx] = ExternalMins[i, j];
-            }
-        }
-
-        var blobRef = builder.CreateBlobAssetReference<ForceMatricesBlob>(Allocator.Persistent);
-        builder.Dispose();
-
-        var entity = entityManager.CreateEntity();
-        entityManager.AddComponentData(entity, new ClusterForceMatricesComponent
-        {
-            ClusterOwner = Entity.Null, // Optional unless you want a link back
-            ClusterId = clusterId,
-            ForceData = blobRef,
-            Center = Center,
-            MaxExternalRadii = MaxExternalRadii
-        });
-
-        return entity;
-    }
-
 }

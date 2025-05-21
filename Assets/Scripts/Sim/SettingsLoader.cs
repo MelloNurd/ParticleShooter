@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Events;
 using static Unity.Entities.SystemBaseDelegates;
 
 public struct SimSettings : IComponentData
@@ -36,10 +37,9 @@ public class SettingsLoader : MonoBehaviour
     [MinMaxSlider(0.0f, 18.0f)][SerializeField] private Vector2 _minDistancesRange = new Vector2(1f, 3f);
     [MinMaxSlider(0.0f, 18.0f)][SerializeField] private Vector2 _radiiRange = new Vector2(3f, 5f);
 
-    [Space(10)]
-    [UnityEngine.Range(-5, 5)] public float repulsion = -5f;
-    [UnityEngine.Range(0, 2)] public float friction = 0.95f;
-    [UnityEngine.Range(0, 1)] public float dampening = 0.5f;
+    [UnityEngine.Range(-5, 5)] public float repulsion { get; set; } = -5f;
+    [UnityEngine.Range(0, 2)] public float friction { get; set; } = 0.95f;
+    [UnityEngine.Range(0, 1)] public float dampening { get; set; } = 0.5f;
 
     [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
     [UnityEngine.Range(0, 5)][SerializeField] public float _timeScale = 1f;
@@ -61,6 +61,9 @@ public class SettingsLoader : MonoBehaviour
 
     float startScreenSpaceX;
     float startScreenSpaceY;
+
+    private UnityEvent<float, float> test = new();
+    private UnityEvent<float> test2 = new();
 
     private void Awake()
     {

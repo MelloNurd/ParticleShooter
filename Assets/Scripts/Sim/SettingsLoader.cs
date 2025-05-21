@@ -1,12 +1,13 @@
+using System;
+using System.IO;
 using NaughtyAttributes;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Events;
 using static Unity.Entities.SystemBaseDelegates;
 
-public struct SimSettings : IComponentData
+public struct EntitySimSettings : IComponentData
 {
     public int NumberOfParticles;
     public int NumberOfTypes;
@@ -27,19 +28,21 @@ public struct RespawnParticles : IComponentData { }
 public class SettingsLoader : MonoBehaviour
 {
     public static SettingsLoader Instance { get; private set; }
+
     [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
     public Vector2 screenSpace = new Vector2(32, 18);
     [UnityEngine.Range(1, 9999)] public int numberOfParticles = 1000;
     [UnityEngine.Range(1, 32)] public int numberOfTypes = 5;
 
     [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
-    [MinMaxSlider(0.0f, 18.0f)][SerializeField] private Vector2 _forcesRange = new Vector2(0.3f, 1f);
-    [MinMaxSlider(0.0f, 18.0f)][SerializeField] private Vector2 _minDistancesRange = new Vector2(1f, 3f);
-    [MinMaxSlider(0.0f, 18.0f)][SerializeField] private Vector2 _radiiRange = new Vector2(3f, 5f);
+    [MinMaxSlider(0.0f, 18.0f)] public Vector2 _forcesRange = new Vector2(0.3f, 1f);
+    [MinMaxSlider(0.0f, 18.0f)] public Vector2 _minDistancesRange = new Vector2(1f, 3f);
+    [MinMaxSlider(0.0f, 18.0f)] public Vector2 _radiiRange = new Vector2(3f, 5f);
 
-    [UnityEngine.Range(-5, 5)] public float repulsion { get; set; } = -5f;
-    [UnityEngine.Range(0, 2)] public float friction { get; set; } = 0.95f;
-    [UnityEngine.Range(0, 1)] public float dampening { get; set; } = 0.5f;
+    [Space(10)]
+    [UnityEngine.Range(-5, 5)] public float repulsion = -5f;
+    [UnityEngine.Range(0, 2)] public float friction = 0.95f;
+    [UnityEngine.Range(0, 1)] public float dampening = 0.5f;
 
     [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
     [UnityEngine.Range(0, 5)][SerializeField] public float _timeScale = 1f;
@@ -59,11 +62,7 @@ public class SettingsLoader : MonoBehaviour
     private bool _settingsDirty = false;
     private bool _needsRespawn = false;
 
-    float startScreenSpaceX;
-    float startScreenSpaceY;
-
-    private UnityEvent<float, float> test = new();
-    private UnityEvent<float> test2 = new();
+    private Vector2 startScreenSpace;
 
     private void Awake()
     {
@@ -86,8 +85,7 @@ public class SettingsLoader : MonoBehaviour
         _prevParticleCount = numberOfParticles;
         _prevTypeCount = numberOfTypes;
 
-        startScreenSpaceX = screenSpace.x;
-        startScreenSpaceY = screenSpace.y;
+        startScreenSpace = screenSpace;
     }
 
     void Update()
@@ -110,6 +108,52 @@ public class SettingsLoader : MonoBehaviour
             }
             _settingsDirty = false;
         }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            SaverLoader.SaveData(GetSettings());
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            var Test = SaverLoader.LoadData(Application.persistentDataPath + "/settings.json");
+            Test.PrintSettings();
+            SetSettings(Test);
+        }
+    }
+
+    public SimSettings GetSettings()
+    {
+        SimSettings settings = new SimSettings
+        {
+            ScreenSpace = screenSpace,
+            NumberOfParticles = numberOfParticles,
+            NumberOfTypes = numberOfTypes,
+            forces = _forcesRange,
+            minDistances = _minDistancesRange,
+            radii = _radiiRange,
+            RepulsionEffector = repulsion,
+            Friction = friction,
+            Dampening = dampening,
+            TimeScale = _timeScale
+        };
+        return settings;
+    }
+
+    public void SetSettings(SimSettings settings)
+    {
+        screenSpace = settings.ScreenSpace;
+        numberOfParticles = settings.NumberOfParticles;
+        numberOfTypes = settings.NumberOfTypes;
+        _forcesRange = settings.forces;
+        _minDistancesRange = settings.minDistances;
+        _radiiRange = settings.radii;
+        repulsion = settings.RepulsionEffector;
+        friction = settings.Friction;
+        dampening = settings.Dampening;
+        _timeScale = settings.TimeScale;
+
+        ForceRestart();
     }
 
     private void InitializeSettings()
@@ -124,7 +168,7 @@ public class SettingsLoader : MonoBehaviour
         _respawnFlagEntity = em.CreateEntity();
 
         _simSettingsEntity = em.CreateEntity();
-        em.AddComponentData(_simSettingsEntity, new SimSettings
+        em.AddComponentData(_simSettingsEntity, new EntitySimSettings
         {
             NumberOfParticles = numberOfParticles,
             NumberOfTypes = numberOfTypes,
@@ -146,7 +190,7 @@ public class SettingsLoader : MonoBehaviour
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         // Update the main settings component
-        em.SetComponentData(_simSettingsEntity, new SimSettings
+        em.SetComponentData(_simSettingsEntity, new EntitySimSettings
         {
             NumberOfParticles = numberOfParticles,
             NumberOfTypes = numberOfTypes,
@@ -256,24 +300,24 @@ public class SettingsLoader : MonoBehaviour
     public void ForceRestart()
     {
         _needsRespawn = true;
-        _settingsDirty = true;
+        RefreshSettings();
     }
 
     public void ForcesRangeChanged(float lowerRange, float upperRange)
     {
         _forcesRange = new Vector2(lowerRange, upperRange);
-        _settingsDirty=true;
+        RefreshSettings();
     }
 
     public void MinDistancesRangeChanged(float lowerRange, float upperRange)
     {
         _minDistancesRange = new Vector2(lowerRange, upperRange);
-        _settingsDirty=true;
+        RefreshSettings();
     }
     public void RadiiRangeChanged(float lowerRange, float upperRange)
     {
         _radiiRange = new Vector2(lowerRange, upperRange);
-        _settingsDirty=true;
+        RefreshSettings();
     }
 
     public void NumbParticlesChanged(float number)
@@ -291,19 +335,19 @@ public class SettingsLoader : MonoBehaviour
     public void RepulsionEffectorChanged(float number)
     {
         repulsion = number;
-        _settingsDirty = true;
+        RefreshSettings();
     }
 
     public void DampeningChanged(float number)
     {
         dampening = number;
-        _settingsDirty = true;
+        RefreshSettings();
     }
 
     public void FrictionChanged(float number)
     {
         friction = number;
-        _settingsDirty = true;
+        RefreshSettings();
     }
 
     public void TimeScaleChanged(float number)
@@ -312,7 +356,7 @@ public class SettingsLoader : MonoBehaviour
     }
     public void ScreenSpaceChanged(float scale)
     {
-        screenSpace = new Vector2(startScreenSpaceX * scale, startScreenSpaceY * scale);
-        _settingsDirty=true;
+        screenSpace = new Vector2(startScreenSpace.x * scale, startScreenSpace.y * scale);
+        RefreshSettings();
     }
 }

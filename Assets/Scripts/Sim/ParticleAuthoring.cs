@@ -44,7 +44,7 @@ public partial struct ParticleMovementSystem : ISystem
     public void OnUpdate(ref SystemState state)
     {
         float deltaTime = SystemAPI.Time.DeltaTime;
-        var settings = SystemAPI.GetSingleton<SimSettings>();
+        var settings = SystemAPI.GetSingleton<EntitySimSettings>();
         float2 screen = settings.ScreenSpace;
         float2 halfScreen = settings.HalfScreenSpace;
         float friction = settings.Friction;

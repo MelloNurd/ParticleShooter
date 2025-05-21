@@ -46,7 +46,7 @@ public partial class ParticleSpawnerSystem : SystemBase
 
     protected override void OnCreate()
     {
-        RequireForUpdate<SimSettings>();
+        RequireForUpdate<EntitySimSettings>();
         RequireForUpdate<ParticleSpawner>();
         // We don't require RespawnParticles for update because it might not 
         // exist when the simulation first starts
@@ -74,7 +74,7 @@ public partial class ParticleSpawnerSystem : SystemBase
             return;
 
         // Get singleton data (must be baked from authoring)
-        var settings = SystemAPI.GetSingleton<SimSettings>();
+        var settings = SystemAPI.GetSingleton<EntitySimSettings>();
         var spawner = SystemAPI.GetSingleton<ParticleSpawner>();
 
         Debug.Log($"Spawning {settings.NumberOfParticles} particles with {settings.NumberOfTypes} types");

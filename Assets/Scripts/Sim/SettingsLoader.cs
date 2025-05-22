@@ -79,6 +79,8 @@ public class SettingsLoader : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        screenSpace = new Vector2(Screen.width * 0.0333f, Screen.height * 0.0333f);
     }
 
     void Start()
@@ -111,7 +113,6 @@ public class SettingsLoader : MonoBehaviour
                 UpdateSettings();
             }
             _settingsDirty = false;
-            Debug.Log("Updating settings");
             SettingsChanged?.Invoke();
         }
 

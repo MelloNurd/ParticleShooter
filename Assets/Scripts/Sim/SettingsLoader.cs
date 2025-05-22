@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Events;
 using static Unity.Entities.SystemBaseDelegates;
 
 public struct EntitySimSettings : IComponentData
@@ -30,22 +31,22 @@ public class SettingsLoader : MonoBehaviour
     public static SettingsLoader Instance { get; private set; }
 
     [Header("Simulation Configuration")] ////////////////////////////////////////////////////////////////
-    public Vector2 screenSpace = new Vector2(32, 18);
-    [UnityEngine.Range(1, 9999)] public int numberOfParticles = 1000;
-    [UnityEngine.Range(1, 32)] public int numberOfTypes = 5;
+    [OnValueChanged("RefreshSettings")] public Vector2 screenSpace = new Vector2(32, 18);
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(1, 9999)] public int numberOfParticles = 1000;
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(1, 32)] public int numberOfTypes = 5;
 
     [Header("Particle Properties")] /////////////////////////////////////////////////////////////////////
-    [MinMaxSlider(0.0f, 18.0f)] public Vector2 _forcesRange = new Vector2(0.3f, 1f);
-    [MinMaxSlider(0.0f, 18.0f)] public Vector2 _minDistancesRange = new Vector2(1f, 3f);
-    [MinMaxSlider(0.0f, 18.0f)] public Vector2 _radiiRange = new Vector2(3f, 5f);
+    [OnValueChanged("RefreshSettings")][MinMaxSlider(0.0f, 18.0f)] public Vector2 forcesRange = new Vector2(0.3f, 1f);
+    [OnValueChanged("RefreshSettings")][MinMaxSlider(0.0f, 18.0f)] public Vector2 minDistancesRange = new Vector2(1f, 3f);
+    [OnValueChanged("RefreshSettings")][MinMaxSlider(0.0f, 18.0f)] public Vector2 radiiRange = new Vector2(3f, 5f);
 
     [Space(10)]
-    [UnityEngine.Range(-5, 5)] public float repulsion = -5f;
-    [UnityEngine.Range(0, 2)] public float friction = 0.95f;
-    [UnityEngine.Range(0, 1)] public float dampening = 0.5f;
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(-5, 5)] public float repulsion = -5f;
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(0, 1)] public float friction = 0.95f;
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(0, 1)] public float dampening = 0.5f;
 
     [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////
-    [UnityEngine.Range(0, 5)][SerializeField] public float _timeScale = 1f;
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(0, 5)] public float timeScale = 1f;
 
     // References to entities we create
     private Entity _forcesEntity;
@@ -61,8 +62,11 @@ public class SettingsLoader : MonoBehaviour
     // Flag to track when settings need to be updated
     private bool _settingsDirty = false;
     private bool _needsRespawn = false;
+    public static UnityEvent SettingsChanged = new();
 
-    private Vector2 startScreenSpace;
+    private bool _systemReady = false;
+
+    private void OnEnable() => _systemReady = false;
 
     private void Awake()
     {
@@ -81,17 +85,17 @@ public class SettingsLoader : MonoBehaviour
     {
         Application.targetFrameRate = 60;
 
+        _systemReady = true;
+
         InitializeSettings();
         _prevParticleCount = numberOfParticles;
         _prevTypeCount = numberOfTypes;
-
-        startScreenSpace = screenSpace;
     }
 
     void Update()
     {
         // Update timeScale globally
-        Time.timeScale = _timeScale;
+        Time.timeScale = timeScale;
 
         // Check if settings need to be updated
         if (_settingsDirty)
@@ -107,6 +111,8 @@ public class SettingsLoader : MonoBehaviour
                 UpdateSettings();
             }
             _settingsDirty = false;
+            Debug.Log("Updating settings");
+            SettingsChanged?.Invoke();
         }
 
         if (Input.GetKeyDown(KeyCode.K))
@@ -117,7 +123,7 @@ public class SettingsLoader : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.L))
         {
             var Test = SaverLoader.LoadData(Application.persistentDataPath + "/settings.json");
-            Test.PrintSettings();
+            Test.PrintAll();
             SetSettings(Test);
         }
     }
@@ -129,13 +135,13 @@ public class SettingsLoader : MonoBehaviour
             ScreenSpace = screenSpace,
             NumberOfParticles = numberOfParticles,
             NumberOfTypes = numberOfTypes,
-            forces = _forcesRange,
-            minDistances = _minDistancesRange,
-            radii = _radiiRange,
+            forces = forcesRange,
+            minDistances = minDistancesRange,
+            radii = radiiRange,
             RepulsionEffector = repulsion,
             Friction = friction,
             Dampening = dampening,
-            TimeScale = _timeScale
+            TimeScale = timeScale
         };
         return settings;
     }
@@ -145,13 +151,13 @@ public class SettingsLoader : MonoBehaviour
         screenSpace = settings.ScreenSpace;
         numberOfParticles = settings.NumberOfParticles;
         numberOfTypes = settings.NumberOfTypes;
-        _forcesRange = settings.forces;
-        _minDistancesRange = settings.minDistances;
-        _radiiRange = settings.radii;
+        forcesRange = settings.forces;
+        minDistancesRange = settings.minDistances;
+        radiiRange = settings.radii;
         repulsion = settings.RepulsionEffector;
         friction = settings.Friction;
         dampening = settings.Dampening;
-        _timeScale = settings.TimeScale;
+        timeScale = settings.TimeScale;
 
         ForceRestart();
     }
@@ -213,7 +219,6 @@ public class SettingsLoader : MonoBehaviour
         var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
         // Log for debugging
-        Debug.Log($"Restarting simulation with {numberOfParticles} particles and {numberOfTypes} types");
 
         // Destroy all existing particles
         EntityQuery particleQuery = em.CreateEntityQuery(typeof(Particle));
@@ -232,11 +237,9 @@ public class SettingsLoader : MonoBehaviour
             }
             // Then add the component to signal respawn
             em.AddComponent<RespawnParticles>(_respawnFlagEntity);
-            Debug.Log("Sent respawn signal");
         }
         else
         {
-            Debug.LogError("Respawn flag entity does not exist!");
             // Create a new one as fallback
             _respawnFlagEntity = em.CreateEntity();
             em.AddComponent<RespawnParticles>(_respawnFlagEntity);
@@ -264,9 +267,9 @@ public class SettingsLoader : MonoBehaviour
         int size = numberOfTypes * numberOfTypes;
         for (int i = 0; i < size; i++)
         {
-            float force = UnityEngine.Random.Range(_forcesRange.x, _forcesRange.y);
-            float minDist = UnityEngine.Random.Range(_minDistancesRange.x, _minDistancesRange.y);
-            float radius = UnityEngine.Random.Range(_radiiRange.x, _radiiRange.y);
+            float force = UnityEngine.Random.Range(forcesRange.x, forcesRange.y);
+            float minDist = UnityEngine.Random.Range(minDistancesRange.x, minDistancesRange.y);
+            float radius = UnityEngine.Random.Range(radiiRange.x, radiiRange.y);
 
             forces.Add(new FloatBuffer { Value = force });
             minDists.Add(new FloatBuffer { Value = minDist });
@@ -274,89 +277,28 @@ public class SettingsLoader : MonoBehaviour
         }
     }
 
-    // Hook into Unity's inspector validation to detect changes
-    private void OnValidate()
-    {
-        if (!Application.isPlaying) return;
-
-        // Check if particles count or types changed (requires simulation restart)
-        if (numberOfParticles != _prevParticleCount || numberOfTypes != _prevTypeCount)
-        {
-            _needsRespawn = true;
-        }
-
-        _settingsDirty = true;
-    }
-
     // Public method to manually update settings (can be called from UI)
     [Button("Update Simulation")]
     public void RefreshSettings()
     {
+        if (!_systemReady) return;
+
         _settingsDirty = true;
+
+        if(_prevParticleCount != numberOfParticles || _prevTypeCount != numberOfTypes)
+        {
+            _needsRespawn = true; // will cause a restart
+        }
     }
 
     // Public method to manually restart the simulation
     [Button("Restart Simulation")]
     public void ForceRestart()
     {
+        if (!_systemReady) return;
+
+        Debug.Log("Restarting");
         _needsRespawn = true;
-        RefreshSettings();
-    }
-
-    public void ForcesRangeChanged(float lowerRange, float upperRange)
-    {
-        _forcesRange = new Vector2(lowerRange, upperRange);
-        RefreshSettings();
-    }
-
-    public void MinDistancesRangeChanged(float lowerRange, float upperRange)
-    {
-        _minDistancesRange = new Vector2(lowerRange, upperRange);
-        RefreshSettings();
-    }
-    public void RadiiRangeChanged(float lowerRange, float upperRange)
-    {
-        _radiiRange = new Vector2(lowerRange, upperRange);
-        RefreshSettings();
-    }
-
-    public void NumbParticlesChanged(float number)
-    {
-        numberOfParticles = (int)number;
-        ForceRestart();
-    }
-
-    public void NumbTypesChanged(float number)
-    {
-        numberOfTypes = (int)number;
-        ForceRestart();
-    }
-
-    public void RepulsionEffectorChanged(float number)
-    {
-        repulsion = number;
-        RefreshSettings();
-    }
-
-    public void DampeningChanged(float number)
-    {
-        dampening = number;
-        RefreshSettings();
-    }
-
-    public void FrictionChanged(float number)
-    {
-        friction = number;
-        RefreshSettings();
-    }
-
-    public void TimeScaleChanged(float number)
-    {
-        _timeScale = number;
-    }
-    public void ScreenSpaceChanged(float scale)
-    {
-        screenSpace = new Vector2(startScreenSpace.x * scale, startScreenSpace.y * scale);
         RefreshSettings();
     }
 }

@@ -19,7 +19,7 @@ public class SimSettings
 
     public float TimeScale;
 
-    public void PrintSettings()
+    public void PrintAll()
     {
         Debug.Log("ScreenSpace: " + ScreenSpace);
         Debug.Log("NumberOfParticles: " + NumberOfParticles);
@@ -54,5 +54,9 @@ public static class SaverLoader
         Debug.Log("Unable to find " + Application.persistentDataPath + "/settings.json");
         return null;
 
+    }
+
+    public static void test() {
+        //System.Diagnostics.Process.Start("explorer.exe" , "/ select," + path);
     }
 }

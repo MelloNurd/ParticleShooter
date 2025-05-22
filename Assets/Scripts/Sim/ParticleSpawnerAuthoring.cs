@@ -61,7 +61,6 @@ public partial class ParticleSpawnerSystem : SystemBase
 
         if (respawnQuery.CalculateEntityCount() > 0)
         {
-            Debug.Log("Detected respawn signal - respawning particles");
             shouldRespawn = true;
             // We'll remove the component from all entities with the tag
             // (should just be the one flag entity)
@@ -77,7 +76,6 @@ public partial class ParticleSpawnerSystem : SystemBase
         var settings = SystemAPI.GetSingleton<EntitySimSettings>();
         var spawner = SystemAPI.GetSingleton<ParticleSpawner>();
 
-        Debug.Log($"Spawning {settings.NumberOfParticles} particles with {settings.NumberOfTypes} types");
 
         var ecb = new EntityCommandBuffer(Allocator.Temp);
         var rand = new Unity.Mathematics.Random((uint)UnityEngine.Random.Range(1, int.MaxValue));
@@ -115,6 +113,5 @@ public partial class ParticleSpawnerSystem : SystemBase
         ecb.Dispose();
 
         _hasSpawned = true;
-        Debug.Log("Particle spawning complete");
     }
 }

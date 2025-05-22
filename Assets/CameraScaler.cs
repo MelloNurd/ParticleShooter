@@ -38,13 +38,11 @@ public class CameraScaler : MonoBehaviour
 
     public float GetScaleRatio(Vector2 current)
     {
-        Debug.Log("calculated: " + current.magnitude / _startScreenSpace.magnitude);
         return current.magnitude / _startScreenSpace.magnitude;
     }
 
     public float CalculateScale()
     {
-        Debug.Log(SettingsLoader.Instance.screenSpace.y * 0.5f);
         return SettingsLoader.Instance.screenSpace.y * 0.5f;
     }
 

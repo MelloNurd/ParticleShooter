@@ -297,7 +297,6 @@ public class SettingsLoader : MonoBehaviour
     {
         if (!_systemReady) return;
 
-        Debug.Log("Restarting");
         _needsRespawn = true;
         RefreshSettings();
     }

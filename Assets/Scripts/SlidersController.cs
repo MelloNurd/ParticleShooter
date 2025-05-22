@@ -24,8 +24,8 @@ public class SlidersController : MonoBehaviour
         ScreenSpace.onValueChanged.AddListener(val => 
         {
             SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(ScreenSpace.value);
-            CameraScaler.Instance.ScaleCamera();
             SettingsLoader.Instance.RefreshSettings();
+            CameraScaler.Instance.ScaleCamera();
             ScreenSpace.GetComponent<RangeText>().updateValueText(); 
         });
 
@@ -114,6 +114,8 @@ public class SlidersController : MonoBehaviour
     public void SetSliders()
     {
         SimSettings settings = SettingsLoader.Instance.GetSettings();
+
+        ScreenSpace.value = CameraScaler.Instance.GetScaleRatio(settings.ScreenSpace);
 
         NumberOfParticles.value = settings.NumberOfParticles;
 

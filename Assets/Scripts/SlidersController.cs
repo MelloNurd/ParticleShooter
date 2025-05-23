@@ -23,30 +23,29 @@ public class SlidersController : MonoBehaviour
     public Button SaveButton;
     public Button LoadButton;
     bool wasAlreadyHerePal = false;
+    bool first = true;
 
     public void OnEnable()
     {
-        ScreenSpace.onValueChanged.AddListener(async (val) =>
+        // In SlidersController.cs, replace the ScreenSpace.onValueChanged listener with this:
+        ScreenSpace.onValueChanged.AddListener(val =>
         {
-            await UniTask.WaitUntil(() => wasAlreadyHerePal == false);
+            if (wasAlreadyHerePal) return; // Skip if we're already processing
             wasAlreadyHerePal = true;
 
-            Debug.Log("Shape changed" + CameraScaler.Instance.shapeChanged);
-            if (CameraScaler.Instance.shapeChanged == false)
+            // If shape changed was triggered by screen resize, set the value once and exit
+            if (CameraScaler.Instance.shapeChanged)
             {
-                Debug.Log("new runscale");
-                SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(ScreenSpace.value);
-                Debug.Log("After new");
+                ScreenSpace.SetValueWithoutNotify(CameraScaler.Instance.lastScale); // Use this instead of value = to avoid loop
+                SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(CameraScaler.Instance.lastScale);
+                CameraScaler.Instance.shapeChanged = false;
             }
             else
             {
-                Debug.Log("last runscale");
-                ScreenSpace.value = CameraScaler.Instance.lastScale;
-                SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(CameraScaler.Instance.lastScale);
-                Debug.Log("After last");
-                CameraScaler.Instance.shapeChanged = false;
-                Debug.Log("set false");
+                // Normal slider movement by user
+                SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(val);
             }
+
             SettingsLoader.Instance.RefreshSettings();
             CameraScaler.Instance.ScaleCamera();
             ScreenSpace.GetComponent<RangeText>().updateValueText();
@@ -123,6 +122,15 @@ public class SlidersController : MonoBehaviour
     {
         SaveButton.onClick.AddListener(() => SaveSystem.Instance.ShowSaveMenu());
         LoadButton.onClick.AddListener(() => SaveSystem.Instance.ShowLoadMenu());
+    }
+
+    private void Update()
+    {
+        if(first)
+        {
+            first = false;
+            SetSliders();
+        }
     }
 
     public void OnDisable()

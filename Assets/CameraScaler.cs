@@ -39,7 +39,9 @@ public class CameraScaler : MonoBehaviour
 
     public Vector2 AdjustByScale(float scale)
     {
-        return new Vector2(_startScreenSpace.x * scale, _startScreenSpace.y * scale);
+        // Define a maximum scale factor (adjust as needed)
+        float clampedScale = Mathf.Clamp(scale, 0.1f, 5f);
+        return new Vector2(_startScreenSpace.x * clampedScale, _startScreenSpace.y * clampedScale);
     }
 
     public float GetScaleRatio(Vector2 current)

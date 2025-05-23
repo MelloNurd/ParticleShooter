@@ -78,14 +78,14 @@ public class SaveSystem : MonoBehaviour
         }
 
         // Loading
-        _loadingGroup = transform.Find("LoadingMenu").GetComponent<CanvasGroup>();
+        _loadingGroup = transform.Find("Loading Menu").GetComponent<CanvasGroup>();
         _contentHolder = _loadingGroup.transform.GetChild(0).GetChild(0).GetChild(0);
 
         Button closeButton = _loadingGroup.transform.GetChild(0).Find("Panel").GetChild(0).GetComponent<Button>();
         closeButton.onClick.AddListener(HideLoadMenu);
 
         // Saving
-        _savingGroup = transform.Find("SavingMenu").GetComponent<CanvasGroup>();
+        _savingGroup = transform.Find("Saving Menu").GetComponent<CanvasGroup>();
         _nameInput = _savingGroup.transform.GetChild(0).Find("FileName").GetComponent<TMP_InputField>();
         _directoryInput = _savingGroup.transform.GetChild(0).Find("Directory").GetComponent<TMP_InputField>();
 

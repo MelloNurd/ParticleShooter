@@ -1,28 +1,47 @@
 using UnityEngine;
 using PrimeTween;
 using TMPro;
+using UnityEngine.UI;
 
 public class MenuButton : MonoBehaviour
 {
-    TMP_Text arrows;
-    RectTransform parentTransform;
-    private void Start()
+    public bool isMenuOpen;
+
+    private TMP_Text arrows;
+    private RectTransform parentTransform;
+    private Outline outline;
+
+    private float startXPos;
+    private float widthToMove;
+
+    private void Awake()
     {
+        isMenuOpen = true;
+
         parentTransform = transform.parent.GetComponent<RectTransform>();
         arrows = GetComponentInChildren<TMP_Text>();
+        outline = GetComponent<Outline>();
+
+        startXPos = parentTransform.anchoredPosition.x;
     }
     public void ToggleMenu()
     {
-        if(parentTransform.anchoredPosition.x < -1000)
+        widthToMove = parentTransform.rect.width + outline.effectDistance.x;
+
+        if (isMenuOpen)
         {            
-            Tween.UIAnchoredPositionX(parentTransform, -962, 0.5f);
-            arrows.text = "<<";
+            Tween.UIAnchoredPositionX(parentTransform, -widthToMove, 0.5f).OnComplete(() =>
+            {
+                arrows.text = ">>";
+            });
         }
         else
         {
-            Tween.UIAnchoredPositionX(parentTransform, -1871, 0.5f);
-            arrows.text = ">>";
+            Tween.UIAnchoredPositionX(parentTransform, startXPos, 0.5f).OnComplete(() =>
+            {
+                arrows.text = "<<";
+            });
         }
-
+        isMenuOpen = !isMenuOpen;
     }
 }

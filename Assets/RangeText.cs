@@ -25,8 +25,8 @@ public class RangeText : MonoBehaviour
     {
         if (rangeSlider = GetComponentInParent<UIRangeSlider>())
         {
-            lowerField = transform.Find("LowerField").GetComponent<TMP_InputField>();
-            upperField = transform.Find("UpperField").GetComponent<TMP_InputField>();
+            lowerField = transform.parent.Find("Values").Find("LowerField").GetComponent<TMP_InputField>();
+            upperField = transform.parent.Find("Values").Find("UpperField").GetComponent<TMP_InputField>();
             if (wholeNumber)
             {
                 lowerField.text = rangeSlider.valueMin.ToString("0");
@@ -40,7 +40,7 @@ public class RangeText : MonoBehaviour
         }
         else if (slider = GetComponentInParent<Slider>())
         {
-            singleField = transform.Find("SingleField").GetComponent<TMP_InputField>();
+            singleField = transform.parent.Find("SingleField").GetComponent<TMP_InputField>();
             if (wholeNumber)
                 singleField.text = slider.value.ToString("0");
             else

@@ -2,6 +2,7 @@ using UnityEngine;
 using PrimeTween;
 using TMPro;
 using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class MenuButton : MonoBehaviour
 {
@@ -9,24 +10,23 @@ public class MenuButton : MonoBehaviour
 
     private TMP_Text arrows;
     private RectTransform parentTransform;
-    private Outline outline;
 
     private float startXPos;
     private float widthToMove;
 
     private void Awake()
     {
-        isMenuOpen = true;
-
         parentTransform = transform.parent.GetComponent<RectTransform>();
         arrows = GetComponentInChildren<TMP_Text>();
-        outline = GetComponent<Outline>();
 
         startXPos = parentTransform.anchoredPosition.x;
+
+        isMenuOpen = parentTransform.anchoredPosition.x > 0;
     }
+
     public void ToggleMenu()
     {
-        widthToMove = parentTransform.rect.width + outline.effectDistance.x;
+        widthToMove = parentTransform.rect.width;
 
         if (isMenuOpen)
         {            

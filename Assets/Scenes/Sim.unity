@@ -5190,6 +5190,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2634923146177630319, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2634923146177630319, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
       propertyPath: 'm_Cameras.Array.data[0]'
       value: 
       objectReference: {fileID: 1947164404}
@@ -16195,9 +16199,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 788761656}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 9999
+  m_MaxValue: 15000
   m_WholeNumbers: 1
-  m_Value: 3
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

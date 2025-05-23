@@ -1,6 +1,7 @@
 using NaughtyAttributes;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CameraScaler : MonoBehaviour
 {
@@ -9,6 +10,11 @@ public class CameraScaler : MonoBehaviour
     [ReadOnly, SerializeField] private CinemachineCamera _myCamera;
 
     private Vector2 _startScreenSpace;
+
+    public bool shapeChanged = false;
+    public float lastScale = 1f;
+
+    [SerializeField] Slider screenSpaceSlider;
 
     private void Awake()
     {
@@ -49,5 +55,12 @@ public class CameraScaler : MonoBehaviour
     public void ScaleCamera()
     {
         _myCamera.Lens.OrthographicSize = CalculateScale();
+    }
+
+    public void ScreenShapeChanged(Vector2 oldScreenSpace, Vector2 screenSpace)
+    {
+        lastScale = GetScaleRatio(oldScreenSpace);
+        _startScreenSpace = screenSpace;
+        shapeChanged = true;
     }
 }

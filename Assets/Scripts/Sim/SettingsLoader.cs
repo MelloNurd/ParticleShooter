@@ -68,6 +68,8 @@ public class SettingsLoader : MonoBehaviour
 
     private void OnEnable() => _systemReady = false;
 
+    private Vector2 screenSize;
+
     private void Awake()
     {
         // Singleton pattern to ensure only one instance of SettingsLoader exists
@@ -80,6 +82,8 @@ public class SettingsLoader : MonoBehaviour
             Destroy(gameObject);
         }
 
+        screenSize = new Vector2(Screen.width, Screen.height);
+        Debug.Log("In awake screensize");
         screenSpace = new Vector2(Screen.width * 0.0333f, Screen.height * 0.0333f);
     }
 
@@ -98,6 +102,16 @@ public class SettingsLoader : MonoBehaviour
     {
         // Update timeScale globally
         Time.timeScale = timeScale;
+
+        Vector2 currentScreen = new Vector2(Screen.width, Screen.height);
+        if (currentScreen != screenSize)
+        {
+            Vector2 oldScreenSpace = screenSpace;
+            screenSize = currentScreen;
+            //screenSpace = new Vector2(Screen.width * 0.0333f, Screen.height * 0.0333f);
+            CameraScaler.Instance.ScreenShapeChanged(oldScreenSpace, new Vector2(Screen.width * 0.0333f, Screen.height * 0.0333f));
+            _settingsDirty = true;
+        }
 
         // Check if settings need to be updated
         if (_settingsDirty)
@@ -149,6 +163,7 @@ public class SettingsLoader : MonoBehaviour
 
     public void SetSettings(SimSettings settings)
     {
+        Debug.Log("In Set Settings");
         screenSpace = settings.ScreenSpace;
         numberOfParticles = settings.NumberOfParticles;
         numberOfTypes = settings.NumberOfTypes;

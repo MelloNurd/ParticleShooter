@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UIRangeSliderNamespace;
 using UnityEditor;
 using UnityEngine;
@@ -19,14 +20,35 @@ public class SlidersController : MonoBehaviour
 
     public Slider TimeScale;
 
+    bool wasAlreadyHerePal = false;
+
     public void OnEnable()
     {
-        ScreenSpace.onValueChanged.AddListener(val => 
+        ScreenSpace.onValueChanged.AddListener(async (val) => 
         {
-            SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(ScreenSpace.value);
+            await UniTask.WaitUntil(() => wasAlreadyHerePal == false);
+            wasAlreadyHerePal = true;
+
+            Debug.Log("Shape changed" + CameraScaler.Instance.shapeChanged);
+            if (CameraScaler.Instance.shapeChanged == false)
+            {
+                Debug.Log("new runscale");
+                SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(ScreenSpace.value);
+                Debug.Log("After new");
+            }
+            else
+            {
+                Debug.Log("last runscale");
+                ScreenSpace.value = CameraScaler.Instance.lastScale;
+                SettingsLoader.Instance.screenSpace = CameraScaler.Instance.AdjustByScale(CameraScaler.Instance.lastScale);
+                Debug.Log("After last");
+                CameraScaler.Instance.shapeChanged = false;
+                Debug.Log("set false");
+            }
             SettingsLoader.Instance.RefreshSettings();
             CameraScaler.Instance.ScaleCamera();
-            ScreenSpace.GetComponent<RangeText>().updateValueText(); 
+            ScreenSpace.GetComponent<RangeText>().updateValueText();
+            wasAlreadyHerePal = false;
         });
 
         NumberOfParticles.onValueChanged.AddListener(val => 

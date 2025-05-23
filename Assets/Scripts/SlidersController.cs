@@ -20,11 +20,13 @@ public class SlidersController : MonoBehaviour
 
     public Slider TimeScale;
 
+    public Button SaveButton;
+    public Button LoadButton;
     bool wasAlreadyHerePal = false;
 
     public void OnEnable()
     {
-        ScreenSpace.onValueChanged.AddListener(async (val) => 
+        ScreenSpace.onValueChanged.AddListener(async (val) =>
         {
             await UniTask.WaitUntil(() => wasAlreadyHerePal == false);
             wasAlreadyHerePal = true;
@@ -51,21 +53,21 @@ public class SlidersController : MonoBehaviour
             wasAlreadyHerePal = false;
         });
 
-        NumberOfParticles.onValueChanged.AddListener(val => 
+        NumberOfParticles.onValueChanged.AddListener(val =>
         {
             SettingsLoader.Instance.numberOfParticles = (int)NumberOfParticles.value;
             SettingsLoader.Instance.ForceRestart();
-            NumberOfParticles.GetComponent<RangeText>().updateValueText(); 
+            NumberOfParticles.GetComponent<RangeText>().updateValueText();
         });
 
-        NumberOfTypes.onValueChanged.AddListener(val => 
-        { 
+        NumberOfTypes.onValueChanged.AddListener(val =>
+        {
             SettingsLoader.Instance.numberOfTypes = (int)NumberOfTypes.value;
             SettingsLoader.Instance.ForceRestart();
             NumberOfTypes.GetComponent<RangeText>().updateValueText();
         });
 
-        forces.onValuesChanged.AddListener((val1, val2) => 
+        forces.onValuesChanged.AddListener((val1, val2) =>
         {
             SettingsLoader.Instance.forcesRange = new Vector2(forces.valueMin, forces.valueMax);
             SettingsLoader.Instance.RefreshSettings();
@@ -79,35 +81,35 @@ public class SlidersController : MonoBehaviour
             minDistances.GetComponent<RangeText>().updateRangeText();
         });
 
-        radii.onValuesChanged.AddListener((val1, val2) => 
-        { 
+        radii.onValuesChanged.AddListener((val1, val2) =>
+        {
             SettingsLoader.Instance.radiiRange = new Vector2(radii.valueMin, radii.valueMax);
             SettingsLoader.Instance.RefreshSettings();
             radii.GetComponent<RangeText>().updateRangeText();
         });
 
-        Friction.onValueChanged.AddListener(val => 
-        { 
+        Friction.onValueChanged.AddListener(val =>
+        {
             SettingsLoader.Instance.friction = Friction.value;
             SettingsLoader.Instance.RefreshSettings();
             Friction.GetComponent<RangeText>().updateValueText();
         });
 
-        Dampening.onValueChanged.AddListener(val => 
-        { 
+        Dampening.onValueChanged.AddListener(val =>
+        {
             SettingsLoader.Instance.dampening = Dampening.value;
             SettingsLoader.Instance.RefreshSettings();
             Dampening.GetComponent<RangeText>().updateValueText();
         });
 
-        RepulsionEffector.onValueChanged.AddListener(val => 
-        { 
+        RepulsionEffector.onValueChanged.AddListener(val =>
+        {
             SettingsLoader.Instance.repulsion = RepulsionEffector.value;
             SettingsLoader.Instance.RefreshSettings();
             RepulsionEffector.GetComponent<RangeText>().updateValueText();
         });
 
-        TimeScale.onValueChanged.AddListener(val => 
+        TimeScale.onValueChanged.AddListener(val =>
         {
             SettingsLoader.Instance.timeScale = TimeScale.value;
             SettingsLoader.Instance.RefreshSettings();
@@ -115,6 +117,12 @@ public class SlidersController : MonoBehaviour
         });
 
         SettingsLoader.SettingsChanged.AddListener(SetSliders);
+    }
+
+    private void Start()
+    {
+        SaveButton.onClick.AddListener(() => SaveSystem.Instance.ShowSaveMenu());
+        LoadButton.onClick.AddListener(() => SaveSystem.Instance.ShowLoadMenu());
     }
 
     public void OnDisable()

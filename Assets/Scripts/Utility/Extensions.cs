@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -119,6 +120,49 @@ public static class Extensions
     /// </summary>
     /// <returns>The new string with spaces between each word.</returns>
     public static string AsSentence(this string value) { return AsSentence(value, true); }
+
+    /// <summary>
+    /// Converts a string into a file name friendly string by replacing invalid characters with a dash.
+    /// </summary>
+    /// <returns>A file-name-friendly version of the string</returns>
+    public static string FileNameFriendly(this string value) => FileNameFriendly(value, '-');
+
+    /// <summary>
+    /// Converts a string into a file name friendly string by replacing invalid characters with a chosen character.
+    /// </summary>
+    /// <param name="replacementCharacter">Character to replace any invalid characters</param>
+    /// <returns>A file-name-friendly version of the string</returns>
+    public static string FileNameFriendly(this string value, char replacementCharacter)
+    {
+        foreach (var c in Path.GetInvalidFileNameChars())
+        {
+            value = value.Replace(c, replacementCharacter);
+        }
+        return value;
+    }
+
+    /// <summary>
+    /// Automatically increments the file name number if there are existing files with the same name.
+    /// </summary>
+    /// <returns>The new, adjusted filePath. If no file with the same name exists, the original string.</returns>
+    public static string AutoIncrementFileName(this string filePath)
+    {
+        if (!File.Exists(filePath)) return filePath;
+
+        // Check for number at end of filePath. If has, increment and concat. Otherwise, add a 1 at the end.
+        string fileName = Path.GetFileNameWithoutExtension(filePath);
+        string fileExtension = Path.GetExtension(filePath);
+        string directory = Path.GetDirectoryName(filePath);
+        string newFilePath = Path.Combine(directory, fileName + fileExtension);
+        int i = 1;
+        while (File.Exists(newFilePath))
+        {
+            string newFileName = $"{fileName} ({i})";
+            newFilePath = Path.Combine(directory, newFileName + fileExtension);
+            i++;
+        }
+        return newFilePath;
+    }
 
     #endregion
 

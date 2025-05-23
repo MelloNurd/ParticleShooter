@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -16.196003, y: 3.8198283, z: -0.01620111}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 14.585701, y: 14.585701, z: 14.585701}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -54,3 +54,5 @@ MonoBehaviour:
   Dampening: {fileID: 0}
   RepulsionEffector: {fileID: 0}
   TimeScale: {fileID: 0}
+  SaveButton: {fileID: 0}
+  LoadButton: {fileID: 0}

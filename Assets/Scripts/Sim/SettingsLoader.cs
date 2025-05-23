@@ -129,24 +129,13 @@ public class SettingsLoader : MonoBehaviour
             _settingsDirty = false;
             SettingsChanged?.Invoke();
         }
-
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            SaverLoader.SaveData(GetSettings());
-        }
-
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            var Test = SaverLoader.LoadData(Application.persistentDataPath + "/settings.json");
-            Test.PrintAll();
-            SetSettings(Test);
-        }
     }
 
     public SimSettings GetSettings()
     {
         SimSettings settings = new SimSettings
         {
+            saveName = "Test",
             ScreenSpace = screenSpace,
             NumberOfParticles = numberOfParticles,
             NumberOfTypes = numberOfTypes,

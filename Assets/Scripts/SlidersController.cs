@@ -20,8 +20,12 @@ public class SlidersController : MonoBehaviour
 
     public Slider TimeScale;
 
+    public Button RandomizeButton;
+
     public Button SaveButton;
     public Button LoadButton;
+    public Button ImportButton;
+
     bool wasAlreadyHerePal = false;
     bool first = true;
 
@@ -120,8 +124,10 @@ public class SlidersController : MonoBehaviour
 
     private void Start()
     {
-        SaveButton.onClick.AddListener(() => SaveSystem.Instance.ShowSaveMenu());
+        RandomizeButton.onClick.AddListener(RandomizeSliders);
+        SaveButton.onClick.AddListener(() => SaveSystem.Instance.SaveSettingsToFile());
         LoadButton.onClick.AddListener(() => SaveSystem.Instance.ShowLoadMenu());
+        ImportButton.onClick.AddListener(() => SaveSystem.Instance.ImportSettings());
     }
 
     private void Update()
@@ -147,6 +153,35 @@ public class SlidersController : MonoBehaviour
         Dampening.onValueChanged.RemoveAllListeners();
         RepulsionEffector.onValueChanged.RemoveAllListeners();
         TimeScale.onValueChanged.RemoveAllListeners();
+    }
+
+    public void RandomizeSliders()
+    {
+        //RandomizeSlider(ScreenSpace);
+        RandomizeSlider(NumberOfParticles);
+        RandomizeSlider(NumberOfTypes);
+        RandomizeRangeSlider(forces);
+        RandomizeRangeSlider(minDistances);
+        RandomizeRangeSlider(radii);
+        RandomizeSlider(Friction);
+        RandomizeSlider(Dampening);
+        RandomizeSlider(RepulsionEffector);
+        //RandomizeSlider(TimeScale);
+        SettingsLoader.Instance.RefreshSettings();
+    }
+
+    private void RandomizeRangeSlider(UIRangeSlider slider)
+    {
+        float newVal1 = Random.Range(slider.minLimit, slider.maxLimit);
+        float newVal2 = Random.Range(slider.minLimit, slider.maxLimit);
+
+        slider.valueMin = Mathf.Min(newVal1, newVal2);
+        slider.valueMax = Mathf.Max(newVal1, newVal2);
+    }
+
+    private void RandomizeSlider(Slider slider)
+    {
+        slider.value = Random.Range(slider.minValue, slider.maxValue);
     }
 
     public void SetSliders()

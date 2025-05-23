@@ -5,6 +5,8 @@ using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using SimpleFileBrowser;
+using System.Collections;
 
 [Serializable]
 public class SimSettings
@@ -56,14 +58,10 @@ public class SaveSystem : MonoBehaviour
     // Loading
     [Header("Loading")]
     [SerializeField] GameObject _savedItemPrefab;
+    [SerializeField] private GameObject _emptyMenuText;
     private CanvasGroup _loadingGroup;
     private Transform _contentHolder;
     private List<string> filePaths = new List<string>();
-
-    // Saving
-    private CanvasGroup _savingGroup;
-    private TMP_InputField _nameInput;
-    private TMP_InputField _directoryInput;
 
     private void Awake()
     {
@@ -84,42 +82,21 @@ public class SaveSystem : MonoBehaviour
         Button closeButton = _loadingGroup.transform.GetChild(0).Find("Panel").GetChild(0).GetComponent<Button>();
         closeButton.onClick.AddListener(HideLoadMenu);
 
-        // Saving
-        _savingGroup = transform.Find("Saving Menu").GetComponent<CanvasGroup>();
-        _nameInput = _savingGroup.transform.GetChild(0).Find("FileName").GetComponent<TMP_InputField>();
-        _directoryInput = _savingGroup.transform.GetChild(0).Find("Directory").GetComponent<TMP_InputField>();
+        _emptyMenuText = _loadingGroup.transform.GetChild(0).Find("Viewport").Find("EmptyMsg").gameObject;
+        _emptyMenuText.SetActive(true);
 
-        Button cancelButton = _savingGroup.transform.GetChild(0).Find("Cancel").GetComponent<Button>();
-        cancelButton.onClick.AddListener(HideSaveMenu);
-        
-        Button saveButton = _savingGroup.transform.GetChild(0).Find("Save").GetComponent<Button>();
-        saveButton.onClick.AddListener(SaveNewSettings);
-
-        HideSaveMenu();
         HideLoadMenu();
-    }
-
-    public void ShowSaveMenu()
-    {
-        HideLoadMenu();
-        Utilities.ShowCanvasGroup(ref _savingGroup);
-        _nameInput.text = string.Empty;
-        _directoryInput.text = Application.persistentDataPath;
-    }
-
-    public void HideSaveMenu()
-    {
-        Utilities.HideCanvasGroup(ref _savingGroup);
-        _nameInput.text = string.Empty;
-        _directoryInput.text = Application.persistentDataPath;
     }
 
     public void ShowLoadMenu()
     {
-        HideSaveMenu();
         Utilities.ShowCanvasGroup(ref _loadingGroup);
-        LoadSavedSettings(_contentHolder);
+        int count = LoadSavedSettings(_contentHolder);
+        Debug.Log("Loaded " + count + " settings.");
+        _emptyMenuText.SetActive(count == 0);
     }
+
+    public void UpdateEmptyMsg() => _emptyMenuText.SetActive(Directory.GetFiles(DataPath, "*.json", SearchOption.TopDirectoryOnly).Length == 0);
 
     public void HideLoadMenu()
     {
@@ -131,26 +108,7 @@ public class SaveSystem : MonoBehaviour
         filePaths.Clear();
     }
 
-    public void SaveNewSettings()
-    {
-        string fileName = _nameInput.text.FileNameFriendly();
-        string directory = _directoryInput.text;
-        if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(directory))
-        {
-            Debug.LogWarning("File name or directory is empty. Cannot save settings.");
-            return;
-        }
-        
-        SimSettings settings = SettingsLoader.Instance.GetSettings().WithName(fileName);
-
-        SaveToFile(settings);
-
-        Debug.Log("Settings saved to " + fileName + ".json in " + directory);
-
-        HideSaveMenu();
-    }
-
-    public void LoadSavedSettings(Transform parent)
+    public int LoadSavedSettings(Transform parent)
     {
         if(!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
 
@@ -158,17 +116,38 @@ public class SaveSystem : MonoBehaviour
         foreach (string file in files)
         {
             filePaths.Add(file);
-            Debug.Log(file);
             Instantiate(_savedItemPrefab, parent).GetComponent<SavedSettings>().filePath = file;
         }
+
+        return files.Length;
     }
 
-    public static void SaveToFile(SimSettings settings)
+    public void SaveSettingsToFile() => SaveSettingsToFile(SettingsLoader.Instance.GetSettings()); // No parameter saves current settings
+    public void SaveSettingsToFile(SimSettings settings) => StartCoroutine(SaveDialog(settings)); // Option to import different settings
+    private IEnumerator SaveDialog(SimSettings settings)
     {
-        string filePath = Path.Combine(DataPath, settings.saveName.FileNameFriendly() + ".json").AutoIncrementFileName();
+        FileBrowser.SetFilters(false, new FileBrowser.Filter("Settings Files", ".json"));
+        FileBrowser.AddQuickLink("Settings", DataPath);
+        FileBrowser.AddQuickLink("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads");
+        yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, initialPath: DataPath, title: "Save Setting File", initialFilename: "settings.json");
+        if (FileBrowser.Success)
+        {
 
-        string jsonData = JsonUtility.ToJson(settings, prettyPrint: true);
-        File.WriteAllText(filePath, jsonData);
+            string[] paths = FileBrowser.Result;
+
+
+            foreach (string path in paths)
+            {
+                string name = Path.GetFileNameWithoutExtension(path);
+
+                string jsonData = JsonUtility.ToJson(settings.WithName(name), prettyPrint: true);
+                File.WriteAllText(path, jsonData);
+            }
+        }
+        else
+        {
+            Debug.Log("Unable to save file.");
+        }
     }
 
     public static SimSettings LoadFromFile(string filePath)
@@ -182,9 +161,30 @@ public class SaveSystem : MonoBehaviour
         return null;
     }
 
-    public static void test() {
-        //System.Diagnostics.Process.Start("explorer.exe" , "/ select," + path);
+    public void ImportSettings() => StartCoroutine(LoadDialog());
+    public IEnumerator LoadDialog()
+    {
+        FileBrowser.SetFilters(false, new FileBrowser.Filter("Settings Files", ".json"));
+        FileBrowser.AddQuickLink("Settings", DataPath);
+        FileBrowser.AddQuickLink("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads");
+
+        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, initialPath: DataPath, title: "Import Setting File");
+        if (FileBrowser.Success)
+        {
+            string[] paths = FileBrowser.Result;
+            foreach (string path in paths)
+            {
+                SimSettings settings = LoadFromFile(path);
+                if (settings != null)
+                {
+                    SaveSettingsToFile(settings);
+                    SettingsLoader.Instance.SetSettings(settings);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("No file selected.");
+        }
     }
 }
-
-// When importing, select a file outside normal save path. Load it, then create a copy inside normal save path.

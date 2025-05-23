@@ -39,7 +39,18 @@ public class SavedSettings : MonoBehaviour
             return;
         }
 
+        // Store current screen space value before loading new settings
+        Vector2 currentScreenSpace = SettingsLoader.Instance.screenSpace;
+        float currentScale = CameraScaler.Instance.GetScaleRatio(currentScreenSpace);
+
+        // Load settings from file
         SimSettings settings = SaveSystem.LoadFromFile(filePath);
+
+        // Keep the current screen space instead of the loaded one
+        Vector2 originalScreenSpace = settings.ScreenSpace;
+        settings.ScreenSpace = currentScreenSpace;
+
+        // Apply settings
         SettingsLoader.Instance.SetSettings(settings);
     }
 
@@ -54,5 +65,7 @@ public class SavedSettings : MonoBehaviour
         File.Delete(filePath);
 
         Destroy(gameObject);
+
+        SaveSystem.Instance.UpdateEmptyMsg();
     }
 }

@@ -323,6 +323,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _savedItemPrefab: {fileID: 1735373414530871651, guid: b4cb5b17ec4fa4145bdc8ecc212db86d, type: 3}
+  _emptyMenuText: {fileID: 0}
 --- !u!1 &2205088288158662805
 GameObject:
   m_ObjectHideFlags: 0

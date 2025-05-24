@@ -45,14 +45,14 @@ public class MenuButton : MonoBehaviour
 
         if (isMenuOpen)
         {            
-            Tween.UIAnchoredPositionX(parentTransform, -widthToMove, 0.5f).OnComplete(() =>
+            Tween.UIAnchoredPositionX(parentTransform, -widthToMove, 0.5f, useUnscaledTime: true).OnComplete(() =>
             {
                 arrows.text = ">>";
             });
         }
         else
         {
-            Tween.UIAnchoredPositionX(parentTransform, startXPos, 0.5f).OnComplete(() =>
+            Tween.UIAnchoredPositionX(parentTransform, startXPos, 0.5f, useUnscaledTime: true).OnComplete(() =>
             {
                 arrows.text = "<<";
             });

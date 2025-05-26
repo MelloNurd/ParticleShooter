@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
 using UIRangeSliderNamespace;
 using UnityEditor;
 using UnityEngine;
@@ -6,13 +7,15 @@ using UnityEngine.UI;
 
 public class SlidersController : MonoBehaviour
 {
+    public static SlidersController Instance { get; private set; }
+
     public Slider ScreenSpace;
     public Slider NumberOfParticles;
     public Slider NumberOfTypes;
 
-    public UIRangeSlider forces;
-    public UIRangeSlider minDistances;
-    public UIRangeSlider radii;
+    public UIRangeSlider Forces;
+    public UIRangeSlider MinDistances;
+    public UIRangeSlider Radii;
 
     public Slider Friction;
     public Slider Dampening;
@@ -28,6 +31,13 @@ public class SlidersController : MonoBehaviour
 
     bool wasAlreadyHerePal = false;
     bool first = true;
+
+    // Limits
+    private float numParticlesLimit;
+    private float numTypesLimit;
+    private float forcesLimit;
+    private float minDistancesLimit;
+    private float radiiLimit;
 
     public void OnEnable()
     {
@@ -70,25 +80,25 @@ public class SlidersController : MonoBehaviour
             NumberOfTypes.GetComponent<RangeText>().updateValueText();
         });
 
-        forces.onValuesChanged.AddListener((val1, val2) =>
+        Forces.onValuesChanged.AddListener((val1, val2) =>
         {
-            SettingsLoader.Instance.forcesRange = new Vector2(forces.valueMin, forces.valueMax);
+            SettingsLoader.Instance.forcesRange = new Vector2(Forces.valueMin, Forces.valueMax);
             SettingsLoader.Instance.RefreshSettings();
-            forces.GetComponent<RangeText>().updateRangeText();
+            Forces.GetComponent<RangeText>().updateRangeText();
         });
 
-        minDistances.onValuesChanged.AddListener((val1, val2) =>
+        MinDistances.onValuesChanged.AddListener((val1, val2) =>
         {
-            SettingsLoader.Instance.minDistancesRange = new Vector2(minDistances.valueMin, minDistances.valueMax);
+            SettingsLoader.Instance.minDistancesRange = new Vector2(MinDistances.valueMin, MinDistances.valueMax);
             SettingsLoader.Instance.RefreshSettings();
-            minDistances.GetComponent<RangeText>().updateRangeText();
+            MinDistances.GetComponent<RangeText>().updateRangeText();
         });
 
-        radii.onValuesChanged.AddListener((val1, val2) =>
+        Radii.onValuesChanged.AddListener((val1, val2) =>
         {
-            SettingsLoader.Instance.radiiRange = new Vector2(radii.valueMin, radii.valueMax);
+            SettingsLoader.Instance.radiiRange = new Vector2(Radii.valueMin, Radii.valueMax);
             SettingsLoader.Instance.RefreshSettings();
-            radii.GetComponent<RangeText>().updateRangeText();
+            Radii.GetComponent<RangeText>().updateRangeText();
         });
 
         Friction.onValueChanged.AddListener(val =>
@@ -122,12 +132,32 @@ public class SlidersController : MonoBehaviour
         SettingsLoader.SettingsChanged.AddListener(SetSliders);
     }
 
+    private void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
     private void Start()
     {
         RandomizeButton.onClick.AddListener(RandomizeSliders);
         SaveButton.onClick.AddListener(() => SaveSystem.Instance.SaveSettingsToFile());
         LoadButton.onClick.AddListener(() => SaveSystem.Instance.ShowLoadMenu());
         ImportButton.onClick.AddListener(() => SaveSystem.Instance.ImportSettings());
+
+        // Set all the limits for the sliders
+        numParticlesLimit = NumberOfParticles.maxValue;
+        numTypesLimit = NumberOfTypes.maxValue;
+        forcesLimit = Forces.maxLimit;
+        minDistancesLimit = MinDistances.maxLimit;
+        radiiLimit = Radii.maxLimit;
     }
 
     private void Update()
@@ -146,9 +176,9 @@ public class SlidersController : MonoBehaviour
         ScreenSpace.onValueChanged.RemoveAllListeners();
         NumberOfParticles.onValueChanged.RemoveAllListeners();
         NumberOfTypes.onValueChanged.RemoveAllListeners();
-        forces.onValuesChanged.RemoveAllListeners();
-        minDistances.onValuesChanged.RemoveAllListeners();
-        radii.onValuesChanged.RemoveAllListeners();
+        Forces.onValuesChanged.RemoveAllListeners();
+        MinDistances.onValuesChanged.RemoveAllListeners();
+        Radii.onValuesChanged.RemoveAllListeners();
         Friction.onValueChanged.RemoveAllListeners();
         Dampening.onValueChanged.RemoveAllListeners();
         RepulsionEffector.onValueChanged.RemoveAllListeners();
@@ -160,12 +190,12 @@ public class SlidersController : MonoBehaviour
         //RandomizeSlider(ScreenSpace);
         RandomizeSlider(NumberOfParticles);
         RandomizeSlider(NumberOfTypes);
-        RandomizeRangeSlider(forces);
-        RandomizeRangeSlider(minDistances);
-        RandomizeRangeSlider(radii);
-        RandomizeSlider(Friction);
-        RandomizeSlider(Dampening);
-        RandomizeSlider(RepulsionEffector);
+        RandomizeRangeSlider(Forces);
+        RandomizeRangeSlider(MinDistances);
+        RandomizeRangeSlider(Radii);
+        //RandomizeSlider(Friction);
+        //RandomizeSlider(Dampening);
+        //RandomizeSlider(RepulsionEffector);
         //RandomizeSlider(TimeScale);
         SettingsLoader.Instance.RefreshSettings();
     }
@@ -184,6 +214,24 @@ public class SlidersController : MonoBehaviour
         slider.value = Random.Range(slider.minValue, slider.maxValue);
     }
 
+    private void IncreaseSlidersLimit(float multiplier = 50f)
+    {
+        NumberOfParticles.maxValue = NumberOfParticles.maxValue * multiplier;
+        NumberOfTypes.maxValue = NumberOfTypes.maxValue * multiplier;
+        Forces.maxLimit = Forces.maxLimit * multiplier;
+        MinDistances.maxLimit = MinDistances.maxLimit * multiplier;
+        Radii.maxLimit = Radii.maxLimit * multiplier;
+    }
+
+    private void DecreaseSlidersLimit(float multiplier = 10f)
+    {
+        NumberOfParticles.maxValue = numParticlesLimit;
+        NumberOfTypes.maxValue = numTypesLimit;
+        Forces.maxLimit = forcesLimit;
+        MinDistances.maxLimit = minDistancesLimit;
+        Radii.maxLimit = radiiLimit;
+    }
+
     public void SetSliders()
     {
         SimSettings settings = SettingsLoader.Instance.GetSettings();
@@ -194,14 +242,14 @@ public class SlidersController : MonoBehaviour
 
         NumberOfTypes.value = settings.NumberOfTypes;
 
-        forces.valueMin = settings.forces.x;
-        forces.valueMax = settings.forces.y;
+        Forces.valueMin = settings.forces.x;
+        Forces.valueMax = settings.forces.y;
 
-        minDistances.valueMin = settings.minDistances.x;
-        minDistances.valueMax = settings.minDistances.y;
+        MinDistances.valueMin = settings.minDistances.x;
+        MinDistances.valueMax = settings.minDistances.y;
 
-        radii.valueMin = settings.radii.x;
-        radii.valueMax = settings.radii.y;
+        Radii.valueMin = settings.radii.x;
+        Radii.valueMax = settings.radii.y;
 
         Friction.value = settings.Friction;
 

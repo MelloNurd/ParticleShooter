@@ -55,9 +55,11 @@ public class SaveSystem : MonoBehaviour
     
     public static string DataPath => Path.Combine(Application.persistentDataPath, "Settings");
 
+    [SerializeField] private GameObject _playerObject;
+
     // Loading
     [Header("Loading")]
-    [SerializeField] GameObject _savedItemPrefab;
+    [SerializeField] private GameObject _savedItemPrefab;
     [SerializeField] private GameObject _emptyMenuText;
     private CanvasGroup _loadingGroup;
     private Transform _contentHolder;
@@ -126,10 +128,12 @@ public class SaveSystem : MonoBehaviour
     public void SaveSettingsToFile(SimSettings settings) => StartCoroutine(SaveDialog(settings)); // Option to import different settings
     private IEnumerator SaveDialog(SimSettings settings)
     {
+        _playerObject.SetActive(false);
+
         FileBrowser.SetFilters(false, new FileBrowser.Filter("Settings Files", ".json"));
         FileBrowser.AddQuickLink("Settings", DataPath);
         FileBrowser.AddQuickLink("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads");
-        yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, initialPath: DataPath, title: "Save Setting File", initialFilename: "settings.json");
+        yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, initialPath: DataPath, title: "Save Setting File", initialFilename: "new_settings_file.json");
         if (FileBrowser.Success)
         {
 
@@ -148,6 +152,8 @@ public class SaveSystem : MonoBehaviour
         {
             Debug.Log("Unable to save file.");
         }
+
+        _playerObject.SetActive(true);
     }
 
     public static SimSettings LoadFromFile(string filePath)
@@ -164,6 +170,8 @@ public class SaveSystem : MonoBehaviour
     public void ImportSettings() => StartCoroutine(LoadDialog());
     public IEnumerator LoadDialog()
     {
+        _playerObject.SetActive(false);
+
         FileBrowser.SetFilters(false, new FileBrowser.Filter("Settings Files", ".json"));
         FileBrowser.AddQuickLink("Settings", DataPath);
         FileBrowser.AddQuickLink("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads");
@@ -186,5 +194,7 @@ public class SaveSystem : MonoBehaviour
         {
             Debug.Log("No file selected.");
         }
+
+        _playerObject.SetActive(true);
     }
 }

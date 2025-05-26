@@ -13,6 +13,7 @@ public class KeyInputs : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        stopOnPause = PlayerPrefs.GetInt("StopOnPause", 1) == 1; // Default to true if not set
         sideMenuRectTransform = SideMenu.GetComponent<RectTransform>();
         sideMenuButtonScript = SideMenuButton.GetComponent<MenuButton>();
     }
@@ -82,6 +83,7 @@ public class KeyInputs : MonoBehaviour
     public void ToggleStop()
     {
         stopOnPause = !stopOnPause;
+        PlayerPrefs.SetInt("StopOnPause", stopOnPause ? 1 : 0);
     }
 }
 

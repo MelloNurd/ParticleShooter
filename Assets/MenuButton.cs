@@ -21,6 +21,7 @@ public class MenuButton : MonoBehaviour
     [Scene] [SerializeField] private string scene;
 
     public bool keepMenuHidden = false;
+
     private void Awake()
     {
         parentTransform = transform.parent.GetComponent<RectTransform>();
@@ -33,7 +34,7 @@ public class MenuButton : MonoBehaviour
 
     public void Start()
     {
-        if(closeOnStart)
+        if (closeOnStart)
         {
             ToggleSideMenu();
         }
@@ -108,16 +109,24 @@ public class MenuButton : MonoBehaviour
         {
             // Disable post-processing
             cameraData.renderPostProcessing = !cameraData.renderPostProcessing;
+            PlayerPrefs.SetInt("PostProcessing", cameraData.renderPostProcessing ? 1 : 0);
         }
     }
 
     public void HideSideMenu(GameObject obj)
     {
         obj.SetActive(!obj.activeSelf);
+        PlayerPrefs.SetInt("HideSideMenu", obj.activeSelf ? 0 : 1);
     }
 
     public void SetTimeScale(float timeScale)
     {
         SettingsLoader.Instance.timeScale = timeScale;
+    }
+
+    public void ToggleRunInBackground()
+    {
+        Application.runInBackground = !Application.runInBackground;
+        PlayerPrefs.SetInt("RunInBackground", Application.runInBackground ? 1 : 0);
     }
 }

@@ -52,6 +52,8 @@ public class SavedSettings : MonoBehaviour
 
         // Apply settings
         SettingsLoader.Instance.SetSettings(settings);
+
+        SaveSystem.Instance.HideLoadMenu();
     }
 
     public void DeleteSetting()

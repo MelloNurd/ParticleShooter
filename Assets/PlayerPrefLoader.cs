@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
@@ -11,7 +12,7 @@ public class PlayerPrefLoader : MonoBehaviour
     [SerializeField] Camera mainCamera;
     [SerializeField] KeyInputs keyInputs;
 
-    [SerializeField] GameObject SideMenuButton;
+    [SerializeField] MenuButton SideMenuButton;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -37,12 +38,13 @@ public class PlayerPrefLoader : MonoBehaviour
         if (PlayerPrefs.GetInt("HideSideMenu", 0) == 1)
         {
             HideSideMenu.isOn = true;
-            SideMenuButton.SetActive(false);
+            SideMenuButton.ToggleSideMenu();
+            SideMenuButton.transform.gameObject.SetActive(false);
         }
         else
         {
             HideSideMenu.isOn = false;
-            SideMenuButton.SetActive(true);
+            SideMenuButton.transform.gameObject.SetActive(true);
         }
 
         if (PlayerPrefs.GetInt("StopInPause", 1) == 1)

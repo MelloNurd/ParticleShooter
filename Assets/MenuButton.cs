@@ -21,8 +21,6 @@ public class MenuButton : MonoBehaviour
     [Scene] [SerializeField] private string scene;
 
     public bool keepMenuHidden = false;
-
-    public int sideMenuMovement = -1;
     private void Awake()
     {
         parentTransform = transform.parent.GetComponent<RectTransform>();
@@ -72,6 +70,14 @@ public class MenuButton : MonoBehaviour
         if (playText.text == "Play")
         {
             playText.text = "Resume";
+        }
+    }
+
+    public void EnablePlayerInput(GameObject playerInputs)
+    {
+        if (!playerInputs.activeSelf)
+        {
+            playerInputs.SetActive(true);
         }
     }
 

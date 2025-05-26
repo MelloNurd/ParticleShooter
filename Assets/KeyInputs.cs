@@ -8,6 +8,7 @@ public class KeyInputs : MonoBehaviour
     private MenuButton sideMenuButtonScript;
     [SerializeField] private GameObject SideMenu;
     RectTransform sideMenuRectTransform;
+    public bool stopOnPause = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -35,7 +36,8 @@ public class KeyInputs : MonoBehaviour
                     SideMenuButton.onClick.Invoke();
                 }
                 SideMenu.transform.localScale = new Vector3(0, 0, 0);
-                SettingsLoader.Instance.timeScale = 0f;
+                if(stopOnPause)
+                    SettingsLoader.Instance.timeScale = 0f;
             }
         }
         if(Input.GetKeyDown(KeyCode.Tab))
@@ -46,4 +48,10 @@ public class KeyInputs : MonoBehaviour
             }
         }
     }
+    public void ToggleStop()
+    {
+        stopOnPause = !stopOnPause;
+    }
 }
+
+

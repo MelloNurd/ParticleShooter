@@ -83,7 +83,6 @@ public class SettingsLoader : MonoBehaviour
         }
 
         screenSize = new Vector2(Screen.width, Screen.height);
-        Debug.Log("In awake screensize");
         screenSpace = new Vector2(Screen.width * 0.0333f, Screen.height * 0.0333f);
     }
 

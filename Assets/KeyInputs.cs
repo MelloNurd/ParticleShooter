@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class KeyInputs : MonoBehaviour
 {
     [SerializeField] private GameObject PauseMenu;
+    [SerializeField] private GameObject SettingsMenu;
     [SerializeField] private Button SideMenuButton;
     private MenuButton sideMenuButtonScript;
     [SerializeField] private GameObject SideMenu;
@@ -21,13 +22,20 @@ public class KeyInputs : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Escape))
         {
-            if (PauseMenu.activeSelf)
+            if (PauseMenu.activeSelf || SettingsMenu.activeSelf)
             {
-                PauseMenu.SetActive(false);
+                if(PauseMenu.activeSelf)
+                {
+                    PauseMenu.SetActive(false);
+                }
+                else
+                {
+                    SettingsMenu.SetActive(false);
+                }
                 SideMenu.transform.localScale = new Vector3(1, 1, 1);
                 SettingsLoader.Instance.timeScale = 1f; 
             }
-            else
+            else if(!PauseMenu.activeSelf && !SettingsMenu.activeSelf)
             {
                 PauseMenu.SetActive(true);
                 if(sideMenuButtonScript.isMenuOpen)
@@ -46,6 +54,29 @@ public class KeyInputs : MonoBehaviour
             {
                 SideMenuButton.onClick.Invoke();
             }
+        }
+        if(Input.GetKeyDown(KeyCode.P))
+        {
+            if (SettingsLoader.Instance.timeScale == 0)
+            {
+                SettingsLoader.Instance.timeScale = 1f;
+            }
+            else
+            {
+                SettingsLoader.Instance.timeScale = 0f;
+            }
+        }
+        if(Input.GetKeyDown(KeyCode.S))
+        {
+            SaveSystem.Instance.SaveSettingsToFile();
+        }
+        if(Input.GetKeyDown(KeyCode.L))
+        {
+            SaveSystem.Instance.ShowLoadMenu();
+        }
+        if(Input.GetKeyDown(KeyCode.I))
+        {
+            SaveSystem.Instance.ImportSettings();
         }
     }
     public void ToggleStop()

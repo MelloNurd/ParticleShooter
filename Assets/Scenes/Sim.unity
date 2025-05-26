@@ -3570,6 +3570,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PauseMenu: {fileID: 500519575}
+  SettingsMenu: {fileID: 386281342}
   SideMenuButton: {fileID: 483684848}
   SideMenu: {fileID: 730031857}
   stopOnPause: 1
@@ -17086,9 +17087,17 @@ PrefabInstance:
       value: Sliders Controller
       objectReference: {fileID: 0}
     - target: {fileID: 5768252478776793197, guid: 014662d2ed10ac740948c2ecdaf27043, type: 3}
+      propertyPath: Radii
+      value: 
+      objectReference: {fileID: 1773718646}
+    - target: {fileID: 5768252478776793197, guid: 014662d2ed10ac740948c2ecdaf27043, type: 3}
       propertyPath: radii
       value: 
       objectReference: {fileID: 1773718646}
+    - target: {fileID: 5768252478776793197, guid: 014662d2ed10ac740948c2ecdaf27043, type: 3}
+      propertyPath: Forces
+      value: 
+      objectReference: {fileID: 1278058008}
     - target: {fileID: 5768252478776793197, guid: 014662d2ed10ac740948c2ecdaf27043, type: 3}
       propertyPath: forces
       value: 
@@ -17121,6 +17130,10 @@ PrefabInstance:
       propertyPath: ImportButton
       value: 
       objectReference: {fileID: 1307644687}
+    - target: {fileID: 5768252478776793197, guid: 014662d2ed10ac740948c2ecdaf27043, type: 3}
+      propertyPath: MinDistances
+      value: 
+      objectReference: {fileID: 1542314693}
     - target: {fileID: 5768252478776793197, guid: 014662d2ed10ac740948c2ecdaf27043, type: 3}
       propertyPath: minDistances
       value: 

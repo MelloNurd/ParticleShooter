@@ -5,12 +5,14 @@ public class KeyInputs : MonoBehaviour
 {
     [SerializeField] private GameObject PauseMenu;
     [SerializeField] private Button SideMenuButton;
+    private MenuButton sideMenuButtonScript;
     [SerializeField] private GameObject SideMenu;
-    [SerializeField] private Slider TimeSlider;
+    RectTransform sideMenuRectTransform;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        sideMenuRectTransform = SideMenu.GetComponent<RectTransform>();
+        sideMenuButtonScript = SideMenuButton.GetComponent<MenuButton>();
     }
 
     // Update is called once per frame
@@ -22,18 +24,23 @@ public class KeyInputs : MonoBehaviour
             {
                 PauseMenu.SetActive(false);
                 SideMenu.transform.localScale = new Vector3(1, 1, 1);
-                TimeSlider.value = 1;
+                SettingsLoader.Instance.timeScale = 1f; 
             }
             else
             {
                 PauseMenu.SetActive(true);
-                TimeSlider.value = 0;
+                if(sideMenuButtonScript.isMenuOpen)
+                {
+                    // If the side menu is open, close it
+                    SideMenuButton.onClick.Invoke();
+                }
                 SideMenu.transform.localScale = new Vector3(0, 0, 0);
+                SettingsLoader.Instance.timeScale = 0f;
             }
         }
         if(Input.GetKeyDown(KeyCode.Tab))
         {
-            if (SideMenuButton != null && SideMenu.activeSelf)
+            if (SideMenu.activeSelf && PauseMenu.activeSelf == false)
             {
                 SideMenuButton.onClick.Invoke();
             }

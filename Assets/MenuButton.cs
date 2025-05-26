@@ -21,6 +21,8 @@ public class MenuButton : MonoBehaviour
     [Scene] [SerializeField] private string scene;
 
     public bool keepMenuHidden = false;
+
+    public int sideMenuMovement = -1;
     private void Awake()
     {
         parentTransform = transform.parent.GetComponent<RectTransform>();
@@ -106,5 +108,10 @@ public class MenuButton : MonoBehaviour
     public void HideSideMenu(GameObject obj)
     {
         obj.SetActive(!obj.activeSelf);
+    }
+
+    public void SetTimeScale(float timeScale)
+    {
+        SettingsLoader.Instance.timeScale = timeScale;
     }
 }

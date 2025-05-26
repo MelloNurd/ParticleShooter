@@ -176,7 +176,7 @@ public class SaveSystem : MonoBehaviour
         FileBrowser.AddQuickLink("Settings", DataPath);
         FileBrowser.AddQuickLink("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads");
 
-        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, initialPath: DataPath, title: "Import Setting File");
+        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, initialPath: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads", title: "Import Setting File");
         if (FileBrowser.Success)
         {
             string[] paths = FileBrowser.Result;
@@ -185,8 +185,14 @@ public class SaveSystem : MonoBehaviour
                 SimSettings settings = LoadFromFile(path);
                 if (settings != null)
                 {
-                    SaveSettingsToFile(settings);
                     SettingsLoader.Instance.SetSettings(settings);
+
+                    // Saving the imported file to the settings folder
+                    string newPath = Path.Combine(DataPath, settings.saveName + ".json");
+
+                    string jsonData = JsonUtility.ToJson(settings, prettyPrint: true);
+                    File.WriteAllText(newPath, jsonData);
+
                 }
             }
         }

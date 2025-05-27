@@ -9976,7 +9976,7 @@ MonoBehaviour:
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
-  m_ReverseArrangement: 0
+  m_ReverseArrangement: 1
 --- !u!1 &1133384930
 GameObject:
   m_ObjectHideFlags: 0
@@ -17147,7 +17147,7 @@ MonoBehaviour:
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
-  m_ReverseArrangement: 0
+  m_ReverseArrangement: 1
 --- !u!1 &1660492137
 GameObject:
   m_ObjectHideFlags: 0
@@ -21217,7 +21217,7 @@ MonoBehaviour:
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 1
   m_ChildScaleHeight: 1
-  m_ReverseArrangement: 0
+  m_ReverseArrangement: 1
 --- !u!1 &1962598432
 GameObject:
   m_ObjectHideFlags: 0

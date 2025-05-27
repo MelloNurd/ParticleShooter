@@ -282,4 +282,27 @@ public class SlidersController : MonoBehaviour
 
         TimeScale.value = settings.TimeScale;
     }
+
+    public void ToggleFPS()
+    {
+        bool currentState = fpsText.gameObject.activeSelf;
+        if (currentState)
+        {
+            DisableFPS();
+        }
+        else
+        {
+            EnableFPS();
+        }
+    }
+    public void EnableFPS()
+    {
+        fpsText.gameObject.SetActive(true);
+        PlayerPrefs.SetInt("ShowFPS", 1);
+    }
+    public void DisableFPS()
+    {
+        fpsText.gameObject.SetActive(false);
+        PlayerPrefs.SetInt("ShowFPS", 0);
+    }
 }

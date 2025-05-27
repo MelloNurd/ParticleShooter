@@ -1353,8 +1353,8 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 78929217}
-        m_TargetAssemblyTypeName: MenuButton, Assembly-CSharp
+      - m_Target: {fileID: 2065732225}
+        m_TargetAssemblyTypeName: SlidersController, Assembly-CSharp
         m_MethodName: ToggleFPS
         m_Mode: 1
         m_Arguments:

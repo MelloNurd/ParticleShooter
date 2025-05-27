@@ -20,7 +20,7 @@ public class PlayerPrefLoader : MonoBehaviour
 
     void Start()
     {
-        SetAllToggles();   
+        SetAllToggles();  
     }
 
     private void SetAllToggles()
@@ -126,7 +126,14 @@ public class PlayerPrefLoader : MonoBehaviour
     private void SetShowFPS()
     {
         bool state = PlayerPrefs.GetInt("ShowFPS", 0) == 1;
-        SlidersController.Instance.fpsText.gameObject.SetActive(state);
-        FPSToggle.isOn = !state;
+        FPSToggle.isOn = state;
+        if (FPSToggle.isOn)
+        {
+            SlidersController.Instance.EnableFPS();
+        }
+        else
+        {
+            SlidersController.Instance.DisableFPS();
+        }
     }
 }

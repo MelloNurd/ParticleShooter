@@ -134,6 +134,7 @@ public class SaveSystem : MonoBehaviour
     private IEnumerator SaveDialog(SimSettings settings)
     {
         _playerObject.SetActive(false);
+        HideLoadMenu();
 
         FileBrowser.SetFilters(false, new FileBrowser.Filter("Settings Files", ".json"));
         FileBrowser.AddQuickLink("Settings", DataPath);
@@ -158,7 +159,6 @@ public class SaveSystem : MonoBehaviour
             Debug.Log("Unable to save file.");
         }
 
-        HideLoadMenu();
         _playerObject.SetActive(true);
     }
 
@@ -177,6 +177,7 @@ public class SaveSystem : MonoBehaviour
     public IEnumerator LoadDialog()
     {
         _playerObject.SetActive(false);
+        SaveSystem.Instance.HideLoadMenu();
 
         FileBrowser.SetFilters(false, new FileBrowser.Filter("Settings Files", ".json"));
         FileBrowser.AddQuickLink("Settings", DataPath);
@@ -198,7 +199,6 @@ public class SaveSystem : MonoBehaviour
 
                     string jsonData = JsonUtility.ToJson(settings, prettyPrint: true);
                     File.WriteAllText(newPath, jsonData);
-                    HideLoadMenu();
                 }
             }
         }

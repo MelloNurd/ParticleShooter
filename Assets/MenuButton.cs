@@ -22,6 +22,8 @@ public class MenuButton : MonoBehaviour
 
     public bool keepMenuHidden = false;
 
+    private bool fullscreen = false;
+
     private void Awake()
     {
         parentTransform = transform.parent.GetComponent<RectTransform>();
@@ -128,5 +130,17 @@ public class MenuButton : MonoBehaviour
     {
         Application.runInBackground = !Application.runInBackground;
         PlayerPrefs.SetInt("RunInBackground", Application.runInBackground ? 1 : 0);
+    }
+
+    public void ToggleFullscreen()
+    {
+        fullscreen = !fullscreen;
+        Screen.fullScreen = fullscreen;
+        if (fullscreen)
+        {
+            Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
+            Screen.SetResolution(Screen.currentResolution.width, Screen.currentResolution.height, FullScreenMode.FullScreenWindow);
+        }
+        PlayerPrefs.SetInt("Fullscreen", fullscreen ? 1 : 0);
     }
 }

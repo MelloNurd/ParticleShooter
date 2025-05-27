@@ -2,6 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PlayerPrefLoader : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class PlayerPrefLoader : MonoBehaviour
     [SerializeField] Toggle HideSideMenu;
     [SerializeField] Toggle StopInPause;
     [SerializeField] Toggle RunInBackground;
+    [SerializeField] Toggle FullScreen;
     [SerializeField] Camera mainCamera;
     [SerializeField] KeyInputs keyInputs;
 
@@ -68,7 +70,17 @@ public class PlayerPrefLoader : MonoBehaviour
             RunInBackground.isOn = false;
             Application.runInBackground = false;
         }
+
+        bool isFullScreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
+        FullScreen.isOn = isFullScreen;
+        if(isFullScreen)
+        {
+            Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
+            Screen.SetResolution(Display.displays[Camera.main.targetDisplay].systemWidth, Display.displays[Camera.main.targetDisplay].systemHeight, Screen.fullScreenMode);
+        }        
     }
+    
+   
 
     // Update is called once per frame
     void Update()

@@ -232,7 +232,7 @@ public class SlidersController : MonoBehaviour
         }
     }
 
-    public void IncreaseSlidersLimit(float multiplier = 5f)
+    public void IncreaseSlidersLimit(float multiplier = 10f)
     {
         DecreaseSlidersLimit(); // Using this as a reset to default limits, so it doesn't stack
         NumberOfParticles.maxValue = NumberOfParticles.maxValue * multiplier;

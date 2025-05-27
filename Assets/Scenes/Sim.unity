@@ -2256,7 +2256,7 @@ MonoBehaviour:
   RunInBackground: {fileID: 1566564561}
   FullScreen: {fileID: 943301408}
   FPSToggle: {fileID: 78929218}
-  mainCamera: {fileID: 719541196}
+  UICamera: {fileID: 1947164404}
   keyInputs: {fileID: 402758994}
   SideMenuButton: {fileID: 483684847}
 --- !u!4 &183625270
@@ -9999,11 +9999,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 712419532}
   m_CullTransparentMesh: 1
---- !u!20 &719541196 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 1068266682060012621, guid: 961bc673db1961e458736faf6f5fde6c, type: 3}
-  m_PrefabInstance: {fileID: 635630496}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &720975534
 GameObject:
   m_ObjectHideFlags: 0

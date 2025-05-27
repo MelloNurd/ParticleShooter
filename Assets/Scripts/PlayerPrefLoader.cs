@@ -13,7 +13,7 @@ public class PlayerPrefLoader : MonoBehaviour
     [SerializeField] private Toggle RunInBackground;
     [SerializeField] private Toggle FullScreen;
     [SerializeField] private Toggle FPSToggle;
-    [SerializeField] private Camera mainCamera;
+    [SerializeField] private Camera UICamera;
     [SerializeField] private KeyInputs keyInputs;
 
     [SerializeField] private MenuButton SideMenuButton;
@@ -39,7 +39,7 @@ public class PlayerPrefLoader : MonoBehaviour
         if (PlayerPrefs.GetInt("PostProcessing", 1) == 1)
         {
             PostProcess.isOn = true;
-            if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
+            if (UICamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
             {
                 cameraData.renderPostProcessing = true;
             }
@@ -47,7 +47,7 @@ public class PlayerPrefLoader : MonoBehaviour
         else
         {
             PostProcess.isOn = false;
-            if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
+            if (UICamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
             {
                 cameraData.renderPostProcessing = false;
             }

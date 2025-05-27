@@ -26,6 +26,7 @@ public class KeyInputs : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Escape))
         {
+            SaveSystem.Instance.HideLoadMenu();
             if (PauseMenu.activeSelf || SettingsMenu.activeSelf || ControlsMenu.activeSelf)
             {
                 if(PauseMenu.activeSelf)

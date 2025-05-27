@@ -114,6 +114,11 @@ public class SaveSystem : MonoBehaviour
     {
         if(!Directory.Exists(DataPath)) Directory.CreateDirectory(DataPath);
 
+        foreach (Transform child in parent)
+        {
+            Destroy(child.gameObject);
+        }
+
         string[] files = Directory.GetFiles(DataPath, "*.json", SearchOption.TopDirectoryOnly);
         foreach (string file in files)
         {
@@ -153,6 +158,7 @@ public class SaveSystem : MonoBehaviour
             Debug.Log("Unable to save file.");
         }
 
+        HideLoadMenu();
         _playerObject.SetActive(true);
     }
 
@@ -192,7 +198,7 @@ public class SaveSystem : MonoBehaviour
 
                     string jsonData = JsonUtility.ToJson(settings, prettyPrint: true);
                     File.WriteAllText(newPath, jsonData);
-
+                    HideLoadMenu();
                 }
             }
         }

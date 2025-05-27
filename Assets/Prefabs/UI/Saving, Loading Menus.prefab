@@ -322,6 +322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5599c0257986bf745b2f5930a4d22d6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerObject: {fileID: 0}
   _savedItemPrefab: {fileID: 1735373414530871651, guid: b4cb5b17ec4fa4145bdc8ecc212db86d, type: 3}
   _emptyMenuText: {fileID: 0}
 --- !u!1 &2205088288158662805

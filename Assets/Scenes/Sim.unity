@@ -1531,9 +1531,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1458368329}
     m_Modifications:
+    - target: {fileID: 112957453153965425, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 112957453153965425, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 112957453153965425, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 112957453153965425, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 284260499385426270, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -12.000244
+      value: -12.000488
       objectReference: {fileID: 0}
     - target: {fileID: 1047342998353134738, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1638,6 +1654,42 @@ PrefabInstance:
     - target: {fileID: 2416063986702118188, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 641.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -464.64
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3097510107242127017, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3334300896340083584, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1811,9 +1863,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7761356031940881226, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_Alpha
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8360674551538686289, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8360674551538686289, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.00049591064
       objectReference: {fileID: 0}
     - target: {fileID: 8592991812758188857, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2256,7 +2316,7 @@ MonoBehaviour:
   RunInBackground: {fileID: 1566564561}
   FullScreen: {fileID: 943301408}
   FPSToggle: {fileID: 78929218}
-  UICamera: {fileID: 1947164404}
+  UICamera: {fileID: 0}
   keyInputs: {fileID: 402758994}
   SideMenuButton: {fileID: 483684847}
 --- !u!4 &183625270
@@ -25030,7 +25090,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 960, y: -217.87329}
+  m_AnchoredPosition: {x: 960, y: -217.87305}
   m_SizeDelta: {x: 306.07, y: 91.61}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1810492345
@@ -29752,9 +29812,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2107588405}
   m_Direction: 0
   m_MinValue: 1
-  m_MaxValue: 32
+  m_MaxValue: 25
   m_WholeNumbers: 1
-  m_Value: 3
+  m_Value: 2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

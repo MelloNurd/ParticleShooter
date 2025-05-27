@@ -6,24 +6,39 @@ using UnityEngine.SceneManagement;
 
 public class PlayerPrefLoader : MonoBehaviour
 {
-    [SerializeField] Toggle PostProcess;
-    [SerializeField] Toggle HideSideMenu;
-    [SerializeField] Toggle StopInPause;
-    [SerializeField] Toggle RunInBackground;
-    [SerializeField] Toggle FullScreen;
-    [SerializeField] Camera mainCamera;
-    [SerializeField] KeyInputs keyInputs;
+    [SerializeField] private Toggle PostProcess;
+    [SerializeField] private Toggle SliderLimit;
+    [SerializeField] private Toggle HideSideMenu;
+    [SerializeField] private Toggle StopInPause;
+    [SerializeField] private Toggle RunInBackground;
+    [SerializeField] private Toggle FullScreen;
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private KeyInputs keyInputs;
 
-    [SerializeField] MenuButton SideMenuButton;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] private MenuButton SideMenuButton;
+
     void Start()
     {
-        if(PlayerPrefs.GetInt("PostProcessing", 1) == 1)
+        SetAllToggles();   
+    }
+
+    private void SetAllToggles()
+    {
+        SetPostProcessingToggle();
+        SetSliderLimitToggle();
+        SetHideMenuToggle();
+        SetStopInPauseToggle();
+        SetRunInBackgroundToggle();
+        SetFullscreenToggle();
+    }
+    
+    private void SetPostProcessingToggle()
+    {
+        if (PlayerPrefs.GetInt("PostProcessing", 1) == 1)
         {
             PostProcess.isOn = true;
             if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
             {
-                // Enable post-processing
                 cameraData.renderPostProcessing = true;
             }
         }
@@ -32,11 +47,28 @@ public class PlayerPrefLoader : MonoBehaviour
             PostProcess.isOn = false;
             if (mainCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData))
             {
-                // Disable post-processing
                 cameraData.renderPostProcessing = false;
             }
         }
+    }
 
+    private void SetSliderLimitToggle()
+    {
+        SliderLimit.isOn = (PlayerPrefs.GetInt("SliderLimit", 0) == 1);
+
+        // Manually run each one for initializing, then can just Toggle after
+        if (SliderLimit.isOn)
+        {
+            SlidersController.Instance.IncreaseSlidersLimit();
+        }
+        else
+        {
+            SlidersController.Instance.DecreaseSlidersLimit();
+        }
+    }
+
+    private void SetHideMenuToggle()
+    {
         if (PlayerPrefs.GetInt("HideSideMenu", 0) == 1)
         {
             HideSideMenu.isOn = true;
@@ -48,18 +80,24 @@ public class PlayerPrefLoader : MonoBehaviour
             HideSideMenu.isOn = false;
             SideMenuButton.transform.gameObject.SetActive(true);
         }
+    }
 
+    private void SetStopInPauseToggle()
+    {
         if (PlayerPrefs.GetInt("StopInPause", 1) == 1)
         {
             StopInPause.isOn = true;
-            keyInputs.stopOnPause = true; 
+            keyInputs.stopOnPause = true;
         }
         else
         {
             StopInPause.isOn = false;
             keyInputs.stopOnPause = false;
         }
+    }
 
+    private void SetRunInBackgroundToggle()
+    {
         if (PlayerPrefs.GetInt("RunInBackground", 0) == 1)
         {
             RunInBackground.isOn = true;
@@ -70,21 +108,16 @@ public class PlayerPrefLoader : MonoBehaviour
             RunInBackground.isOn = false;
             Application.runInBackground = false;
         }
+    }
 
+    private void SetFullscreenToggle()
+    {
         bool isFullScreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
         FullScreen.isOn = isFullScreen;
-        if(isFullScreen)
+        if (isFullScreen)
         {
             Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
             Screen.SetResolution(Display.displays[Camera.main.targetDisplay].systemWidth, Display.displays[Camera.main.targetDisplay].systemHeight, Screen.fullScreenMode);
-        }        
-    }
-    
-   
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        }
     }
 }

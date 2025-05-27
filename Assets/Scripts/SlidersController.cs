@@ -39,6 +39,8 @@ public class SlidersController : MonoBehaviour
     private float minDistancesLimit;
     private float radiiLimit;
 
+    [SerializeField] private GameObject warningMsg;
+
     public void OnEnable()
     {
         // In SlidersController.cs, replace the ScreenSpace.onValueChanged listener with this:
@@ -143,6 +145,12 @@ public class SlidersController : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        numParticlesLimit = NumberOfParticles.maxValue;
+        numTypesLimit = NumberOfTypes.maxValue;
+        forcesLimit = Forces.maxLimit;
+        minDistancesLimit = MinDistances.maxLimit;
+        radiiLimit = Radii.maxLimit;
     }
 
     private void Start()
@@ -151,13 +159,6 @@ public class SlidersController : MonoBehaviour
         SaveButton.onClick.AddListener(() => SaveSystem.Instance.SaveSettingsToFile());
         LoadButton.onClick.AddListener(() => SaveSystem.Instance.ShowLoadMenu());
         ImportButton.onClick.AddListener(() => SaveSystem.Instance.ImportSettings());
-
-        // Set all the limits for the sliders
-        numParticlesLimit = NumberOfParticles.maxValue;
-        numTypesLimit = NumberOfTypes.maxValue;
-        forcesLimit = Forces.maxLimit;
-        minDistancesLimit = MinDistances.maxLimit;
-        radiiLimit = Radii.maxLimit;
     }
 
     private void Update()
@@ -214,22 +215,40 @@ public class SlidersController : MonoBehaviour
         slider.value = Random.Range(slider.minValue, slider.maxValue);
     }
 
-    private void IncreaseSlidersLimit(float multiplier = 50f)
+    public void ToggleSlidersLimit()
     {
+        if(NumberOfParticles.maxValue == numParticlesLimit)
+        {
+            IncreaseSlidersLimit();
+        }
+        else
+        {
+            DecreaseSlidersLimit();
+        }
+    }
+
+    public void IncreaseSlidersLimit(float multiplier = 5f)
+    {
+        DecreaseSlidersLimit(); // Using this as a reset to default limits, so it doesn't stack
         NumberOfParticles.maxValue = NumberOfParticles.maxValue * multiplier;
         NumberOfTypes.maxValue = NumberOfTypes.maxValue * multiplier;
         Forces.maxLimit = Forces.maxLimit * multiplier;
         MinDistances.maxLimit = MinDistances.maxLimit * multiplier;
         Radii.maxLimit = Radii.maxLimit * multiplier;
+        PlayerPrefs.SetInt("SliderLimit", 1);
+        warningMsg.SetActive(true);
     }
 
-    private void DecreaseSlidersLimit(float multiplier = 10f)
+    public void DecreaseSlidersLimit()
     {
+        Debug.Log(numParticlesLimit);
         NumberOfParticles.maxValue = numParticlesLimit;
         NumberOfTypes.maxValue = numTypesLimit;
         Forces.maxLimit = forcesLimit;
         MinDistances.maxLimit = minDistancesLimit;
         Radii.maxLimit = radiiLimit;
+        PlayerPrefs.SetInt("SliderLimit", 0);
+        warningMsg.SetActive(false);
     }
 
     public void SetSliders()

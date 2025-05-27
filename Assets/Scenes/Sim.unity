@@ -1029,7 +1029,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 284260499385426270, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -12
+      value: -11.9999695
       objectReference: {fileID: 0}
     - target: {fileID: 1047342998353134738, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1440,7 +1440,7 @@ MonoBehaviour:
   RunInBackground: {fileID: 1566564561}
   mainCamera: {fileID: 719541196}
   keyInputs: {fileID: 402758994}
-  SideMenuButton: {fileID: 483684845}
+  SideMenuButton: {fileID: 483684847}
 --- !u!4 &183625270
 Transform:
   m_ObjectHideFlags: 0

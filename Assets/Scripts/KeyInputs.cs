@@ -59,6 +59,7 @@ public class KeyInputs : MonoBehaviour
         }
         if(Input.GetKeyDown(KeyCode.Tab))
         {
+            SaveSystem.Instance.HideLoadMenu();
             if (SideMenu.activeSelf && PauseMenu.activeSelf == false)
             {
                 SideMenuButton.onClick.Invoke();

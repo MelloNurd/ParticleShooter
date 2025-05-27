@@ -143,4 +143,11 @@ public class MenuButton : MonoBehaviour
         }
         PlayerPrefs.SetInt("Fullscreen", fullscreen ? 1 : 0);
     }
+
+    public void ToggleFPS()
+    {
+        bool current = SlidersController.Instance.fpsText.gameObject.activeSelf;
+        SlidersController.Instance.fpsText.gameObject.SetActive(!current);
+        PlayerPrefs.SetInt("ShowFPS", !current ? 1 : 0);
+    }
 }

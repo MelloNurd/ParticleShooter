@@ -12,6 +12,7 @@ public class PlayerPrefLoader : MonoBehaviour
     [SerializeField] private Toggle StopInPause;
     [SerializeField] private Toggle RunInBackground;
     [SerializeField] private Toggle FullScreen;
+    [SerializeField] private Toggle FPSToggle;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private KeyInputs keyInputs;
 
@@ -30,6 +31,7 @@ public class PlayerPrefLoader : MonoBehaviour
         SetStopInPauseToggle();
         SetRunInBackgroundToggle();
         SetFullscreenToggle();
+        SetShowFPS();
     }
     
     private void SetPostProcessingToggle()
@@ -119,5 +121,12 @@ public class PlayerPrefLoader : MonoBehaviour
             Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
             Screen.SetResolution(Display.displays[Camera.main.targetDisplay].systemWidth, Display.displays[Camera.main.targetDisplay].systemHeight, Screen.fullScreenMode);
         }
+    }
+
+    private void SetShowFPS()
+    {
+        bool state = PlayerPrefs.GetInt("ShowFPS", 0) == 1;
+        SlidersController.Instance.fpsText.gameObject.SetActive(state);
+        FPSToggle.isOn = !state;
     }
 }

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using TMPro;
 using UIRangeSliderNamespace;
 using UnityEditor;
 using UnityEngine;
@@ -28,6 +29,8 @@ public class SlidersController : MonoBehaviour
     public Button SaveButton;
     public Button LoadButton;
     public Button ImportButton;
+
+    public TMP_Text fpsText;
 
     bool wasAlreadyHerePal = false;
     bool first = true;
@@ -163,7 +166,9 @@ public class SlidersController : MonoBehaviour
 
     private void Update()
     {
-        if(first)
+        fpsText.text = "FPS: " + (1f / Time.unscaledDeltaTime).ToString("F0");
+
+        if (first)
         {
             first = false;
             SetSliders();
@@ -241,7 +246,6 @@ public class SlidersController : MonoBehaviour
 
     public void DecreaseSlidersLimit()
     {
-        Debug.Log(numParticlesLimit);
         NumberOfParticles.maxValue = numParticlesLimit;
         NumberOfTypes.maxValue = numTypesLimit;
         Forces.maxLimit = forcesLimit;

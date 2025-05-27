@@ -5847,6 +5847,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PauseMenu: {fileID: 500519575}
   SettingsMenu: {fileID: 386281342}
+  ControlsMenu: {fileID: 1614503415}
   SideMenuButton: {fileID: 483684848}
   SideMenu: {fileID: 730031857}
   stopOnPause: 1

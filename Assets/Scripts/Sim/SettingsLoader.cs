@@ -42,7 +42,7 @@ public class SettingsLoader : MonoBehaviour
 
     [Space(10)]
     [OnValueChanged("RefreshSettings")][UnityEngine.Range(-5, 5)] public float repulsion = -5f;
-    [OnValueChanged("RefreshSettings")][UnityEngine.Range(0, 1)] public float friction = 0.95f;
+    [OnValueChanged("RefreshSettings")][UnityEngine.Range(0, 1)] public float friction = 0.05f;
     [OnValueChanged("RefreshSettings")][UnityEngine.Range(0, 1)] public float dampening = 0.5f;
 
     [Header("Unity Settings")] /////////////////////////////////////////////////////////////////////

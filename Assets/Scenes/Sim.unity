@@ -1865,7 +1865,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7761356031940881226, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_Alpha
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8360674551538686289, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_SizeDelta.y
@@ -15862,7 +15862,7 @@ MonoBehaviour:
   minDistancesRange: {x: 1, y: 3}
   radiiRange: {x: 3, y: 5}
   repulsion: -5
-  friction: 0.95
+  friction: 0.05
   dampening: 0.5
   timeScale: 1
 --- !u!4 &1202883119

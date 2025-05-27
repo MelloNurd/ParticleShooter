@@ -64,7 +64,7 @@ public partial struct ParticleMovementSystem : ISystem
         var settings = SystemAPI.GetSingleton<EntitySimSettings>();
         float2 screen = settings.ScreenSpace;
         float2 halfScreen = settings.HalfScreenSpace;
-        float friction = settings.Friction;
+        float friction = 1 - settings.Friction;
         float dampening = settings.Dampening;
         float repulsion = settings.RepulsionEffector;
         int numTypes = settings.NumberOfTypes;

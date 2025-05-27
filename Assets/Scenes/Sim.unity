@@ -1059,6 +1059,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Saving/Loading Menus
       objectReference: {fileID: 0}
+    - target: {fileID: 1767888311446777708, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
+      propertyPath: _playerObject
+      value: 
+      objectReference: {fileID: 402758993}
     - target: {fileID: 1897595125588073297, guid: 5ebd3816746f1304286a93621e8aebf1, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -3701,6 +3705,8 @@ MonoBehaviour:
   SideMenuButton: {fileID: 483684848}
   SideMenu: {fileID: 730031857}
   stopOnPause: 1
+  screenScale: {fileID: 271910704}
+  timeScaleSlider: {fileID: 571270507}
 --- !u!4 &402758995
 Transform:
   m_ObjectHideFlags: 0

@@ -10,6 +10,8 @@ public class KeyInputs : MonoBehaviour
     [SerializeField] private GameObject SideMenu;
     RectTransform sideMenuRectTransform;
     public bool stopOnPause = true;
+    [SerializeField] Slider screenScale;
+    [SerializeField] Slider timeScaleSlider;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -78,6 +80,22 @@ public class KeyInputs : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.I))
         {
             SaveSystem.Instance.ImportSettings();
+        }
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f && !Input.GetKey(KeyCode.T))
+        {
+            screenScale.value -= 0.1f;
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f && !Input.GetKey(KeyCode.T))
+        {
+            screenScale.value += 0.1f;
+        }
+        if(Input.GetAxis("Mouse ScrollWheel") > 0f && Input.GetKey(KeyCode.T))
+        {
+            timeScaleSlider.value += 0.1f;
+        }
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f && Input.GetKey(KeyCode.T))
+        {
+            timeScaleSlider.value -= 0.1f;
         }
     }
     public void ToggleStop()

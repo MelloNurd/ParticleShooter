@@ -232,14 +232,14 @@ public class SlidersController : MonoBehaviour
         }
     }
 
-    public void IncreaseSlidersLimit(float multiplier = 10f)
+    public void IncreaseSlidersLimit()
     {
         DecreaseSlidersLimit(); // Using this as a reset to default limits, so it doesn't stack
-        NumberOfParticles.maxValue = NumberOfParticles.maxValue * multiplier;
-        NumberOfTypes.maxValue = NumberOfTypes.maxValue * multiplier;
-        Forces.maxLimit = Forces.maxLimit * multiplier;
-        MinDistances.maxLimit = MinDistances.maxLimit * multiplier;
-        Radii.maxLimit = Radii.maxLimit * multiplier;
+        NumberOfParticles.maxValue = NumberOfParticles.maxValue * 7.5f;
+        NumberOfTypes.maxValue = NumberOfTypes.maxValue * 4;
+        Forces.maxLimit = Forces.maxLimit * 2;
+        MinDistances.maxLimit = MinDistances.maxLimit * 2;
+        Radii.maxLimit = Radii.maxLimit * 2;
         PlayerPrefs.SetInt("SliderLimit", 1);
         warningMsg.SetActive(true);
     }

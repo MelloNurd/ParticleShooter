@@ -5,6 +5,7 @@ public class KeyInputs : MonoBehaviour
 {
     [SerializeField] private GameObject PauseMenu;
     [SerializeField] private GameObject SettingsMenu;
+    [SerializeField] private GameObject ControlsMenu;
     [SerializeField] private Button SideMenuButton;
     private MenuButton sideMenuButtonScript;
     [SerializeField] private GameObject SideMenu;
@@ -25,20 +26,24 @@ public class KeyInputs : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Escape))
         {
-            if (PauseMenu.activeSelf || SettingsMenu.activeSelf)
+            if (PauseMenu.activeSelf || SettingsMenu.activeSelf || ControlsMenu.activeSelf)
             {
                 if(PauseMenu.activeSelf)
                 {
                     PauseMenu.SetActive(false);
                 }
-                else
+                else if (SettingsMenu.activeSelf)
                 {
                     SettingsMenu.SetActive(false);
+                }
+                else if (ControlsMenu.activeSelf)
+                {
+                    ControlsMenu.SetActive(false);
                 }
                 SideMenu.transform.localScale = new Vector3(1, 1, 1);
                 SettingsLoader.Instance.timeScale = 1f; 
             }
-            else if(!PauseMenu.activeSelf && !SettingsMenu.activeSelf)
+            else if(!PauseMenu.activeSelf && !SettingsMenu.activeSelf && !ControlsMenu.activeSelf)
             {
                 PauseMenu.SetActive(true);
                 if(sideMenuButtonScript.isMenuOpen)

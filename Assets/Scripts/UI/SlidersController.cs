@@ -44,6 +44,8 @@ public class SlidersController : MonoBehaviour
 
     [SerializeField] private GameObject warningMsg;
 
+    [SerializeField] private CanvasGroup infoGroup;
+
     public void OnEnable()
     {
         // In SlidersController.cs, replace the ScreenSpace.onValueChanged listener with this:
@@ -162,6 +164,8 @@ public class SlidersController : MonoBehaviour
         SaveButton.onClick.AddListener(() => SaveSystem.Instance.SaveSettingsToFile());
         LoadButton.onClick.AddListener(() => SaveSystem.Instance.ShowLoadMenu());
         ImportButton.onClick.AddListener(() => SaveSystem.Instance.ImportSettings());
+
+        Utilities.HideCanvasGroup(ref infoGroup);
     }
 
     private void Update()

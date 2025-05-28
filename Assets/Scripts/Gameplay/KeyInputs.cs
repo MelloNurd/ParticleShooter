@@ -21,6 +21,16 @@ public class KeyInputs : MonoBehaviour
         sideMenuButtonScript = SideMenuButton.GetComponent<MenuButton>();
     }
 
+    public void ShowSideMenu()
+    {
+        SideMenu.transform.localScale = Vector3.one;
+    }
+
+    public void HideSideMenu()
+    {
+        SideMenu.transform.localScale = Vector3.zero;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -41,7 +51,7 @@ public class KeyInputs : MonoBehaviour
                 {
                     ControlsMenu.SetActive(false);
                 }
-                SideMenu.transform.localScale = new Vector3(1, 1, 1);
+                ShowSideMenu();
                 SettingsLoader.Instance.timeScale = 1f; 
             }
             else if(!PauseMenu.activeSelf && !SettingsMenu.activeSelf && !ControlsMenu.activeSelf)
@@ -52,7 +62,7 @@ public class KeyInputs : MonoBehaviour
                     // If the side menu is open, close it
                     SideMenuButton.onClick.Invoke();
                 }
-                SideMenu.transform.localScale = new Vector3(0, 0, 0);
+                HideSideMenu();
                 if(stopOnPause)
                     SettingsLoader.Instance.timeScale = 0f;
             }
